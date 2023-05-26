@@ -35,8 +35,8 @@ class TestClass():
     @classmethod       
     def teardown_class(cls):   # tearDown(cls) -> unittest
         logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
-        logging.error(sys._getframe(0).f_code.co_name) 
-        """ BBB """ 
+        # logging.error(sys._getframe(0).f_code.co_name) 
+        # """ BBB """ 
     
     def setup_method(self,function):
         logging.info(sys._getframe(0).f_code.co_name)
