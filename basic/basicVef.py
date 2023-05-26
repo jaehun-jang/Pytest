@@ -1,0 +1,71 @@
+# funBaVef.py
+
+# $language = "python"
+# $interface = "1.0"
+
+import pytest, sys, time, os, logging ,datetime
+import sys
+import time
+import os
+import basic.basicConf as bc
+import paramiko
+from netmiko import ConnectHandler
+
+### Check VLAN Number ###
+
+def checkVlanNum(host):                 
+    with bc.connect(host) as child:
+        command = "show vlan summary"
+        print(command)
+        cmdResult = child.send_command(command)
+        numOfVlan = cmdResult.splitlines()[1].split()[5]
+        print('Number of VLAN: {}'.format(numOfVlan))
+        return numOfVlan
+
+
+### Check MAX VTY SESSION  NETMIKO ###        
+def checkVtySsion(host, vty):
+    try:
+        child_list = []
+        for i in range(vty):
+            child = bc.connect(host)
+            child_list.append(child) # Child append a list To disconnect() the sesseions
+            cmdResult = child.send_command('show users')
+#            print(cmdResult)
+            cmdResult_list = cmdResult.splitlines()
+            readResult = str(cmdResult_list)
+            numOfVty = readResult.count('pts/')
+            print('Number of sessions: {}'.format(numOfVty))
+        for child in child_list:
+            child.disconnect()
+        return numOfVty
+    except Exception as e:
+        print('Error connecting: {}'.format(str(e)))
+        return numOfVty
+    
+### Check Process plog ###
+def checkPlog(testName,host):                  
+    with bc.connect(host) as child:
+        Command = "show process plog"
+        cmdResult = child.send_command(Command)
+        result_list = len(cmdResult.splitlines())
+        if result_list <= 1:
+            return 'OK'
+        else:
+            print ('#' *5 + testName +' occur proecee log' + '#' * 5)
+            return 'nok'
+
+### Exception log ###
+def ExceptionLog(testName):                 
+    with open('./log/Exception_log.txt', 'at') as fw:
+
+        # Get the current timestamp
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        fw.writelines(f'Exception occurs while performing_{testName} + {timestamp}' )
+        return('exception')
+
+
+     
+
+             
