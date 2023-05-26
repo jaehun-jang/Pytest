@@ -1,2 +1,0 @@
-# Pytest
-Automation By Pytes
