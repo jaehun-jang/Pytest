@@ -26,36 +26,24 @@ def checkPortChannel(host, state):
     if state == 'hotstandby':
         return 'Ok' if pass_count == 6 else 'Nok'
     else:
-        return 'Ok' if pass_count == 5 else 'Nok'
-    
-# def checkLacpInternal(host,state):                  
-#     with bc.connect(host) as sub_child:
-#         results = []
-#         pass_count = 0
-#         flexport = sub_child.send_command('sh lacp 1 internal ')
-#         results.extend(flexport.splitlines()[9].split())
-#         print(results) 
-#     check_lists = {'active': ['FA','bndl'],
-#                     'passive': ['FP','bndl'],
-#                     'hotstandby': ['FP','standby']}
-#     for i in check_lists[state]:
-#         pass_count += results.count(i)
-#     print(pass_count)
-#     if state == 'hotstandby':
-#     return 'Ok' if pass_count == 2 else 'Nok'
+        return 'Ok' if pass_count == 5 else 'Nok'    
 
 def checkLacpInternal(host, state):                  
     with bc.connect(host) as sub_child:
         sub_child.send_command('sh lacp 1 internal ')
         flexport = sub_child.send_command('sh lacp 1 internal ')
-        results = flexport.splitlines()[8].split()
+        results = flexport.splitlines()[8:10]
+        results = str(results).split()
         print(results) 
     check_lists = {'active': ['FA', 'bndl'],
                    'passive': ['FP', 'bndl'],
                    'hotstandby': ['FP', 'standby']}
     pass_count = sum(results.count(i) for i in check_lists[state])
     # print(pass_count)
-    return 'Ok' if pass_count == 2 else 'Nok'
+    if state == 'hotstandby':
+            return 'Ok' if pass_count == 3 else 'Nok'
+    else:
+        return 'Ok' if pass_count == 4 else 'Nok'
 
 def checkBcmPort(host,state):                 
     with bc.connectbcm(host) as sub_child: 
