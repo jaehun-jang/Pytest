@@ -55,12 +55,14 @@ def defaultSetup(host):
         child.enable()
         default_config = ["logging console", "aaa auth attempts login 0"]
         child.send_config_set(default_config)
+        int_shutdown_config = ["interface 1/6,1/23-1/24", "shutdown"]
+        child.send_config_set(int_shutdown_config)
         time.sleep(1)
-        hostname_config = {"192.168.0.211": "hostname LAB3", "192.168.0.212": "hostname LAB4"} 
+        hostname_config = {"192.168.0.201": "hostname LAB1", "192.168.0.202": "hostname LAB2"} 
         """  Using Dictionary """
         if host in hostname_config:
             child.send_config_set(hostname_config[host])
-        time.sleep(1)
+            time.sleep(1)
 
 ### Create maximum numberof VLAN  ###	  
 def crtVlan(host,vlans):
