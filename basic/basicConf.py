@@ -70,6 +70,11 @@ def crtVlan(host,vlans):
         result= sub_child.send_config_set('vlan 2-%s' % str(vlans))
         return result 
 
+def addiproute(host):
+    with connect(host) as sub_child:
+        sub_child.send_config_set('ip route 0.0.0.0/0 192.168.0.2')
+        pass 
+    
 ### Delet maximum numberof VLAN  ###	  
 def dltVlan(host,vlans):
     with connect(host) as child:
@@ -125,3 +130,9 @@ def deftSystem(host):
         time.sleep(180) 
         child.expect(None)
         time.sleep(1)
+
+
+def deliproute(host):
+    with connect(host) as sub_child:
+        sub_child.send_config_set('no ip route 0.0.0.0/0 192.168.0.2')
+        pass

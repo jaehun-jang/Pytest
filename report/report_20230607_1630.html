@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>report_20230607_1630.html</h1>
+    <p>Report generated on 07-Jun-2023 at 16:58:18 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "1.0.0", "py": "1.11.0", "pytest": "7.1.2"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Windows-10-10.0.19041-SP0</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"html": "3.1.1", "metadata": "2.0.2", "ssh": "0.1"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.9.0</td></tr></table>
+    <h2>Summary</h2>
+    <p>12 tests ran in 1685.41 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">10 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">2 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_031_static_lag</td>
+          <td class="col-duration">103.98</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;pytest_basic.TestClass object at 0x0000024F7D66F6D0&gt;<br/><br/>    def test_031_static_lag(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; Link Aggregation Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(dut1,Title)<br/>            lac.confLag (dut2)<br/>&gt;           assert lac.confStaticLag(dut1) == 2<br/><span class="error">E           AssertionError: assert 1 == 2</span><br/><span class="error">E            +  where 1 = &lt;function confStaticLag at 0x0000024F7D43C310&gt;(&#x27;192.168.0.201&#x27;)</span><br/><span class="error">E            +    where &lt;function confStaticLag at 0x0000024F7D43C310&gt; = lac.confStaticLag</span><br/><br/>pytest_basic.py:162: AssertionError<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;pytest_basic.TestClass object at 0x0000024F7D66F6D0&gt;<br/><br/>    def test_031_static_lag(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; Link Aggregation Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(dut1,Title)<br/>            lac.confLag (dut2)<br/>            assert lac.confStaticLag(dut1) == 2<br/>            time.sleep(1)<br/>            lac.removeLag(dut2)<br/>            time.sleep(1)<br/>        except:<br/>            lac.removeLag(dut2)<br/>&gt;           assert bv.ExceptionLog(testName) == &#x27;normal&#x27;<br/><span class="error">E           AssertionError: assert &#x27;exception&#x27; == &#x27;normal&#x27;</span><br/><span class="error">E             - normal</span><br/><span class="error">E             + exception</span><br/><br/>pytest_basic.py:168: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>##### Link Aggregation Test #####
+### check static channel-group ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;NONE&#x27;, &#x27;-&#x27;, &#x27;work:&#x27;, &#x27;1/23(D)&#x27;, &#x27;protect:&#x27;, &#x27;1/24(D)&#x27;]
+### check BCM Port state ###
+[&#x27;xe23(&#x27;, &#x27;24)&#x27;, &#x27;down&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+[&#x27;Nok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_032_basic_lacp</td>
+          <td class="col-duration">181.24</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;pytest_basic.TestClass object at 0x0000024F7D66F850&gt;<br/><br/>    def test_032_basic_lacp(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; LACP Basic Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(dut1,Title)<br/>            lac.confLacp(dut2)<br/>&gt;           assert lac.confBasicLacp(dut1) == 10<br/><span class="error">E           AssertionError: assert 1 == 10</span><br/><span class="error">E            +  where 1 = &lt;function confBasicLacp at 0x0000024F7D43C3A0&gt;(&#x27;192.168.0.201&#x27;)</span><br/><span class="error">E            +    where &lt;function confBasicLacp at 0x0000024F7D43C3A0&gt; = lac.confBasicLacp</span><br/><br/>pytest_basic.py:178: AssertionError<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;pytest_basic.TestClass object at 0x0000024F7D66F850&gt;<br/><br/>    def test_032_basic_lacp(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; LACP Basic Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(dut1,Title)<br/>            lac.confLacp(dut2)<br/>            assert lac.confBasicLacp(dut1) == 10<br/>            time.sleep(1)<br/>            lac.removeLacp(dut2)<br/>            time.sleep(1)<br/>        except:<br/>            lac.removeLacp(dut2)<br/>&gt;           assert bv.ExceptionLog(testName) == &#x27;normal&#x27;<br/><span class="error">E           AssertionError: assert &#x27;exception&#x27; == &#x27;normal&#x27;</span><br/><span class="error">E             - normal</span><br/><span class="error">E             + exception</span><br/><br/>pytest_basic.py:184: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>##### LACP Basic Test #####
+### check lacp active Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/24(D)&#x27;, &#x27;1/23(D)&#x27;]
+[&quot;[&#x27;1/24&quot;, &#x27;FA&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x47&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FA&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x47&#x27;]&quot;]
+### check lacp passive Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/24(D)&#x27;, &#x27;1/23(D)&#x27;]
+[&quot;[&#x27;1/24&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x46&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x46&#x27;]&quot;]
+### check lacp MaxMember 1 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;LACP&#x27;, &#x27;1&#x27;, &#x27;1/24(D)&#x27;, &#x27;1/23(D)&#x27;]
+[&quot;[&#x27;1/24&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x46&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x46&#x27;]&quot;]
+### check BCM Port state ###
+[&#x27;xe23(&#x27;, &#x27;24)&#x27;, &#x27;down&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+### check lacp MaxMember 8 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/24(D)&#x27;, &#x27;1/23(D)&#x27;]
+[&quot;[&#x27;1/24&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x46&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x46&#x27;]&quot;]
+[&#x27;xe23(&#x27;, &#x27;24)&#x27;, &#x27;down&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+[&#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Ok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_001_max_vty</td>
+          <td class="col-duration">230.10</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VTY Session TEST #####
+Number of sessions: 1
+Number of sessions: 2
+Number of sessions: 3
+Number of sessions: 4
+Number of sessions: 5
+Number of sessions: 6
+Number of sessions: 7
+Number of sessions: 8
+Number of sessions: 9
+Number of sessions: 10
+Number of sessions: 11
+Number of sessions: 12
+Number of sessions: 13
+Number of sessions: 14
+Number of sessions: 15
+Number of sessions: 16
+Number of sessions: 17
+Number of sessions: 18
+Number of sessions: 19
+Number of sessions: 20
+Number of sessions: 21
+Number of sessions: 22
+Number of sessions: 23
+Number of sessions: 24
+Number of sessions: 25
+Number of sessions: 26
+Number of sessions: 27
+Number of sessions: 28
+Number of sessions: 29
+Number of sessions: 30
+Number of sessions: 31
+Number of sessions: 32
+Number of sessions: 33
+Number of sessions: 34
+Number of sessions: 35
+Number of sessions: 36
+Number of sessions: 37
+Number of sessions: 38
+Number of sessions: 39
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_002_conf_vty</td>
+          <td class="col-duration">62.90</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VTY Session Configuration TEST #####
+Number of sessions: 1
+Number of sessions: 2
+Number of sessions: 3
+Number of sessions: 4
+Number of sessions: 5
+Number of sessions: 6
+Number of sessions: 7
+Number of sessions: 8
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_003_max_vlan</td>
+          <td class="col-duration">64.48</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VLAN TEST    #####
+show vlan summary
+Number of VLAN: 4095
+show vlan summary
+Number of VLAN: 1
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_011_user_account</td>
+          <td class="col-duration">83.29</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### User Account Configuration TEST #####
+configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)# username actus role network-admin password encrypted actus1234
+LAB1(config)# end
+LAB1# 
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:07:08    Exec
+ pts/0      actus     192.168.0.157         00:00:23    -
+ console    root      NETCONF               00:09:05    Exec
+User:root 
+                roles: network-admin  
+User:emsuser 
+                roles: network-admin  
+User:actus 
+                roles: network-admin  
+Successful login - Username: actus, Password: actus1234
+True
+configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)# no username actus
+LAB1(config)# end
+LAB1# 
+Failed login - Username: actus, Password: actus1234
+Authentication failed.
+False
+configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)# username hfrn role network-operator password encrypted hfrn1234
+LAB1(config)# end
+LAB1# 
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:07:24    Exec
+ pts/0      hfrn      192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:09:21    Exec
+User:root 
+                roles: network-admin  
+User:emsuser 
+                roles: network-admin  
+User:hfrn 
+                roles: network-operator  
+Successful login - Username: hfrn, Password: hfrn1234
+True
+configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)# no username hfrn
+LAB1(config)# end
+LAB1# 
+Failed login - Username: hfrn, Password: hfrn1234
+Authentication failed.
+False
+configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)# username cisco role network-viewer password encrypted cisco1234
+LAB1(config)# end
+LAB1# 
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:07:40    Exec
+ pts/0      cisco     192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:09:37    Exec
+User:root 
+                roles: network-admin  
+User:emsuser 
+                roles: network-admin  
+User:cisco 
+                roles: network-viewer  
+Successful login - Username: cisco, Password: cisco1234
+True
+configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)# no username cisco
+LAB1(config)# end
+LAB1# 
+Failed login - Username: cisco, Password: cisco1234
+Authentication failed.
+False
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_021_max_svc</td>
+          <td class="col-duration">304.65</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of of SVCs TEST    #####
+### check Nmmber of SVCs ###
+ 256
+### check Nmmber of UNIs ###
+24
+### check Nmmber of SEPs ###
+10
+20
+30
+40
+50
+60
+70
+80
+90
+100
+110
+120
+130
+140
+150
+160
+170
+180
+190
+200
+210
+220
+230
+256
+0
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_041_basic_lldp</td>
+          <td class="col-duration">345.78</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### LLDP Basic Test #####
+### check lacp default tlv ###
+PRINT: 40
+### check lldp disable all tlv ###
+PRINT: 0
+### check lldp enable all tlv###
+PRINT: 40
+### change lldp TLV to enable/disable for each tlv###
+### no 8021-org-spec ###
+PRINT TLV Count: 39 39
+PRINT TLV Count: 38 38
+PRINT TLV Count: 37 37
+PRINT TLV Count: 34 34
+### no 8023-org-spec ###
+PRINT TLV Count: 32 32
+PRINT TLV Count: 30 30
+PRINT TLV Count: 29 29
+PRINT TLV Count: 22 22
+PRINT TLV Count: 18 18
+### no basic ###
+PRINT TLV Count: 14 14
+PRINT TLV Count: 14 14
+PRINT TLV Count: 11 11
+PRINT TLV Count: 11 11
+PRINT TLV Count: 11 11
+###  8021-org-spec ###
+PRINT TLV Count: 12 12
+PRINT TLV Count: 13 13
+PRINT TLV Count: 14 14
+PRINT TLV Count: 17 17
+###  8023-org-spec ###
+PRINT TLV Count: 19 19
+PRINT TLV Count: 21 21
+PRINT TLV Count: 22 22
+PRINT TLV Count: 29 29
+PRINT TLV Count: 33 33
+###  basic ###
+PRINT TLV Count: 37 37
+PRINT TLV Count: 37 37
+PRINT TLV Count: 40 40
+PRINT TLV Count: 40 40
+PRINT TLV Count: 40 40
+### check lldp setMgmtTlv ###
+[&#x27;Management address Subtype  &#x27;, &#x27; All 802&#x27;]
+### check lldp setLldpTimer ###
+[&#x27;Time To Live    &#x27;, &#x27; 40&#x27;]
+### check lldp chgMgmtTlv ###
+[&#x27;Interface Number            &#x27;, &#x27; 25001  &#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_051_basic_eoam</td>
+          <td class="col-duration">173.22</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### EOAM Basic Test #####
+### Ethernet OAM Passive Mode ###
+[&#x27;Mode:&#x27;, &#x27;passive&#x27;]
+[&#x27;Ok&#x27;]
+### Ethernet OAM Active Mode ###
+[&#x27;Mode:&#x27;, &#x27;active&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM dying-gasp ###
+[&#x27;Dying-Gasp:&#x27;, &#x27;disable&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM link-fault ###
+[&#x27;Link-Fault:&#x27;, &#x27;disable&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM link-monitor ###
+[&#x27;Status:&#x27;, &#x27;supported(on)&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM Loopback Test(start) ###
+[&#x27;Loopback&#x27;, &#x27;status:&#x27;, &#x27;local&#x27;, &#x27;loopback&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM Loopback Test(stop) ###
+[&#x27;Loopback&#x27;, &#x27;status:&#x27;, &#x27;no&#x27;, &#x27;loopback&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+[&#x27;Tx&#x27;, &#x27;:&#x27;, &#x27;15&#x27;, &#x27;|&#x27;, &#x27;Rx&#x27;, &#x27;:&#x27;, &#x27;15&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_062_basic_NTP</td>
+          <td class="col-duration">58.29</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### NTP Basic Test #####
+Server status: *~106.247.248.106
+Current time: 16:56  KST Wed Jun 07 2023
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_063_MAX_NTP_Server</td>
+          <td class="col-duration">58.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Maximum NTP Server Test #####
+server count: 4
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_099_plog</td>
+          <td class="col-duration">18.92</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### check plog #####
+<br/> -----------------------------Captured log teardown------------------------------ <br/>ERROR    root:pytest_basic.py:44 teardown_class<br/></div></td></tr></tbody></table></body></html>
