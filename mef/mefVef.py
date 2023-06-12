@@ -44,7 +44,7 @@ def checkNmbrSep(uni,host):
                 readResult = cmdResult.splitlines()[12]
                 result = readResult.split(':')
                 resultSum  += int(result[1])
-                print(resultSum)
+    print(resultSum)
     return resultSum # 'SUM of sep of UNIs#
 
 

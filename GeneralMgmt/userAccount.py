@@ -31,7 +31,7 @@ def login_with_credentials(device, username, password):
         command1 = net_connect.send_command('show users')
         print(command1)                
         command2 = net_connect.send_command('show user-account')
-        print(command2) 
+        # print(command2) 
         print(f"Successful login - Username: {username}, Password: {password}")      
         net_connect.disconnect()
         return True

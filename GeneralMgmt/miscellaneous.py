@@ -56,58 +56,25 @@ def checkmaxntpserver(host):
 
 ##################################################################################
     
-### Set TWAMP Configuration ###	  
-def ntpConf(dut1): 
+def tcpdump(dut1): 
     with bc.connect(dut1) as child: 
-        TIME_config_set = ('clock set 00:00:00 1 1 2002')
-        child.send_command(TIME_config_set)    
-        time.sleep(1)
-        time_zone_config_set = ['time-zone asia seoul']
-        child.send_config_set(time_zone_config_set)        
-        time.sleep(1)    
-        NTP_config_set = ['ntp server 106.247.248.106 prefer']
-        child.send_config_set(NTP_config_set)
+        command = child.send_command('tcpdump -vi eth0', expect_string= 'length')
         time.sleep(1) 
-       
-def maxntpserver(dut1): 
-    with bc.connect(dut1) as child:    
-        NTP_config_set = [
-            'ntp server 10.1.1.1',
-            'ntp server 10.1.1.2' ,
-            'ntp server 10.1.1.3' ,
-            'ntp server 106.247.248.106 prefer'
-        ]
-        for command in NTP_config_set:
-            child.send_config_set(command)
-            time.sleep(1)
+        # print(command)
+        child.write_channel('\x03')
+        result = command.splitlines() 
+        resultlen = len(result) 
+        print(f'tcpdump count: {resultlen}')
+        return resultlen
 
-def overmaxntpserver(dut1): 
-    with bc.connect(dut1) as child:    
-        NTP_config_set = ['ntp server 100.1.1.1']
-        result = child.send_config_set(NTP_config_set)
-        time.sleep(1)
-        if "Error ntp entry is full" in result:
-            return True
-        else:
-            return False     
-
-def delntpconfe(dut1): 
+def traceRT(dut1): 
+    dnsserver = '168.126.63.1'
     with bc.connect(dut1) as child: 
-        time_zone_config_set = ['time-zone europe london']
-        child.send_config_set(time_zone_config_set)        
-        time.sleep(1)  
-        NTP_config_set = ['no ntp server 106.247.248.106']
-        child.send_config_set(NTP_config_set)
-        time.sleep(1) 
-
-def delmaxntpserver(dut1): 
-    with bc.connect(dut1) as child:    
-        NTP_config_set = [
-            'no ntp server 10.1.1.1',
-            'no ntp server 10.1.1.2',
-            'no ntp server 10.1.1.3' ,
-            'no ntp server 106.247.248.106' ,
-        ]
-        for command in NTP_config_set:
-            child.send_config_set(command)
-            time.sleep(1)
+        # command = child.send_command(f'traceroute {dnsserver}', expect_string= 'packets') 
+        command = child.send_command(f'traceroute {dnsserver}', expect_string= 'ms')   
+        time.sleep(1)
+        print(command)
+        ctlPC = child.write_channel('\x03')  
+        result = command.splitlines()[-2].split()[1]
+        print(result)
+        return result

@@ -9,6 +9,7 @@ import basic.basicConf as bc
 import basic.basicVef as bv
 import GeneralMgmt.userAccount as gua
 import GeneralMgmt.ntpConf as gntpc
+import GeneralMgmt.miscellaneous as gmis
 import mef.mefConf as mc
 import mef.mefVef as mv
 import flexport.flexConf as fc
@@ -90,7 +91,107 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)
 
-    def test_003_max_vlan(self):
+    def test_003_user_account(self):
+        logging.info(sys._getframe(0).f_code.co_name)  
+        testName =  sys._getframe(0).f_code.co_name 
+        Title = "#" * 5 + " User Account Configuration TEST " + "#" * 5
+        print(Title)
+        try:     
+            bc.disTitle(dut1,Title) 
+            assert gua.useraccount(dut1) == 6
+            time.sleep(1)
+        except:             
+            assert bv.ExceptionLog(testName) == 'normal'
+            time.sleep(2)
+
+    def test_011_static_route(self):
+          logging.info(sys._getframe(0).f_code.co_name)  
+          testName =  sys._getframe(0).f_code.co_name 
+          Title = "#" * 5 + " static route Configuration TEST " + "#" * 5
+          print(Title)
+          try:     
+              bc.disTitle(dut1,Title)
+              bc.addiproute(dut1)  
+              assert bc.ping(dut1) == "icmp_seq=10"
+              time.sleep(1)
+          except:             
+              assert bv.ExceptionLog(testName) == 'normal'
+              time.sleep(2)
+
+    def test_012_basic_ntp_time_zone(self):
+        testName =  sys._getframe(0).f_code.co_name 
+        Title = "#" * 5 + " NTP Basic & TIME ZONE Test " + "#" * 5
+        print(Title)
+        try:         
+            bc.disTitle(dut1,Title)
+            bc.addiproute(dut1) 
+            gntpc.ntpConf(dut1)
+            time.sleep(10)                
+            #assert gntpc.checkntpconf(dut1) == True 
+            #timestamp = datetime.datetime.now().strftime("%H:%M  KST %a %b %d %Y") 
+            timestamp = datetime.datetime.now().strftime("%H  KST %a %b %d %Y") 
+            assert gntpc.checktime(dut1) == timestamp                
+            time.sleep(1)
+            bc.deliproute(dut1)
+            gntpc.delntpconfe(dut1)                  
+        except:              
+            bc.deliproute(dut1) 
+            gntpc.delntpconfe(dut1) 
+            assert bv.ExceptionLog(testName) == 'normal'
+            time.sleep(2)
+
+    def test_013_max_ntp_server(self):
+        testName =  sys._getframe(0).f_code.co_name 
+        Title = "#" * 5 + " Maximum NTP Server Test " + "#" * 5
+        print(Title)
+        try:         
+            bc.disTitle(dut1,Title)
+            bc.addiproute(dut1) 
+            time.sleep(1) 
+            gntpc.maxntpserver(dut1)
+            time.sleep(1)                
+            assert gntpc.checkmaxntpserver(dut1) == 4 
+            time.sleep(1)                
+            assert gntpc.overmaxntpserver(dut1) == True           
+            time.sleep(1)
+            bc.deliproute(dut1)
+            gntpc.delmaxntpserver(dut1)                  
+        except:              
+            bc.deliproute(dut1) 
+            gntpc.delmaxntpserver(dut1) 
+            assert bv.ExceptionLog(testName) == 'normal'
+            time.sleep(2)
+
+    def test_014_traceroute(self):
+        testName =  sys._getframe(0).f_code.co_name 
+        Title = "#" * 5 + " TraceRT Test " + "#" * 5
+        print(Title)
+        try:         
+            bc.disTitle(dut1,Title)
+            bc.addiproute(dut1) 
+            time.sleep(1)              
+            assert gmis.traceRT(dut1) == "192.168.0.2"
+            time.sleep(1)                
+            bc.deliproute(dut1)             
+        except:              
+            bc.deliproute(dut1) 
+            assert bv.ExceptionLog(testName) == 'normal'
+            time.sleep(2)
+
+    def test_015_tcp_dump(self):
+        testName =  sys._getframe(0).f_code.co_name 
+        Title = "#" * 5 + " TCP_DUMP Test " + "#" * 5
+        print(Title)
+        try:         
+            bc.disTitle(dut1,Title)            
+            assert gmis.tcpdump(dut1) >= 10
+            time.sleep(1)                        
+        except:              
+            assert bv.ExceptionLog(testName) == 'normal'
+            time.sleep(2)
+
+
+    def test_021_max_vlan(self):
         logging.info(sys._getframe(0).f_code.co_name) 
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " maximum number of VLAN TEST    " + "#" * 5
@@ -112,20 +213,7 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)                 
 
-    def test_011_user_account(self):
-        logging.info(sys._getframe(0).f_code.co_name)  
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + " User Account Configuration TEST " + "#" * 5
-        print(Title)
-        try:     
-            bc.disTitle(dut1,Title) 
-            assert gua.useraccount(dut1) == 6
-            time.sleep(1)
-        except:             
-            assert bv.ExceptionLog(testName) == 'normal'
-            time.sleep(2)
-
-    def test_021_max_svc(self): 
+    def test_022_max_svc(self): 
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " maximum number of of SVCs TEST    " + "#" * 5
         print(Title)
@@ -231,49 +319,6 @@ class TestClass():
     #         twc.removetwamp(dut1) 
     #         assert bv.ExceptionLog(testName) == 'normal'
     #         time.sleep(2)
-
-    def test_062_basic_NTP(self):
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + " NTP Basic Test " + "#" * 5
-        print(Title)
-        try:         
-            bc.disTitle(dut1,Title)
-            bc.addiproute(dut1) 
-            gntpc.ntpConf(dut1)
-            time.sleep(10)                
-            assert gntpc.checkntpconf(dut1) == True 
-            timestamp = datetime.datetime.now().strftime("%H:%M  KST %a %b %d %Y") 
-            assert gntpc.checktime(dut1) == timestamp                
-            time.sleep(1)
-            bc.deliproute(dut1)
-            gntpc.delntpconfe(dut1)                  
-        except:              
-            bc.deliproute(dut1) 
-            gntpc.delntpconfe(dut1) 
-            assert bv.ExceptionLog(testName) == 'normal'
-            time.sleep(2)
-
-    def test_063_MAX_NTP_Server(self):
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + " Maximum NTP Server Test " + "#" * 5
-        print(Title)
-        try:         
-            bc.disTitle(dut1,Title)
-            bc.addiproute(dut1) 
-            time.sleep(1) 
-            gntpc.maxntpserver(dut1)
-            time.sleep(1)                
-            assert gntpc.checkmaxntpserver(dut1) == 4 
-            time.sleep(1)                
-            assert gntpc.overmaxntpserver(dut1) == True           
-            time.sleep(1)
-            bc.deliproute(dut1)
-            gntpc.delmaxntpserver(dut1)                  
-        except:              
-            bc.deliproute(dut1) 
-            gntpc.delmaxntpserver(dut1) 
-            assert bv.ExceptionLog(testName) == 'normal'
-            time.sleep(2)
 
     def test_099_plog(self):
         testName =  sys._getframe(0).f_code.co_name 

@@ -71,7 +71,8 @@ def conftwamp(dut1):
 
 def removetwamp(dut1): 
     with bc.connect(dut1) as child: 
-        removeCuEthService(child)
-        time.sleep(1)
         shutInterface(child)
         time.sleep(1) 
+        removeCuEthService(child)
+        time.sleep(1)
+

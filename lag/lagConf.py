@@ -69,11 +69,13 @@ def deflacpTime(child):
     child.send_config_set(config_set)
 
 def noshutLagInt(child):    
-    config_set = ['interface po1', 'no shutdown']
+    config_set = ['interface range 1/23-1/24', 'no shutdown']
+    # config_set = ['interface po1', 'no shutdown']
     child.send_config_set(config_set)
 
 def shutLagInt(child):    
-    config_set = ['interface po1', 'shutdown']
+    config_set = ['interface range 1/23-1/24', 'shutdown']
+    # config_set = ['interface po1', 'shutdown']
     child.send_config_set(config_set)
 
 ###################################################################################
@@ -107,27 +109,31 @@ def confLacp(host):
         time.sleep(1)
         addNniInt(child)
         time.sleep(1)
-
+        noshutLagInt(child)
+        time.sleep(1)
 
 ### Pure Static Link Aggregation ###	  
 def removeLag(host):
     with bc.connect(host) as child:
         svc = 1
         uni = 1
+        shutLagInt(child)
+        time.sleep(1)
         delNniInt(child)
         time.sleep(1)
         delPortCh(child)
         time.sleep(1)   
         mc.dltServi(host,svc,uni)
         time.sleep(1)
-        shutLagInt(child)
-        time.sleep(1)
+
 
 ### Pure Static Link Aggregation ###	  
 def removeLacp(host):
     with bc.connect(host) as child:
         svc = 1
         uni = 1
+        shutLagInt(child)
+        time.sleep(1)
         delNniInt(child)
         time.sleep(1)
         deflacpTime(child)
@@ -135,8 +141,6 @@ def removeLacp(host):
         delPortCh(child)
         time.sleep(1)   
         mc.dltServi(host,svc,uni)
-        time.sleep(1)
-        shutLagInt(child)
         time.sleep(1)
 
 ### Redundant Static Link Aggregation ###	  

@@ -5,6 +5,7 @@
 
 from logging import root
 from netmiko import ConnectHandler
+import paramiko
 import sys
 import time
 import os
@@ -55,7 +56,7 @@ def defaultSetup(host):
         child.enable()
         default_config = ["logging console", "aaa auth attempts login 0"]
         child.send_config_set(default_config)
-        int_shutdown_config = ["interface 1/6,1/23-1/24", "shutdown"]
+        int_shutdown_config = ["interface range 1/6,1/23-1/24", "shutdown"]
         child.send_config_set(int_shutdown_config)
         time.sleep(1)
         hostname_config = {"192.168.0.201": "hostname LAB1", "192.168.0.202": "hostname LAB2"} 
@@ -74,16 +75,25 @@ def addiproute(host):
     with connect(host) as sub_child:
         sub_child.send_config_set('ip route 0.0.0.0/0 192.168.0.2')
         pass 
-    
+
+def ping(host):
+    with connect(host) as child:
+        command = child.send_command('ping 168.126.63.1', expect_string= 'icmp_seq=10')
+        time.sleep(5)
+        print(command)
+        child.write_channel('\x03') 
+        result = command.splitlines()[-1].split()[4]
+        return result
+ 
+
 ### Delet maximum numberof VLAN  ###	  
 def dltVlan(host,vlans):
     with connect(host) as child:
         if vlans == 1:
             return
         else:
-            host.send_config_set("no vlan 2-%s" % str(vlans))    
+            child.send_config_set("no vlan 2-%s" % str(vlans))    
             time.sleep(1) 
-
 
 ### Delet maximum numberof VLAN  ###	  
 def dltDevVlan(host,vlans):

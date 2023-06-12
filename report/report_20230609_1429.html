@@ -242,8 +242,8 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
     notFoundMessage.hidden = !allRowsHidden;
 }
 </script>
-    <h1>report_20230607_1630.html</h1>
-    <p>Report generated on 07-Jun-2023 at 16:58:18 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h1>report_20230609_1429.html</h1>
+    <p>Report generated on 09-Jun-2023 at 14:57:05 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
     <h2>Environment</h2>
     <table id="environment">
       <tr>
@@ -259,8 +259,8 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
         <td>Python</td>
         <td>3.9.0</td></tr></table>
     <h2>Summary</h2>
-    <p>12 tests ran in 1685.41 seconds. </p>
-    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">10 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">2 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <p>13 tests ran in 1669.42 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">13 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
     <h2>Results</h2>
     <table id="results-table">
       <thead id="results-table-head">
@@ -271,57 +271,15 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <th class="sortable links" col="links">Links</th></tr>
         <tr hidden="true" id="not-found-message">
           <th colspan="4">No results found. Try to check the filters</th></tr></thead>
-      <tbody class="failed results-table-row">
-        <tr>
-          <td class="col-result">Failed</td>
-          <td class="col-name">pytest_basic.py::TestClass::test_031_static_lag</td>
-          <td class="col-duration">103.98</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">self = &lt;pytest_basic.TestClass object at 0x0000024F7D66F6D0&gt;<br/><br/>    def test_031_static_lag(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; Link Aggregation Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(dut1,Title)<br/>            lac.confLag (dut2)<br/>&gt;           assert lac.confStaticLag(dut1) == 2<br/><span class="error">E           AssertionError: assert 1 == 2</span><br/><span class="error">E            +  where 1 = &lt;function confStaticLag at 0x0000024F7D43C310&gt;(&#x27;192.168.0.201&#x27;)</span><br/><span class="error">E            +    where &lt;function confStaticLag at 0x0000024F7D43C310&gt; = lac.confStaticLag</span><br/><br/>pytest_basic.py:162: AssertionError<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;pytest_basic.TestClass object at 0x0000024F7D66F6D0&gt;<br/><br/>    def test_031_static_lag(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; Link Aggregation Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(dut1,Title)<br/>            lac.confLag (dut2)<br/>            assert lac.confStaticLag(dut1) == 2<br/>            time.sleep(1)<br/>            lac.removeLag(dut2)<br/>            time.sleep(1)<br/>        except:<br/>            lac.removeLag(dut2)<br/>&gt;           assert bv.ExceptionLog(testName) == &#x27;normal&#x27;<br/><span class="error">E           AssertionError: assert &#x27;exception&#x27; == &#x27;normal&#x27;</span><br/><span class="error">E             - normal</span><br/><span class="error">E             + exception</span><br/><br/>pytest_basic.py:168: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>##### Link Aggregation Test #####
-### check static channel-group ###
-[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;NONE&#x27;, &#x27;-&#x27;, &#x27;work:&#x27;, &#x27;1/23(D)&#x27;, &#x27;protect:&#x27;, &#x27;1/24(D)&#x27;]
-### check BCM Port state ###
-[&#x27;xe23(&#x27;, &#x27;24)&#x27;, &#x27;down&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
-[&#x27;Nok&#x27;, &#x27;Ok&#x27;]
-<br/></div></td></tr></tbody>
-      <tbody class="failed results-table-row">
-        <tr>
-          <td class="col-result">Failed</td>
-          <td class="col-name">pytest_basic.py::TestClass::test_032_basic_lacp</td>
-          <td class="col-duration">181.24</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">self = &lt;pytest_basic.TestClass object at 0x0000024F7D66F850&gt;<br/><br/>    def test_032_basic_lacp(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; LACP Basic Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(dut1,Title)<br/>            lac.confLacp(dut2)<br/>&gt;           assert lac.confBasicLacp(dut1) == 10<br/><span class="error">E           AssertionError: assert 1 == 10</span><br/><span class="error">E            +  where 1 = &lt;function confBasicLacp at 0x0000024F7D43C3A0&gt;(&#x27;192.168.0.201&#x27;)</span><br/><span class="error">E            +    where &lt;function confBasicLacp at 0x0000024F7D43C3A0&gt; = lac.confBasicLacp</span><br/><br/>pytest_basic.py:178: AssertionError<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;pytest_basic.TestClass object at 0x0000024F7D66F850&gt;<br/><br/>    def test_032_basic_lacp(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; LACP Basic Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(dut1,Title)<br/>            lac.confLacp(dut2)<br/>            assert lac.confBasicLacp(dut1) == 10<br/>            time.sleep(1)<br/>            lac.removeLacp(dut2)<br/>            time.sleep(1)<br/>        except:<br/>            lac.removeLacp(dut2)<br/>&gt;           assert bv.ExceptionLog(testName) == &#x27;normal&#x27;<br/><span class="error">E           AssertionError: assert &#x27;exception&#x27; == &#x27;normal&#x27;</span><br/><span class="error">E             - normal</span><br/><span class="error">E             + exception</span><br/><br/>pytest_basic.py:184: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>##### LACP Basic Test #####
-### check lacp active Mode ###
-[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/24(D)&#x27;, &#x27;1/23(D)&#x27;]
-[&quot;[&#x27;1/24&quot;, &#x27;FA&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x47&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FA&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x47&#x27;]&quot;]
-### check lacp passive Mode ###
-[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/24(D)&#x27;, &#x27;1/23(D)&#x27;]
-[&quot;[&#x27;1/24&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x46&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x46&#x27;]&quot;]
-### check lacp MaxMember 1 ###
-[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;LACP&#x27;, &#x27;1&#x27;, &#x27;1/24(D)&#x27;, &#x27;1/23(D)&#x27;]
-[&quot;[&#x27;1/24&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x46&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x46&#x27;]&quot;]
-### check BCM Port state ###
-[&#x27;xe23(&#x27;, &#x27;24)&#x27;, &#x27;down&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
-### check lacp MaxMember 8 ###
-[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SD)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/24(D)&#x27;, &#x27;1/23(D)&#x27;]
-[&quot;[&#x27;1/24&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x46&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FP&#x27;, &#x27;down&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x46&#x27;]&quot;]
-[&#x27;xe23(&#x27;, &#x27;24)&#x27;, &#x27;down&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
-[&#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Ok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;]
-<br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_basic.py::TestClass::test_001_max_vty</td>
-          <td class="col-duration">230.10</td>
+          <td class="col-duration">225.33</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
             <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VTY Session TEST #####
-Number of sessions: 1
 Number of sessions: 2
 Number of sessions: 3
 Number of sessions: 4
@@ -344,6 +302,7 @@ Number of sessions: 20
 Number of sessions: 21
 Number of sessions: 22
 Number of sessions: 23
+Number of sessions: 23
 Number of sessions: 24
 Number of sessions: 25
 Number of sessions: 26
@@ -365,7 +324,7 @@ Number of sessions: 39
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_basic.py::TestClass::test_002_conf_vty</td>
-          <td class="col-duration">62.90</td>
+          <td class="col-duration">60.23</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -382,22 +341,8 @@ Number of sessions: 8
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-name">pytest_basic.py::TestClass::test_003_max_vlan</td>
-          <td class="col-duration">64.48</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VLAN TEST    #####
-show vlan summary
-Number of VLAN: 4095
-show vlan summary
-Number of VLAN: 1
-<br/></div></td></tr></tbody>
-      <tbody class="passed results-table-row">
-        <tr>
-          <td class="col-result">Passed</td>
-          <td class="col-name">pytest_basic.py::TestClass::test_011_user_account</td>
-          <td class="col-duration">83.29</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_003_user_account</td>
+          <td class="col-duration">60.08</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -408,9 +353,8 @@ LAB1(config)# username actus role network-admin password encrypted actus1234
 LAB1(config)# end
 LAB1# 
  Line       User      Host(s)               Login Time  Mode
- ttyS0      root      -                     00:07:08    Exec
- pts/0      actus     192.168.0.157         00:00:23    -
- console    root      NETCONF               00:09:05    Exec
+ pts/0      actus     192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:17:17    Exec
 User:root 
                 roles: network-admin  
 User:emsuser 
@@ -433,9 +377,8 @@ LAB1(config)# username hfrn role network-operator password encrypted hfrn1234
 LAB1(config)# end
 LAB1# 
  Line       User      Host(s)               Login Time  Mode
- ttyS0      root      -                     00:07:24    Exec
  pts/0      hfrn      192.168.0.157         00:00:00    -
- console    root      NETCONF               00:09:21    Exec
+ console    root      NETCONF               00:17:33    Exec
 User:root 
                 roles: network-admin  
 User:emsuser 
@@ -458,9 +401,8 @@ LAB1(config)# username cisco role network-viewer password encrypted cisco1234
 LAB1(config)# end
 LAB1# 
  Line       User      Host(s)               Login Time  Mode
- ttyS0      root      -                     00:07:40    Exec
- pts/0      cisco     192.168.0.157         00:00:00    -
- console    root      NETCONF               00:09:37    Exec
+ pts/0      cisco     192.168.0.157         00:00:01    -
+ console    root      NETCONF               00:17:49    Exec
 User:root 
                 roles: network-admin  
 User:emsuser 
@@ -482,8 +424,35 @@ False
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-name">pytest_basic.py::TestClass::test_021_max_svc</td>
-          <td class="col-duration">304.65</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_011_static_route</td>
+          <td class="col-duration">25.64</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### static route Configuration TEST #####
+PING 168.126.63.1 (168.126.63.1) 56(84) bytes of data.
+64 bytes from 168.126.63.1: icmp_seq=1 ttl=54 time=2.70 ms
+
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_021_max_vlan</td>
+          <td class="col-duration">60.96</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VLAN TEST    #####
+show vlan summary
+Number of VLAN: 4095
+show vlan summary
+Number of VLAN: 1
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_022_max_svc</td>
+          <td class="col-duration">266.32</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -522,8 +491,49 @@ False
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_031_static_lag</td>
+          <td class="col-duration">112.48</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Link Aggregation Test #####
+### check static channel-group ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;NONE&#x27;, &#x27;-&#x27;, &#x27;work:&#x27;, &#x27;1/23(P)*&#x27;, &#x27;protect:&#x27;, &#x27;1/24(P)&#x27;]
+### check BCM Port state ###
+[&#x27;xe23(&#x27;, &#x27;24)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_032_basic_lacp</td>
+          <td class="col-duration">199.42</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### LACP Basic Test #####
+### check lacp active Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/24(P)&#x27;, &#x27;1/23(P)&#x27;]
+[&quot;[&#x27;1/24&quot;, &#x27;FA&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x3f&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FA&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x3f&#x27;]&quot;]
+### check lacp passive Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/24(P)&#x27;, &#x27;1/23(P)&#x27;]
+[&quot;[&#x27;1/24&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x3e&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x3e&#x27;]&quot;]
+### check lacp MaxMember 1 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;1&#x27;, &#x27;1/24(D)&#x27;, &#x27;1/23(P)&#x27;]
+[&quot;[&#x27;1/24&quot;, &#x27;FP&#x27;, &#x27;standby&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x6&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x3e&#x27;]&quot;]
+### check BCM Port state ###
+[&#x27;xe23(&#x27;, &#x27;24)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+### check lacp MaxMember 8 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/24(P)&#x27;, &#x27;1/23(P)&#x27;]
+[&quot;[&#x27;1/24&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x13a0&#x27;, &quot;0x3e&#x27;,&quot;, &quot;&#x27;1/23&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x139f&#x27;, &quot;0x3e&#x27;]&quot;]
+[&#x27;xe23(&#x27;, &#x27;24)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Forward&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
           <td class="col-name">pytest_basic.py::TestClass::test_041_basic_lldp</td>
-          <td class="col-duration">345.78</td>
+          <td class="col-duration">360.35</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -581,7 +591,7 @@ PRINT TLV Count: 40 40
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_basic.py::TestClass::test_051_basic_eoam</td>
-          <td class="col-duration">173.22</td>
+          <td class="col-duration">173.80</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -613,20 +623,19 @@ PRINT TLV Count: 40 40
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-name">pytest_basic.py::TestClass::test_062_basic_NTP</td>
-          <td class="col-duration">58.29</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_062_basic_NTP_TIME_ZONE</td>
+          <td class="col-duration">49.94</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
-            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### NTP Basic Test #####
-Server status: *~106.247.248.106
-Current time: 16:56  KST Wed Jun 07 2023
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### NTP Basic &amp; TIME ZONE Test #####
+Current time: 14  KST Fri Jun 09 2023
 <br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_basic.py::TestClass::test_063_MAX_NTP_Server</td>
-          <td class="col-duration">58.12</td>
+          <td class="col-duration">56.19</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -637,7 +646,7 @@ server count: 4
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_basic.py::TestClass::test_099_plog</td>
-          <td class="col-duration">18.92</td>
+          <td class="col-duration">18.53</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
