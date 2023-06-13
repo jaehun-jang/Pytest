@@ -28,9 +28,23 @@ def connect(host):
         'global_delay_factor': 2,
         }
     device = ConnectHandler(**login)
-    # with ConnectHandler(**login) as device:
     device.enable() ## Enable mode ##
     return device
+
+def telnet(host):
+    login ={
+        'device_type':'cisco_ios_telnet',
+        'ip': host, 
+        'username':'root', 
+        'password':'admin',
+        'session_timeout': 120,
+        'timeout': 120,
+        'global_delay_factor': 2,
+        }
+    device = ConnectHandler(**login)
+    device.enable() ## Enable mode ##
+    return device
+
 def connectbcm(host):
     login ={
         'device_type':'cisco_ios',

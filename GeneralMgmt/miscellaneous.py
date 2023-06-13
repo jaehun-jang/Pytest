@@ -54,6 +54,63 @@ def checkmaxntpserver(host):
         print(f"server count: {servercount}")
         return servercount
 
+def check_mirror(host,direction):
+    with bc.connect(host) as child:  
+        command = child.send_command('show mirror')       
+        if direction == "transmit":
+            if len(command.splitlines()) == 0:
+                return True
+            else:
+                return False
+        else:         
+            dst = command.splitlines()[0].split()[4]         
+            dir = command.splitlines()[2].split()[2]
+            src = command.splitlines()[3].split()[3] 
+
+            if direction == "both":
+                print(f'mirror dst: {dst}, dir: {dir}, src: {src}')
+                if  dst == '1/2' and dir == 'both' and src == '1/25':
+                    return True
+                else:
+                    return False
+            
+            elif direction == "receive":
+                print(f'mirror dst: {dst}, dir: {dir}, src: {src}')
+                if  dst == '1/2' and dir == 'transmit' and src == '1/25':
+                    return True
+                else:
+                    return False 
+
+def check_feature(host,connection,state):
+    if connection == 'telnet':
+        with bc.telnet(host) as child:
+            result = []  
+            gnmi = child.send_command('show gnmi agent')
+            netconf = child.send_command('show netconf agent')       
+            ssh = child.send_command('show ssh server')               
+            result.append(gnmi.splitlines()[1].split(':')[1])         
+            result.append(netconf.splitlines()[1].split(':')[1])
+            result.append(ssh.splitlines()[0].split()[2])
+            print(result)            
+            result_count = result.count(state)
+            print(result_count)
+            if result_count == 3:
+                return True
+            else:
+                return False
+    else:
+        with bc.connect(host) as child:
+            result = []         
+            telnet = child.send_command('show telnet server')               
+            result.append(telnet.splitlines()[0].split()[1])
+            print(result)   
+            result_count = result.count(state)
+            print(result_count)
+            if result_count == 1:
+                return True
+            else:
+                return False     
+    
 ##################################################################################
     
 def tcpdump(dut1): 
@@ -70,7 +127,6 @@ def tcpdump(dut1):
 def traceRT(dut1): 
     dnsserver = '168.126.63.1'
     with bc.connect(dut1) as child: 
-        # command = child.send_command(f'traceroute {dnsserver}', expect_string= 'packets') 
         command = child.send_command(f'traceroute {dnsserver}', expect_string= 'ms')   
         time.sleep(1)
         print(command)
@@ -78,3 +134,60 @@ def traceRT(dut1):
         result = command.splitlines()[-2].split()[1]
         print(result)
         return result
+
+def mirror(dut1):
+    result = []
+    with bc.connect(dut1) as child:
+        config_commands = ['interface 1/2', 'mirror interface 1/25 direction both']
+        child.send_config_set(config_commands)
+        time.sleep(1)
+        result.append(check_mirror(dut1, 'both'))
+
+        config_commands = ['interface 1/2', 'no mirror interface 1/25 direction receive']
+        child.send_config_set(config_commands)
+        time.sleep(1)
+        result.append(check_mirror(dut1, 'receive'))
+
+        config_commands = ['interface 1/2', 'no mirror interface 1/25 direction transmit']
+        child.send_config_set(config_commands)
+        time.sleep(1)
+        result.append(check_mirror(dut1, 'transmit'))
+
+        print(result)
+        if result.count('False') == 0:
+            return True
+        else:
+            return False
+    
+def feature(dut1):
+    result = []
+    with bc.telnet(dut1) as child:
+        config_commands = ['no feature gnmi', 'no feature netconf', 'no feature ssh']
+        child.send_config_set(config_commands)
+        time.sleep(1)
+        result.append(check_feature(dut1,'telnet','disabled'))
+
+        config_commands = ['feature gnmi', ' feature netconf', 'feature ssh']
+        child.send_config_set(config_commands)
+        time.sleep(1)
+        result.append(check_feature(dut1,'telnet','enabled'))
+        
+    
+    with bc.connect(dut1) as child:
+        config_commands = ['no feature telnet']
+        child.send_config_set(config_commands)
+        time.sleep(1)
+        result.append(check_feature(dut1,'ssh','disabled'))
+
+        config_commands = ['feature telnet']
+        child.send_config_set(config_commands)
+        time.sleep(1)
+        result.append(check_feature(dut1,'ssh','enabled'))
+
+    return result
+
+def default_feature(dut1):
+    with bc.connect(dut1) as child:
+        config_commands = ['no feature gnmi','feature netconf','feature ssh','feature telnet']
+        child.send_config_set(config_commands)
+        time.sleep(1)

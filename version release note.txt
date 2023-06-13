@@ -17,3 +17,6 @@ add NTP check function
 add Static route check function
 (Implementing this function was hard because of the need to check the ICMP result.)
 
+(2023-06-12)
+add tcp dump & tracrRT check function
+
