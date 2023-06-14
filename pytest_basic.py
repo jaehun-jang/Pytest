@@ -118,51 +118,7 @@ class TestClass():
 #               assert bv.ExceptionLog(testName) == 'normal'
 #               time.sleep(2)
 
-#     def test_012_basic_ntp_time_zone(self):
-#         testName =  sys._getframe(0).f_code.co_name 
-#         Title = "#" * 5 + " NTP Basic & TIME ZONE Test " + "#" * 5
-#         print(Title)
-#         try:         
-#             bc.disTitle(dut1,Title)
-#             bc.addiproute(dut1) 
-#             gntpc.ntpConf(dut1)
-#             time.sleep(10)                
-#             #assert gntpc.checkntpconf(dut1) == True 
-#             #timestamp = datetime.datetime.now().strftime("%H:%M  KST %a %b %d %Y") 
-#             timestamp = datetime.datetime.now().strftime("%H  KST %a %b %d %Y") 
-#             assert gntpc.checktime(dut1) == timestamp                
-#             time.sleep(1)
-#             bc.deliproute(dut1)
-#             gntpc.delntpconfe(dut1)                  
-#         except:              
-#             bc.deliproute(dut1) 
-#             gntpc.delntpconfe(dut1) 
-#             assert bv.ExceptionLog(testName) == 'normal'
-#             time.sleep(2)
-
-#     def test_013_max_ntp_server(self):
-#         testName =  sys._getframe(0).f_code.co_name 
-#         Title = "#" * 5 + " Maximum NTP Server Test " + "#" * 5
-#         print(Title)
-#         try:         
-#             bc.disTitle(dut1,Title)
-#             bc.addiproute(dut1) 
-#             time.sleep(1) 
-#             gntpc.maxntpserver(dut1)
-#             time.sleep(1)                
-#             assert gntpc.checkmaxntpserver(dut1) == 4 
-#             time.sleep(1)                
-#             assert gntpc.overmaxntpserver(dut1) == True           
-#             time.sleep(1)
-#             bc.deliproute(dut1)
-#             gntpc.delmaxntpserver(dut1)                  
-#         except:              
-#             bc.deliproute(dut1) 
-#             gntpc.delmaxntpserver(dut1) 
-#             assert bv.ExceptionLog(testName) == 'normal'
-#             time.sleep(2)
-
-#     def test_014_trace_route(self):
+#     def test_012_trace_route(self):
 #         testName =  sys._getframe(0).f_code.co_name 
 #         Title = "#" * 5 + " TraceRT Test " + "#" * 5
 #         print(Title)
@@ -178,43 +134,43 @@ class TestClass():
 #             assert bv.ExceptionLog(testName) == 'normal'
 #             time.sleep(2)
 
-    # def test_015_tcp_dump(self):
-    #     testName =  sys._getframe(0).f_code.co_name 
-    #     Title = "#" * 5 + " TCP_DUMP Test " + "#" * 5
-    #     print(Title)
-    #     try:         
-    #         bc.disTitle(dut1,Title)            
-    #         assert gmis.tcpdump(dut1) >= 10
-    #         time.sleep(1)                        
-    #     except:              
-    #         assert bv.ExceptionLog(testName) == 'normal'
-    #         time.sleep(2)
+#     def test_013_tcp_dump(self):
+#         testName =  sys._getframe(0).f_code.co_name 
+#         Title = "#" * 5 + " TCP_DUMP Test " + "#" * 5
+#         print(Title)
+#         try:         
+#             bc.disTitle(dut1,Title)            
+#             assert gmis.tcpdump(dut1) >= 10
+#             time.sleep(1)                        
+#         except:              
+#             assert bv.ExceptionLog(testName) == 'normal'
+#             time.sleep(2)
 
-    # def test_016_mirror(self):
-    #     testName =  sys._getframe(0).f_code.co_name 
-    #     Title = "#" * 5 + " Mirror Test " + "#" * 5
-    #     print(Title)
-    #     try:         
-    #         bc.disTitle(dut1,Title)            
-    #         assert gmis.mirror(dut1) == True
-    #         time.sleep(1)                        
-    #     except:              
-    #         assert bv.ExceptionLog(testName) == 'normal'
-    #         time.sleep(2)
+#     def test_014_mirror(self):
+#         testName =  sys._getframe(0).f_code.co_name 
+#         Title = "#" * 5 + " Mirror Test " + "#" * 5
+#         print(Title)
+#         try:         
+#             bc.disTitle(dut1,Title)            
+#             assert gmis.mirror(dut1) == True
+#             time.sleep(1)                        
+#         except:              
+#             assert bv.ExceptionLog(testName) == 'normal'
+#             time.sleep(2)
 
-    def test_017_service_feature(self):
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + " service_feature " + "#" * 5
-        print(Title)
-        try:         
-            bc.disTitle(dut1,Title)            
-            assert gmis.feature(dut1) == True
-            time.sleep(1)
-            gmis.default_feature(dut1)                        
-        except:
-            gmis.default_feature(dut1)              
-            assert bv.ExceptionLog(testName) == 'normal'
-            time.sleep(2)
+#     def test_015_service_feature(self):
+#         testName =  sys._getframe(0).f_code.co_name 
+#         Title = "#" * 5 + " service_feature " + "#" * 5
+#         print(Title)
+#         try:         
+#             bc.disTitle(dut1,Title)            
+#             assert gmis.feature(dut1) == True
+#             time.sleep(1)
+#             gmis.default_feature(dut1)                        
+#         except:
+#             gmis.default_feature(dut1)              
+#             assert bv.ExceptionLog(testName) == 'normal'
+#             time.sleep(2)
 
 #     def test_021_max_vlan(self):
 #         logging.info(sys._getframe(0).f_code.co_name) 
@@ -297,6 +253,22 @@ class TestClass():
 #             assert bv.ExceptionLog(testName) == 'normal'
 #             time.sleep(2)
 
+#     def test_033_basic_eoam(self):
+#         testName =  sys._getframe(0).f_code.co_name 
+#         Title = "#" * 5 + " EOAM Basic Test " + "#" * 5
+#         print(Title)
+#         try: 
+#             bc.disTitle(dut1,Title)
+#             eoc.confEoam(dut2)
+#             assert eoc.confBasicEoam(dut1,dut2) == 8
+#             time.sleep(1)
+#             eoc.removeEoam(dut2) 
+#             time.sleep(1)                
+#         except: 
+#             eoc.removeEoam(dut2)                
+#             assert bv.ExceptionLog(testName) == 'normal'
+#             time.sleep(2)
+
 #     def test_041_basic_lldp(self):
 #         testName =  sys._getframe(0).f_code.co_name 
 #         Title = "#" * 5 + " LLDP Basic Test " + "#" * 5
@@ -313,49 +285,93 @@ class TestClass():
 #             assert bv.ExceptionLog(testName) == 'normal'
 #             time.sleep(2)
 
-#     def test_051_basic_eoam(self):
+#     def test_042_basic_twamp(self):
 #         testName =  sys._getframe(0).f_code.co_name 
-#         Title = "#" * 5 + " EOAM Basic Test " + "#" * 5
+#         Title = "#" * 5 + " TWAMP Basic Test " + "#" * 5
 #         print(Title)
-#         try: 
+#         try:         
 #             bc.disTitle(dut1,Title)
-#             eoc.confEoam(dut2)
-#             assert eoc.confBasicEoam(dut1,dut2) == 8
+#             twc.conftwamp(dut1)
+#             guitwp.twampclient()        
+#             assert twv.checkTwampResult(dut1) == 20                        
 #             time.sleep(1)
-#             eoc.removeEoam(dut2) 
-#             time.sleep(1)                
-#         except: 
-#             eoc.removeEoam(dut2)                
+#             twc.removetwamp(dut1)                
+#         except:              
+#             twc.removetwamp(dut1) 
 #             assert bv.ExceptionLog(testName) == 'normal'
 #             time.sleep(2)
 
-    # def test_061_basic_twamp(self):
-    #     testName =  sys._getframe(0).f_code.co_name 
-    #     Title = "#" * 5 + " TWAMP Basic Test " + "#" * 5
-    #     print(Title)
-    #     try:         
-    #         bc.disTitle(dut1,Title)
-    #         twc.conftwamp(dut1)
-    #         guitwp.twampclient()        
-    #         assert twv.checkTwampResult(dut1) == 20                        
-    #         time.sleep(1)
-    #         twc.removetwamp(dut1)                
-    #     except:              
-    #         twc.removetwamp(dut1) 
-    #         assert bv.ExceptionLog(testName) == 'normal'
-    #         time.sleep(2)
+#     def test_043_basic_ntp_time_zone(self):
+#         testName =  sys._getframe(0).f_code.co_name 
+#         Title = "#" * 5 + " NTP Basic & TIME ZONE Test " + "#" * 5
+#         print(Title)
+#         try:         
+#             bc.disTitle(dut1,Title)
+#             bc.addiproute(dut1) 
+#             gntpc.ntpConf(dut1)
+#             time.sleep(10)                
+#             #assert gntpc.checkntpconf(dut1) == True 
+#             #timestamp = datetime.datetime.now().strftime("%H:%M  KST %a %b %d %Y") 
+#             timestamp = datetime.datetime.now().strftime("%H  KST %a %b %d %Y") 
+#             assert gntpc.checktime(dut1) == timestamp                
+#             time.sleep(1)
+#             bc.deliproute(dut1)
+#             gntpc.delntpconfe(dut1)                  
+#         except:              
+#             bc.deliproute(dut1) 
+#             gntpc.delntpconfe(dut1) 
+#             assert bv.ExceptionLog(testName) == 'normal'
+#             time.sleep(2)
 
-    # def test_099_plog(self):
-    #     testName =  sys._getframe(0).f_code.co_name 
-    #     Title = "#" * 5 + " check plog " + "#" * 5
-    #     print(Title)
-    #     try: 
-    #         bc.disTitle(dut1,Title)
-    #         assert bv.checkPlog(Title,dut1) == 'OK'
-    #         time.sleep(2)                
-    #     except:            
-    #         assert bv.ExceptionLog(testName) == 'normal'
-    #         time.sleep(2)
+#     def test_044_max_ntp_server(self):
+#         testName =  sys._getframe(0).f_code.co_name 
+#         Title = "#" * 5 + " Maximum NTP Server Test " + "#" * 5
+#         print(Title)
+#         try:         
+#             bc.disTitle(dut1,Title)
+#             bc.addiproute(dut1) 
+#             time.sleep(1) 
+#             gntpc.maxntpserver(dut1)
+#             time.sleep(1)                
+#             assert gntpc.checkmaxntpserver(dut1) == 4 
+#             time.sleep(1)                
+#             assert gntpc.overmaxntpserver(dut1) == True           
+#             time.sleep(1)
+#             bc.deliproute(dut1)
+#             gntpc.delmaxntpserver(dut1)                  
+#         except:              
+#             bc.deliproute(dut1) 
+#             gntpc.delmaxntpserver(dut1) 
+#             assert bv.ExceptionLog(testName) == 'normal'
+#             time.sleep(2)
+
+    def test_051_basic_PM(self):
+        testName =  sys._getframe(0).f_code.co_name 
+        Title = "#" * 5 + " PM Configuration Test " + "#" * 5
+        print(Title)
+        try:         
+            bc.disTitle(dut1,Title)
+            twc.conftwamp(dut1)
+            guitwp.twampclient()        
+            assert twv.checkTwampResult(dut1) == 20                        
+            time.sleep(1)
+            twc.removetwamp(dut1)                
+        except:              
+            twc.removetwamp(dut1) 
+            assert bv.ExceptionLog(testName) == 'normal'
+            time.sleep(2)
+
+#     def test_099_plog(self):
+#         testName =  sys._getframe(0).f_code.co_name 
+#         Title = "#" * 5 + " check plog " + "#" * 5
+#         print(Title)
+#         try: 
+#             bc.disTitle(dut1,Title)
+#             assert bv.checkPlog(Title,dut1) == 'OK'
+#             time.sleep(2)                
+#         except:            
+#             assert bv.ExceptionLog(testName) == 'normal'
+#             time.sleep(2)
 
 class MyPlugin:
     def pytest_sessionfinish(self):
