@@ -24,8 +24,11 @@ import eoam.eoamConf as eoc
 import eoam.eoamVef as eov
 import twamp.twampConf as twc
 import twamp.twampVef as twv
+import pm.pmConfig as pmc
+import mngConfig.mngConfig as mngc
 #######################  PYTEST   ##########################
 
+# dut1 = '192.168.43.53'
 dut1 = '192.168.0.201'
 dut2 = '192.168.0.202'
 
@@ -39,20 +42,20 @@ class TestClass():
         bc.defaultSetup(dut1)   
         bc.defaultSetup(dut2)
 
-    @classmethod       
-    def teardown_class(cls):   # tearDown(cls) -> unittest
-        logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
-        logging.error(sys._getframe(0).f_code.co_name) 
-        """ BBB """ 
+    # @classmethod       
+    # def teardown_class(cls):   # tearDown(cls) -> unittest
+    #     logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+    #     logging.error(sys._getframe(0).f_code.co_name) 
+    #     """ BBB """ 
     
-    def setup_method(self,function):
-        logging.info(sys._getframe(0).f_code.co_name)
-        test_method_name = function.__name__ 
-        assert bv.checkPlog(test_method_name,dut1) == 'OK'
-        time.sleep(2)  
+    # def setup_method(self,function):
+    #     logging.info(sys._getframe(0).f_code.co_name)
+    #     test_method_name = function.__name__ 
+    #     assert bv.checkPlog(test_method_name,dut1) == 'OK'
+    #     time.sleep(2)  
     
-    def teardown_method(self,function):
-        logging.info(sys._getframe(0).f_code.co_name)
+    # def teardown_method(self,function):
+    #     logging.info(sys._getframe(0).f_code.co_name)
   
 
 # #### -----------------------------------------------------
@@ -91,20 +94,20 @@ class TestClass():
 #             assert bv.ExceptionLog(testName) == 'normal'
 #             time.sleep(2)
 
-#     def test_003_user_account(self):
-#         logging.info(sys._getframe(0).f_code.co_name)  
-#         testName =  sys._getframe(0).f_code.co_name 
-#         Title = "#" * 5 + " User Account Configuration TEST " + "#" * 5
-#         print(Title)
-#         try:     
-#             bc.disTitle(dut1,Title) 
-#             assert gua.useraccount(dut1) == 6
-#             time.sleep(1)
-#         except:             
-#             assert bv.ExceptionLog(testName) == 'normal'
-#             time.sleep(2)
+    # def test_003_user_account(self):
+    #     logging.info(sys._getframe(0).f_code.co_name)  
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " User Account Configuration TEST " + "#" * 5
+    #     print(Title)
+    #     try:     
+    #         bc.disTitle(dut1,Title) 
+    #         assert gua.useraccount(dut1) == 6
+    #         time.sleep(1)
+    #     except:             
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(2)
 
-#     def test_011_static_route(self):
+#      def test_011_static_route(self):
 #           logging.info(sys._getframe(0).f_code.co_name)  
 #           testName =  sys._getframe(0).f_code.co_name 
 #           Title = "#" * 5 + " static route Configuration TEST " + "#" * 5
@@ -344,34 +347,106 @@ class TestClass():
 #             gntpc.delmaxntpserver(dut1) 
 #             assert bv.ExceptionLog(testName) == 'normal'
 #             time.sleep(2)
+# # 
+#     def test_051_basic_PM_Config(self):
+#         testName =  sys._getframe(0).f_code.co_name 
+#         Title = "#" * 5 + " basic PM Config Test " + "#" * 5
+#         print(Title)
+#         try:         
+#             bc.disTitle(dut1,Title)            
+#             assert pmc.pmConf(dut1) == True
+#             time.sleep(1)
+#             pmc.default_pm(dut1)                        
+#         except:
+#             pmc.default_pm(dut1)              
+#             assert bv.ExceptionLog(testName) == 'normal'
+#             time.sleep(2)
 
-    def test_051_basic_PM(self):
+#     def test_052_basic_PM_CSV(self):
+#         testName =  sys._getframe(0).f_code.co_name 
+#         Title = "#" * 5 + " basic PM CSV Test " + "#" * 5
+#         print(Title)
+#         try:         
+#             bc.disTitle(dut1,Title)            
+#             assert pmc.csvConf(dut1) == True
+#             time.sleep(1)
+#             pmc.default_csv(dut1)                        
+#         except:
+#             pmc.default_csv(dut1)              
+#             assert bv.ExceptionLog(testName) == 'normal'
+#             time.sleep(2)
+
+    # def test_053_mng_ping_config(self):
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " basic MNG PING Configuration Test " + "#" * 5
+    #     print(Title)
+    #     try:         
+    #         bc.disTitle(dut1,Title)            
+    #         assert mngc.mngPingConf(dut1) == True
+    #         time.sleep(1)
+    #         mngc.default_mng_ping_config(dut1) 
+    #         time.sleep(1)                
+    #     except:
+    #         mngc.default_mng_ping_config(dut1)              
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(2)
+
+    # def test_054_mng_process_config(self):
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " basic MNG Process Configuration Test " + "#" * 5
+    #     print(Title)
+    #     try:         
+    #         bc.disTitle(dut1,Title)            
+    #         assert mngc.mngProcessConf(dut1) == True
+    #         time.sleep(1)
+    #         mngc.default_mng_process_config(dut1) 
+    #         time.sleep(1)              
+    #     except:
+    #         mngc.default_mng_process_config(dut1)              
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(2)
+
+    # def test_055_mng_mem_config_(self):
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " basic MNG Memory Configuration Test " + "#" * 5
+    #     print(Title)
+    #     try:         
+    #         bc.disTitle(dut1,Title)            
+    #         assert mngc.mngMemoryConf(dut1) == True
+    #         time.sleep(1)
+    #         mngc.default_mng_mem_config(dut1) 
+    #         time.sleep(1)              
+    #     except:
+    #         mngc.default_mng_mem_config(dut1)              
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(2)
+
+    def test_056_mng_evm_config_(self):
         testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + " PM Configuration Test " + "#" * 5
+        Title = "#" * 5 + " basic MNG EVM Configuration Test " + "#" * 5
         print(Title)
         try:         
-            bc.disTitle(dut1,Title)
-            twc.conftwamp(dut1)
-            guitwp.twampclient()        
-            assert twv.checkTwampResult(dut1) == 20                        
+            bc.disTitle(dut1,Title)            
+            assert mngc.mngEvmConf(dut1) == True
             time.sleep(1)
-            twc.removetwamp(dut1)                
-        except:              
-            twc.removetwamp(dut1) 
+            mngc.default_mng_evm_config(dut1) 
+            time.sleep(1)              
+        except:
+            mngc.default_mng_evm_config(dut1)              
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)
 
-#     def test_099_plog(self):
-#         testName =  sys._getframe(0).f_code.co_name 
-#         Title = "#" * 5 + " check plog " + "#" * 5
-#         print(Title)
-#         try: 
-#             bc.disTitle(dut1,Title)
-#             assert bv.checkPlog(Title,dut1) == 'OK'
-#             time.sleep(2)                
-#         except:            
-#             assert bv.ExceptionLog(testName) == 'normal'
-#             time.sleep(2)
+    # def test_099_plog(self):
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " check plog " + "#" * 5
+    #     print(Title)
+    #     try: 
+    #         bc.disTitle(dut1,Title)
+    #         assert bv.checkPlog(Title,dut1) == 'OK'
+    #         time.sleep(2)                
+    #     except:            
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(2)
 
 class MyPlugin:
     def pytest_sessionfinish(self):

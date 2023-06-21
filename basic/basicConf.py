@@ -146,15 +146,14 @@ def deftVty(host):
        
 ### Restore maximum numberof vty session  ###	  
 def deftSystem(host):
-    with connect(host) as child:
-        child.send_command('write default',expect_string='[y/n]' )
-        child.send_command('y')
-        child.send_command('reload',expect_string='(y/n)')
-        child.send_command("y")
+    with connect(host) as child:   
+        child.send_command('write memory') 
+        write = child.send_command_timing('write default')
+        write += child.send_command_timing('y')
+        reload = child.send_command_timing('reload')
+        reload += child.send_command_timing('n')
+        reload += child.send_command_timing('y')
         time.sleep(180) 
-        child.expect(None)
-        time.sleep(1)
-
 
 def deliproute(host):
     with connect(host) as sub_child:

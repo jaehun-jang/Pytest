@@ -49,11 +49,14 @@ def checkPlog(testName,host):
     with bc.connect(host) as child:
         Command = "show process plog"
         cmdResult = child.send_command(Command)
-        result_list = len(cmdResult.splitlines())
-        if result_list <= 1:
+        result_split = cmdResult.splitlines()[0]
+        print(result_split)     
+        result_split = result_split.split(':')[0]
+        print(result_split)
+        if result_split == 'ls':
             return 'OK'
         else:
-            print ('#' *5 + testName +' occur proecee log' + '#' * 5)
+            print (f'##### {testName} occur proecee log {result_split}  #####')
             return 'nok'
 
 ### Exception log ###
