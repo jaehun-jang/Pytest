@@ -95,8 +95,8 @@ def check_mng_memory(child,state):
 
 def check_mng_evm_conf(child,state):
     successExpect = ['Disable','Disable','30','5','Normal','0']
-    failureExpect = ['Enable','enable','10','1','Normal','0']
-    # failureExpect = ['Enable','enable','10','1','Lockout','1']
+    # failureExpect = ['Enable','enable','10','1','Normal','0']
+    failureExpect = ['Enable','enable','10','1','Lockout','1']
     result = []  
     command = child.send_command('show mng evm') 
     cmd_split = (command.splitlines())
@@ -279,10 +279,10 @@ def mngEvmConf(dut1):
     with bc.connect(dut1) as child:                
         result.append(check_mng_evm_conf(child,'failure'))
         time.sleep(1)               
-        if result.count(True) == 2 :
-            return True
-        else:
-            return False
+    if result.count(True) == 2 :
+        return True
+    else:
+        return False
 
 def enable_evm(host):
     with bc.connect(host) as child:
