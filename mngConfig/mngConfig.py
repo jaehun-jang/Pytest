@@ -4,7 +4,7 @@
 # $interface = "1.0"
 
 from logging import root
-import time
+import time, paramiko
 import basic.basicConf as bc
 
 
@@ -66,8 +66,8 @@ def check_mng_process(child,state):
         
 def check_mng_memory(child,state):
     successExpect = ['disable','60','10','5','80 %','60','normal','normal']
-    failureExpect = ['enable','51','10','1','20 %','10','normal','normal']
-    # failureExpect = ['enable','51','10','1','20 %','10','dead','fail']
+    failureExpect = ['enable','11','10','1','20 %','10','exceed','fail']
+    # failureExpect = ['enable','11','10','1','20 %','10','normal','normal']
     result = []  
     command = child.send_command('show mng memory') 
     cmd_split = (command.splitlines())
@@ -95,7 +95,6 @@ def check_mng_memory(child,state):
 
 def check_mng_evm_conf(child,state):
     successExpect = ['Disable','Disable','30','5','Normal','0']
-    # failureExpect = ['Enable','enable','10','1','Normal','0']
     failureExpect = ['Enable','enable','10','1','Lockout','1']
     result = []  
     command = child.send_command('show mng evm') 
@@ -146,7 +145,7 @@ def check_mng_evm(child,state):
             process = command_list[15].split(':')[1].strip() 
             action = command_list[16].split(':')[1].strip()    
             print(f'Reserved Actions: {process} & {action}')        
-            if 'mem mon' == process and 'reboot' == action:
+            if 'memory mon' == process and 'reboot' == action:
                 return True
             else:
                 return False
@@ -211,8 +210,11 @@ def mngProcessConf(dut1):
         time.sleep(1)
         child.send_config_set(proc_enable_config)  
         time.sleep(5)
-        killall_process(dut1) 
-        time.sleep(5)
+        killall_process(dut1)
+        time.sleep(5) 
+
+    with bc.connect(dut1) as child:   # To avoid the console prompt hanging,       
+        time.sleep(1)
         result.append(check_mng_process(child,'failure'))
         time.sleep(12)               
         result.append(check_mng_evm(child,'process'))
@@ -231,21 +233,25 @@ def mngMemoryConf(dut1):
             'mng configuration',
             'memory monitor type count 1 ',
             'memory monitor type duration 10',
-            'memory monitor type period 51 ',
             'memory monitor type interval 10',
+            'memory monitor type period 11 ',
             'memory monitor type usage 20',
             'enable memory monitor'
             ]
         result.append(check_mng_memory(child,'normal'))
         time.sleep(1)
         child.send_config_set(mem_enable_config)  
-        time.sleep(5)
+        time.sleep(1)
+        # generate_mrmory_overload(child)
+        generate_mrmory_overload(dut1)
+        time.sleep(25)        
+    with bc.connect(dut1) as child:    
         result.append(check_mng_memory(child,'failure'))
-        time.sleep(12)               
-        # result.append(check_mng_evm(child,'memory'))
-        # print(result)
-        if result.count(True) == 2 :
-        # if result.count(True) == 3 :
+        time.sleep(1)              
+        result.append(check_mng_evm(child,'memory'))
+        print(result)
+        if result.count(True) == 3 :
+        # if result.count(True) == 2 :
             return True
         else:
             return False
@@ -274,7 +280,7 @@ def mngEvmConf(dut1):
         time.sleep(1)
         child.send_config_set(ping_failure_config)
         child.send_command('write memory')
-        time.sleep(180) 
+        time.sleep(200) 
 
     with bc.connect(dut1) as child:                
         result.append(check_mng_evm_conf(child,'failure'))
@@ -325,11 +331,11 @@ def default_mng_mem_config(dut1):
     with bc.connect(dut1) as child:
         default_config_commands = [
             'mng configuration',
-            'no memory monitor type count ',
             'no memory monitor type duration',
-            'no memory monitor type period ',
+            'memory monitor type period 60',
             'no memory monitor type interval',
             'no memory monitor type usage',
+            'memory monitor type count 5',
             'disable memory monitor '
             ]
         child.send_config_set(default_config_commands)
@@ -362,9 +368,40 @@ def killall_process(host):
         child.send_command('debug no-auth') 
         shell = child.send_command_timing('system-shell')
         shell += child.send_command_timing('killall mstpd')
-        shell += child.send_command_timing('exit')
-        time.sleep(1) 
+        time.sleep(2)
+        shell += child.send_command_timing('killall imish') # To avoid the console prompt hanging, 
 
+# def generate_mrmory_overload(host):
+#     with bc.connect(host) as child:  
+#         child.send_command('debug no-auth') 
+#         shell = child.send_command_timing('system-shell')
+#         shell += child.send_command_timing('cat /dev/zero | head -c 1000m | tail')
+#         time.sleep(20)             
+       
+def generate_mrmory_overload(host):
+    cli = paramiko.SSHClient()
+    cli.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+    server = host
+    user = "root"  
+    pwd = "admin"            
+    cli.connect(server, port=22, username=user, password=pwd)
+    commands = ['show clock',
+                'debug no-auth',
+                'show version', 
+                'system-shell',
+                'show env'
+                # 'cat /dev/zero | head -c 1000m | tail'
+                ]
+    for command in commands:
+        stdin, stdout, stderr = cli.exec_command(command)
+   
+    # lines = stdout.readlines()
+    # print(''.join(lines))
+    print(f'Command: {command}')
+    print(stdout.read().decode())
+    print(stderr.read().decode())
+    # cli.close()
+               
 def remove_plog(host):
     with bc.connect(host) as child:
         show_plog = child.send_command('show process plog')

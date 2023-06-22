@@ -406,35 +406,37 @@ class TestClass():
     #         assert bv.ExceptionLog(testName) == 'normal'
     #         time.sleep(2)
 
-    # def test_055_mng_mem_config_(self):
-    #     testName =  sys._getframe(0).f_code.co_name 
-    #     Title = "#" * 5 + " basic MNG Memory Configuration Test " + "#" * 5
-    #     print(Title)
-    #     try:         
-    #         bc.disTitle(dut1,Title)            
-    #         assert mngc.mngMemoryConf(dut1) == True
-    #         time.sleep(1)
-    #         mngc.default_mng_mem_config(dut1) 
-    #         time.sleep(1)              
-    #     except:
-    #         mngc.default_mng_mem_config(dut1)              
-    #         assert bv.ExceptionLog(testName) == 'normal'
-    #         time.sleep(2)
-
-    def test_056_mng_evm_config_(self):
+    def test_055_mng_mem_config_(self):
         testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + " basic MNG EVM Configuration Test " + "#" * 5
+        Title = "#" * 5 + " basic MNG Memory Configuration Test " + "#" * 5
         print(Title)
         try:         
             bc.disTitle(dut1,Title)            
-            assert mngc.mngEvmConf(dut1) == True
+            assert mngc.mngMemoryConf(dut1) == True
             time.sleep(1)
-            mngc.default_mng_evm_config(dut1) 
+            mngc.default_mng_mem_config(dut1) 
             time.sleep(1)              
         except:
-            mngc.default_mng_evm_config(dut1)              
+            mngc.default_mng_mem_config(dut1)              
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)
+
+    # def test_056_mng_evm_config_(self):
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " basic MNG EVM Configuration Test " + "#" * 5
+    #     print(Title)
+    #     try:         
+    #         bc.disTitle(dut1,Title)            
+    #         assert mngc.mngEvmConf(dut1) == True
+    #         time.sleep(1)
+    #         mngc.default_mng_ping_config(dut1)
+    #         mngc.default_mng_evm_config(dut1) 
+    #         time.sleep(1)              
+    #     except:
+    #         mngc.default_mng_ping_config(dut1)
+    #         mngc.default_mng_evm_config(dut1)              
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(2)
 
     # def test_099_plog(self):
     #     testName =  sys._getframe(0).f_code.co_name 
