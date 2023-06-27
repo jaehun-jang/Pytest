@@ -32,12 +32,12 @@ def crtSvc(sub_child,svc):
 
 
 ### Create NNI and add Service ###  
-def crtNni(sub_child, svc):
+def crtNni(sub_child, svc, nni):
     config_set = [
         "ethernet nni add nni1",
-        "map interface 1/25",
+        "map interface " + str(nni),
         *[f"add service evc{i}" for i in range(1, svc+1)],
-    ]
+        ]
     sub_child.send_config_set(config_set)
     time.sleep(0.2)
 
@@ -129,7 +129,6 @@ def dltNni(sub_child, svc):
     sub_child.send_config_set(config_set)
     time.sleep(0.2)
 
-
 def dltSvc(sub_child,svc):
     config_set = [*[f"ethernet service del evc{i}" for i in range(1, svc+1)], "time sleep 0.2"]
     sub_child.send_config_set(config_set)
@@ -138,7 +137,7 @@ def dltSvc(sub_child,svc):
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
 
-def crtServi(host,svc,uni):
+def crtServi(host,svc,uni,nni):
     with bc.connect(host) as sub_child:  
         #Create SVLAN
         crtVlan(sub_child,svc)
@@ -147,7 +146,7 @@ def crtServi(host,svc,uni):
         crtSvc(sub_child,svc)
         time.sleep(1)
         #Create NNI and add Service
-        crtNni(sub_child,svc)
+        crtNni(sub_child,svc,nni)
         time.sleep(1)
         #Create UNI and add Service
         crtUni(sub_child,uni)

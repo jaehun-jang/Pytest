@@ -12,9 +12,9 @@ import basic.basicConf as bc
 
 ### Check LLDP Neighbor ###
 
-def checkEoamNeighborDisc(host,state):               
+def checkEoamNeighborDisc(host,state,nni):               
     with bc.connect(host) as sub_child:
-        command = sub_child.send_command('sh ethernet oam discovery interface 1/25')
+        command = sub_child.send_command(f'sh ethernet oam discovery interface {nni}')
         # print(command)
 
         if 'passive' in state:
@@ -49,9 +49,9 @@ def checkEoamNeighborDisc(host,state):
         else:
             return 'Nok' 
          
-def checkEoamStatus(host,state):
+def checkEoamStatus(host,state,nni):
     with bc.connect(host) as sub_child:
-        command = sub_child.send_command('sh ethernet oam status interface 1/25')               
+        command = sub_child.send_command(f'sh ethernet oam status interface {nni}')               
         # print(command)
 
         if 'dying-gasp' in state:

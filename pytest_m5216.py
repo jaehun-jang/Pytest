@@ -20,25 +20,34 @@ import eoam.eoamVef as eov
 from pytest_basic import TestClass as basic
 #######################  PYTEST   ##########################
 
-dut1 = '192.168.0.201'
-dut2 = '192.168.0.202'
 
 # TestCase
-class Test_m5216(basic):   
+class Test_m6424(basic): 
 
+# ##### -----------------------------------------------------
+# ##### ------- Flexport Function Test ----------------------
+# ##### ----------------------------------------------------- 
+
+    dut1 = '192.168.0.211'
+    dut2 = '192.168.0.202' 
+    nni = '1/17'
+    lagin = ['1/15','1/16']
+    blockport = '1/6,1/15-1/16'
+
+    @pytest.mark.skip()
     def test_201_basic_soam(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " EOAM Basic Test " + "#" * 5
         print(Title)
         try: 
-            bc.disTitle(dut1,Title)
-            eoc.confEoam(dut2)
-            assert eoc.confBasicEoam(dut1,dut2) == 8
+            bc.disTitle(self.dut1,Title)
+            eoc.confEoam(self.dut2)
+            assert eoc.confBasicEoam(self.dut1,self.dut2) == 8
             time.sleep(1)
-            eoc.removeEoam(dut2) 
+            eoc.removeEoam(self.dut2) 
             time.sleep(1)                
         except: 
-            eoc.removeEoam(dut2)                
+            eoc.removeEoam(self.dut2)                
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)
 

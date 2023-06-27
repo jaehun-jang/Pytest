@@ -54,7 +54,7 @@ def checkmaxntpserver(host):
         print(f"server count: {servercount}")
         return servercount
 
-def check_mirror(host,direction):
+def check_mirror(host,nni,direction):
     with bc.connect(host) as child:  
         command = child.send_command('show mirror')       
         if direction == "transmit":
@@ -69,14 +69,14 @@ def check_mirror(host,direction):
 
             if direction == "both":
                 print(f'mirror dst: {dst}, dir: {dir}, src: {src}')
-                if  dst == '1/2' and dir == 'both' and src == '1/25':
+                if  dst == '1/2' and dir == 'both' and src == nni:
                     return True
                 else:
                     return False
             
             elif direction == "receive":
                 print(f'mirror dst: {dst}, dir: {dir}, src: {src}')
-                if  dst == '1/2' and dir == 'transmit' and src == '1/25':
+                if  dst == '1/2' and dir == 'transmit' and src == nni:
                     return True
                 else:
                     return False 
@@ -135,23 +135,23 @@ def traceRT(dut1):
         print(result)
         return result
 
-def mirror(dut1):
+def mirror(dut1,nni):
     result = []
     with bc.connect(dut1) as child:
-        config_commands = ['interface 1/2', 'mirror interface 1/25 direction both']
+        config_commands = ['interface 1/2', f'mirror interface {nni} direction both']
         child.send_config_set(config_commands)
         time.sleep(1)
-        result.append(check_mirror(dut1, 'both'))
+        result.append(check_mirror(dut1,nni,'both'))
 
-        config_commands = ['interface 1/2', 'no mirror interface 1/25 direction receive']
+        config_commands = ['interface 1/2', f'no mirror interface {nni} direction receive']
         child.send_config_set(config_commands)
         time.sleep(1)
-        result.append(check_mirror(dut1, 'receive'))
+        result.append(check_mirror(dut1,nni,'receive'))
 
-        config_commands = ['interface 1/2', 'no mirror interface 1/25 direction transmit']
+        config_commands = ['interface 1/2', f'no mirror interface {nni} direction transmit']
         child.send_config_set(config_commands)
         time.sleep(1)
-        result.append(check_mirror(dut1, 'transmit'))
+        result.append(check_mirror(dut1,nni,'transmit'))
 
         print(result)
         if result.count(True) == 3:

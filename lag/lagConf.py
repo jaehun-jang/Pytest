@@ -18,32 +18,32 @@ def disSubTitle(child,Title):
     child.send_command(Title )
 
 
-def staticLag(child):
+def staticLag(child,lagin):
     config_set = [
-                'interface 1/23',  
+                f'interface {lagin[0]}',  
                 'channel-group 1 mode on working',
-                'interface 1/24',
+                f'interface {lagin[1]}',
                 'channel-group 1 mode on protection'
     ]
     child.send_config_set(config_set)
 
-def activeLacp(child):
+def activeLacp(child,lagin):
     config_set = [
-                'interface 1/23',  
+                f'interface {lagin[0]}',  
                 'channel-group 1 mode active',
                 'lacp timeout short',
-                'interface 1/24',
+                f'interface {lagin[1]}',
                 'channel-group 1 mode active',
                 'lacp timeout short'
     ]
     child.send_config_set(config_set)
 
-def passiveLacp(child):
+def passiveLacp(child,lagin):
     config_set = [
-                'interface 1/23',  
+                f'interface {lagin[0]}',  
                 'channel-group 1 mode passive',
                 'lacp timeout short',
-                'interface 1/24',
+                f'interface {lagin[1]}',
                 'channel-group 1 mode passive',
                 'lacp timeout short'
     ]
@@ -60,127 +60,115 @@ def addNniInt(child):
     config_set = ['ethernet nni nni1', 'map interface po1']
     child.send_config_set(config_set)     
 
-def delPortCh(child):    
-    config_set = ['interface range 1/23-1/24', 'no channel-group']
+def delPortCh(child,lagin):    
+    config_set = [f'interface range {lagin[0]}-{lagin[1]}', 'no channel-group']
     child.send_config_set(config_set)
 
-def deflacpTime(child):    
-    config_set = ['interface range 1/23-1/24', 'lacp timeout long']
+def deflacpTime(child,lagin):    
+    config_set = [f'interface range {lagin[0]}-{lagin[1]}', 'lacp timeout long']
     child.send_config_set(config_set)
 
-def noshutLagInt(child):    
-    config_set = ['interface range 1/23-1/24', 'no shutdown']
+def noshutLagInt(child,lagin):    
+    config_set = [f'interface range {lagin[0]}-{lagin[1]}', 'no shutdown']
     # config_set = ['interface po1', 'no shutdown']
     child.send_config_set(config_set)
 
-def shutLagInt(child):    
-    config_set = ['interface range 1/23-1/24', 'shutdown']
+def shutLagInt(child,lagin):    
+    config_set = [f'interface range {lagin[0]}-{lagin[1]}', 'shutdown']
     # config_set = ['interface po1', 'shutdown']
     child.send_config_set(config_set)
 
 ###################################################################################
 
 ### Static Link Aggregation ###	  
-def confLag(host):
+def confLag(host,lagin):
     with bc.connect(host) as child:
-        svc = 1
-        uni = 1
-        mc.crtServi(host,svc,uni)
         time.sleep(1)
         delNniInt(child)
         time.sleep(1)
-        staticLag(child)
+        staticLag(child,lagin)
         time.sleep(1)
         addNniInt(child)
         time.sleep(1)
-        noshutLagInt(child)
+        noshutLagInt(child,lagin)
         time.sleep(1)
 
 ### Static Link Aggregation ###	  
-def confLacp(host):
+def confLacp(host,lagin):
     with bc.connect(host) as child:
-        svc = 1
-        uni = 1
-        mc.crtServi(host,svc,uni)
         time.sleep(1)
         delNniInt(child)
         time.sleep(1)
-        activeLacp(child)
+        activeLacp(child,lagin)
         time.sleep(1)
         addNniInt(child)
         time.sleep(1)
-        noshutLagInt(child)
-        time.sleep(1)
+        noshutLagInt(child,lagin)
+        time.sleep(5)
 
 ### Pure Static Link Aggregation ###	  
-def removeLag(host):
+def removeLag(host,lagin):
     with bc.connect(host) as child:
-        svc = 1
-        uni = 1
-        shutLagInt(child)
+        shutLagInt(child,lagin)
         time.sleep(1)
         delNniInt(child)
         time.sleep(1)
-        delPortCh(child)
+        delPortCh(child,lagin)
         time.sleep(1)   
-        mc.dltServi(host,svc,uni)
-        time.sleep(1)
 
 
 ### Pure Static Link Aggregation ###	  
-def removeLacp(host):
+def removeLacp(host,lagin):
     with bc.connect(host) as child:
         svc = 1
         uni = 1
-        shutLagInt(child)
+        shutLagInt(child,lagin)
         time.sleep(1)
         delNniInt(child)
         time.sleep(1)
-        deflacpTime(child)
+        deflacpTime(child,lagin)
         time.sleep(1)
-        delPortCh(child)
+        delPortCh(child,lagin)
         time.sleep(1)   
         mc.dltServi(host,svc,uni)
         time.sleep(1)
 
 ### Redundant Static Link Aggregation ###	  
 
-def confStaticLag(host):
+def confStaticLag(host,lagin):
         result = []
-        confLag(host)
+        confLag(host,lagin)
         print('#' * 3 + ' check static channel-group ' + '#' * 3)
-        result.append(lav.checkPortChannel(host,'static'))
+        result.append(lav.checkPortChannel(host,'static',lagin))
         time.sleep(1)
         print('#' * 3 + ' check BCM Port state ' + '#' * 3)
         result.append(lav.checkBcmPort(host,'hotstandby'))
-        time.sleep(1)
-        removeLag(host)
         print(result)
         return result.count('Ok')
 
-def confBasicLacp(host): 
+def confBasicLacp(host,lagin): 
     with bc.connect(host) as child: 
         result = []
-        confLacp(host)
+        confLacp(host,lagin)
         time.sleep(10)
         print('#' * 3 + ' check lacp active Mode ' + '#' * 3)
-        result.append(lav.checkPortChannel(host,'lacp'))
+        result.append(lav.checkPortChannel(host,'lacp',lagin))
         result.append(lav.checkLacpInternal(host,'active')) 
         time.sleep(1)
         delNniInt(child)
         time.sleep(1)
-        passiveLacp(child)
+        passiveLacp(child,lagin)
         time.sleep(1)    
         addNniInt(child)
         time.sleep(5)
         print('#' * 3 + ' check lacp passive Mode ' + '#' * 3)    
-        result.append(lav.checkPortChannel(host,'lacp'))
+        result.append(lav.checkPortChannel(host,'lacp',lagin))
         result.append(lav.checkLacpInternal(host,'passive'))
         time.sleep(1)
         changeMaxMember(child,1)
         time.sleep(5)
         print('#' * 3 + ' check lacp MaxMember 1 ' + '#' * 3) 
-        result.append(lav.checkPortChannel(host,'hotstandby'))
+        result.append(lav.checkPortChannel(host,'hotstandby',lagin))
         result.append(lav.checkLacpInternal(host,'hotstandby'))
         time.sleep(1)
         print('#' * 3 + ' check BCM Port state ' + '#' * 3)            
@@ -188,12 +176,12 @@ def confBasicLacp(host):
         changeMaxMember(child,8)
         time.sleep(5)
         print('#' * 3 + ' check lacp MaxMember 8 ' + '#' * 3) 
-        result.append(lav.checkPortChannel(host,'lacp'))
+        result.append(lav.checkPortChannel(host,'lacp',lagin))
         result.append(lav.checkLacpInternal(host,'passive'))
         time.sleep(1)  
         result.append(lav.checkBcmPort(host,'normal'))
         time.sleep(1)
-        removeLacp(host)  
+        removeLacp(host,lagin)  
         print(result)  
         return result.count('Ok')
 

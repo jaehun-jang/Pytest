@@ -22,21 +22,15 @@ def disTitle(child,Title):
 
 ###################################################################################
 
-def disblldp(child):
-    config_set = ['interface 1/25', 'lldp disable']
+def disblldp(child,nni):
+    config_set = [f'interface {nni}', 'lldp disable']
     child.send_config_set(config_set)
 
-def enblldp(child):
-    config_set = ['interface 1/25', 'lldp enable txrx']
+def enblldp(child,nni):
+    config_set = [f'interface {nni}', 'lldp enable txrx']
     child.send_config_set(config_set)
-
-def changLldpTlv(child,stateI,tlvI):
-    state = ['','no']
-    tlv = ['8021-org-spec','8023-org-spec','basic']
-    config_set = ['interface 1/25', state[stateI] + ' lldp tlv-select ' + tlv[tlvI] + ' all']
-    child.send_config_set(config_set) 
     
-def changLldpTlvall(child,dut2):
+def changLldpTlvall(child,dut2,nni):
     result = []
     sucCount = 0
     state = ['no','']
@@ -48,7 +42,7 @@ def changLldpTlvall(child,dut2):
             if orgI == '8021-org-spec':
                 print('#'*3 + ' ' + stateI +' 8021-org-spec ' + '#'*3  )
                 for tlvI in tlv[0:4]:
-                    config_set = ['interface 1/25', stateI+' lldp tlv-select '+ orgI +' '+ tlvI ]
+                    config_set = [f'interface {nni}', stateI+' lldp tlv-select '+ orgI +' '+ tlvI ]
                     child.send_config_set(config_set) 
                     time.sleep(1.5)
                     result.append(llv.checkLldpNeighborTlvCF(dut2,sucCount))
@@ -57,7 +51,7 @@ def changLldpTlvall(child,dut2):
             elif orgI == '8023-org-spec':
                 print('#'*3 + ' ' +  stateI +' 8023-org-spec ' + '#'*3  )
                 for tlvI in tlv[4:9]:
-                    config_set = ['interface 1/25', stateI+' lldp tlv-select '+ orgI +' '+ tlvI ]
+                    config_set = [f'interface {nni}', stateI+' lldp tlv-select '+ orgI +' '+ tlvI ]
                     child.send_config_set(config_set)
                     time.sleep(1.5)
                     result.append(llv.checkLldpNeighborTlvCF(dut2,sucCount))
@@ -66,7 +60,7 @@ def changLldpTlvall(child,dut2):
             elif orgI == 'basic':
                 print('#'*3 + ' ' +  stateI +' basic ' + '#'*3  )
                 for tlvI in tlv[9::]:
-                    config_set = ['interface 1/25', stateI+' lldp tlv-select '+ orgI +' '+ tlvI ]
+                    config_set = [f'interface {nni}', stateI+' lldp tlv-select '+ orgI +' '+ tlvI ]
                     child.send_config_set(config_set)
                     time.sleep(1.5)
                     result.append(llv.checkLldpNeighborTlvCF(dut2,sucCount))
@@ -89,44 +83,35 @@ def setLldpTimer(child):
 def chgMgmtTlv(child):
     child.send_config_set('system management-address vlan 1 v6')
 
-
+def lldptimer(host):
+    with bc.connect(host) as child: 
+        command = ['lldp tx-interval 5 ','lldp transmit-delay 1','lldp reinit 1', ]
+        child.send_config_set(command)
     
 ###################################################################################
 
-### Static Link Aggregation ###	  
-def confEthService(host):
-    svc = 2
-    uni = 1
-    mc.crtServi(host,svc,uni)
-    time.sleep(1)
 
-### Pure Static Link Aggregation ###	  
-def removeEthService(host):
-    svc = 2
-    uni = 1  
-    mc.dltServi(host,svc,uni)
-    time.sleep(1)
-
-def confBasicLldp(dut1,dut2): 
+def confBasicLldp(dut1,dut2,nni): 
     with bc.connect(dut1) as child: 
         result = []
-        confEthService(dut1)
-        time.sleep(3)
         print('#' * 3 + ' check lacp default tlv ' + '#' * 3)
+        lldptimer(dut1)
+        lldptimer(dut2)
+        time.sleep(10) 
         result.append(llv.checkLldpNeighborTlvC(dut2,'default'))
         time.sleep(1)               
-        disblldp(child)
+        disblldp(child,nni)
         time.sleep(3)
         print('#' * 3 + ' check lldp disable all tlv ' + '#' * 3)
         result.append(llv.checkLldpNeighborTlvC(dut2,'disable'))
         time.sleep(1)
-        enblldp(child)
+        enblldp(child,nni)
         time.sleep(3)
         print('#' * 3 + ' check lldp enable all tlv' + '#' * 3)
         result.append(llv.checkLldpNeighborTlvC(dut2,'enable'))
         time.sleep(3)
         print('#' * 3 + ' change lldp TLV to enable/disable for each tlv' + '#' * 3)
-        result.extend(changLldpTlvall(child,dut2))
+        result.extend(changLldpTlvall(child,dut2,nni))
         time.sleep(3)
         setMgmtTlv(child)
         time.sleep(3)
@@ -143,7 +128,5 @@ def confBasicLldp(dut1,dut2):
         print('#' * 3 + ' check lldp chgMgmtTlv ' + '#' * 3)
         result.append(llv.checkLldpNeighborTlvD(dut2,'sys-mgmt'))
         time.sleep(1)
-        print(result)
-        removeEthService(dut1) 
         return result.count('Ok')
 

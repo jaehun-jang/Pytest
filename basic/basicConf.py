@@ -65,19 +65,72 @@ def disTitle(host,Title):
         child.send_command(Title)
  
 ### default SetUp  ###	  
-def defaultSetup(host):
+def defaultSetup(host,blockport):
     with connect(host) as child:
         child.enable()
         default_config = ["logging console", "aaa auth attempts login 0"]
         child.send_config_set(default_config)
-        int_shutdown_config = ["interface range 1/6,1/23-1/24", "shutdown"]
+        int_shutdown_config = f'interface range {blockport}', "shutdown"
         child.send_config_set(int_shutdown_config)
         time.sleep(1)
-        hostname_config = {"192.168.0.201": "hostname LAB1", "192.168.0.202": "hostname LAB2"} 
+        hostname_config = {
+            "192.168.0.201": "hostname LAB1",
+            "192.168.0.202": "hostname LAB2",
+            "192.168.0.211": "hostname LAB3", 
+            "192.168.0.212": "hostname LAB4"
+            } 
         """  Using Dictionary """
         if host in hostname_config:
             child.send_config_set(hostname_config[host])
             time.sleep(1)
+
+def defaultFor6424(host,blockport):
+    with connect(host) as child:
+        child.enable()
+        default_config = ["logging console", "aaa auth attempts login 0"]
+        child.send_config_set(default_config)
+        int_shutdown_config = f'interface range {blockport}', "shutdown"
+        child.send_config_set(int_shutdown_config)
+        time.sleep(1)
+        hostname_config = {
+            "192.168.0.201": "hostname LAB1",
+            "192.168.0.202": "hostname LAB2",
+            "192.168.0.211": "hostname LAB3", 
+            "192.168.0.212": "hostname LAB4"
+            } 
+        """  Using Dictionary """
+        if host in hostname_config:
+            child.send_config_set(hostname_config[host])
+            time.sleep(1)
+
+def defaultFor5216(host,blockport):
+    with connect(host) as child:
+        child.enable()
+        default_config = ["logging console", "aaa auth attempts login 0"]
+        child.send_config_set(default_config)
+        int_shutdown_config = f'interface range {blockport}', "shutdown"
+        child.send_config_set(int_shutdown_config)
+        time.sleep(1)
+        hostname_config = {
+            "192.168.0.201": "hostname LAB1",
+            "192.168.0.202": "hostname LAB2",
+            "192.168.0.211": "hostname LAB3", 
+            "192.168.0.212": "hostname LAB4"
+            } 
+        """  Using Dictionary """
+        if host in hostname_config:
+            child.send_config_set(hostname_config[host])
+            time.sleep(1)
+
+def noshutblockport(host,blockport): 
+    with connect(host) as child:   
+        config_set = [f'interface range {blockport}', 'no shutdown']
+        child.send_config_set(config_set)
+
+def shutblockport(host,blockport): 
+    with connect(host) as child:              
+        config_set = [f'interface range {blockport}', 'shutdown']
+        child.send_config_set(config_set)
 
 ### Create maximum numberof VLAN  ###	  
 def crtVlan(host,vlans):
@@ -92,13 +145,26 @@ def addiproute(host):
 
 def ping(host):
     with connect(host) as child:
-        command = child.send_command('ping 168.126.63.1', expect_string= 'icmp_seq=10')
-        time.sleep(5)
-        print(command)
-        child.write_channel('\x03') 
-        result = command.splitlines()[-1].split()[4]
-        return result
- 
+        if host == '192.168.0.201':
+            command = child.send_command('ping 168.126.63.1', expect_string= 'icmp_seq=10')
+            time.sleep(5)
+            print(command)
+            child.write_channel('\x03') 
+            result = command.splitlines()[-1].split()[4]
+            if result == 'icmp_seq=10':
+                return True
+            else:
+                return False
+
+        if host == '192.168.0.211':
+            command = child.send_command('ping 168.126.63.1')
+            time.sleep(7)
+            print(command)
+            result = command.splitlines()[-2].split()[5]
+            if result == '0%':
+                return True
+            else:
+                return False 
 
 ### Delet maximum numberof VLAN  ###	  
 def dltVlan(host,vlans):
@@ -159,3 +225,15 @@ def deliproute(host):
     with connect(host) as sub_child:
         sub_child.send_config_set('no ip route 0.0.0.0/0 192.168.0.2')
         pass
+
+
+### Detach ###  
+def translate(host):
+    with connect(host) as child:
+        for intCon in range(10, 17):
+            config_set = [f'flexport-group {intCon}', 'detach']
+            child.send_config_set(config_set)
+            time.sleep(1.5)
+        config_set = [f'flexport-group 9', 'max-speed 25 ']
+        child.send_config_set(config_set)
+        time.sleep(1.5)

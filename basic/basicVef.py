@@ -30,12 +30,10 @@ def checkVtySsion(host, vty):
         for i in range(vty):
             child = bc.connect(host)
             child_list.append(child) # Child append a list To disconnect() the sesseions
-            cmdResult = child.send_command('show users')
-#            print(cmdResult)
-            cmdResult_list = cmdResult.splitlines()
-            readResult = str(cmdResult_list)
-            numOfVty = readResult.count('pts/')
-            # print('Number of sessions: {}'.format(numOfVty))
+        cmdResult = child.send_command('show users')
+        cmdResult_list = cmdResult.splitlines()
+        readResult = str(cmdResult_list)
+        numOfVty = readResult.count('pts/')
         for child in child_list:
             child.disconnect()
         print('Number of sessions: {}'.format(numOfVty))
