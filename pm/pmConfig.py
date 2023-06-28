@@ -4,8 +4,6 @@
 # $interface = "1.0"
 
 from logging import root
-import unittest
-import pexpect
 import sys
 import time, datetime
 import os

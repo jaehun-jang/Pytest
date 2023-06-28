@@ -2,7 +2,6 @@
 # $interface = "1.0"
 
 
-import pexpect
 import sys
 import time
 import os

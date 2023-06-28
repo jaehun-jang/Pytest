@@ -3,7 +3,6 @@
 # $interface = "1.0"
 
 from re import I
-import pexpect
 import sys
 import time
 import os

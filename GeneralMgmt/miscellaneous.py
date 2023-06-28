@@ -5,7 +5,6 @@
 
 from logging import root
 import unittest
-import pexpect
 import sys
 import time, datetime
 import os
