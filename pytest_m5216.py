@@ -34,6 +34,26 @@ class Test_m6424(basic):
     lagin = ['1/15','1/16']
     blockport = '1/6,1/15-1/16'
 
+
+
+
+    @pytest.mark.skip() #Because the GNMI implementation is not complete, this test item is skipped.
+    def test_015_service_feature(self):
+        pass
+
+    @pytest.mark.skip() #Because the system is hanging, this test item is skipped.
+    def test_021_max_vlan_4k(self):
+        pass
+
+    @pytest.mark.skip() #Because the feature hase a bug, this test item is skipped.
+    def test_043_basic_ntp_time_zone(self):
+        pass
+
+    @pytest.mark.skip() #Because the feature hase a bug, this test item is skipped.
+    def test_044_max_ntp_server(self):
+        pass
+
+
     @pytest.mark.skip()
     def test_201_basic_soam(self):
         testName =  sys._getframe(0).f_code.co_name 

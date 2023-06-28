@@ -242,8 +242,8 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
     notFoundMessage.hidden = !allRowsHidden;
 }
 </script>
-    <h1>report_20230627_1801.html</h1>
-    <p>Report generated on 27-Jun-2023 at 18:33:19 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h1>report_20230628_1134.html</h1>
+    <p>Report generated on 28-Jun-2023 at 12:07:23 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
     <h2>Environment</h2>
     <table id="environment">
       <tr>
@@ -259,8 +259,8 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
         <td>Python</td>
         <td>3.9.0</td></tr></table>
     <h2>Summary</h2>
-    <p>18 tests ran in 1899.34 seconds. </p>
-    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">17 passed</span>, <input checked="true" class="filter" data-test-result="skipped" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">7 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">1 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <p>18 tests ran in 1948.94 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">18 passed</span>, <input checked="true" class="filter" data-test-result="skipped" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">7 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
     <h2>Results</h2>
     <table id="results-table">
       <thead id="results-table-head">
@@ -271,50 +271,6 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <th class="sortable links" col="links">Links</th></tr>
         <tr hidden="true" id="not-found-message">
           <th colspan="4">No results found. Try to check the filters</th></tr></thead>
-      <tbody class="failed results-table-row">
-        <tr>
-          <td class="col-result">Failed</td>
-          <td class="col-name">pytest_m5216.py::Test_m6424::test_032_basic_lacp</td>
-          <td class="col-duration">206.69</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">self = &lt;pytest_m5216.Test_m6424 object at 0x000001622FA26070&gt;<br/><br/>    def test_032_basic_lacp(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; LACP Basic Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(self.dut1,Title)<br/>            mc.crtServi(self.dut2,1,1,self.nni) # svc = 1, uni = 1<br/>            lac.confLacp(self.dut2,self.lagin)<br/>            mc.crtServi(self.dut1,1,1,self.nni) # svc = 1, uni = 1<br/>&gt;           assert lac.confBasicLacp(self.dut1,self.lagin) == 10<br/><span class="error">E           AssertionError</span><br/><br/>pytest_basic.py:273: AssertionError<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;pytest_m5216.Test_m6424 object at 0x000001622FA26070&gt;<br/><br/>    def test_032_basic_lacp(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; LACP Basic Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(self.dut1,Title)<br/>            mc.crtServi(self.dut2,1,1,self.nni) # svc = 1, uni = 1<br/>            lac.confLacp(self.dut2,self.lagin)<br/>            mc.crtServi(self.dut1,1,1,self.nni) # svc = 1, uni = 1<br/>            assert lac.confBasicLacp(self.dut1,self.lagin) == 10<br/>            mc.dltServi(self.dut1,1,1)<br/>            lac.removeLacp(self.dut2,self.lagin)<br/>            mc.dltServi(self.dut2,1,1)<br/>            time.sleep(5)<br/>        except:<br/>            lac.removeLacp(self.dut2,self.lagin)<br/>            mc.dltServi(self.dut2,1,1)<br/>&gt;           assert bv.ExceptionLog(testName) == &#x27;normal&#x27;<br/><span class="error">E           AssertionError</span><br/><br/>pytest_basic.py:281: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>##### LACP Basic Test #####
-### check lacp active Mode ###
-[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;NONE&#x27;, &#x27;-&#x27;, &#x27;work:&#x27;, &#x27;1/15(P)*&#x27;, &#x27;protect:&#x27;, &#x27;1/16(P)&#x27;]
-[&#x27;[]&#x27;]
-### check lacp passive Mode ###
-[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;NONE&#x27;, &#x27;-&#x27;, &#x27;work:&#x27;, &#x27;1/15(P)*&#x27;, &#x27;protect:&#x27;, &#x27;1/16(P)&#x27;]
-[&#x27;[]&#x27;]
-### check lacp MaxMember 1 ###
-[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;NONE&#x27;, &#x27;-&#x27;, &#x27;work:&#x27;, &#x27;1/15(P)*&#x27;, &#x27;protect:&#x27;, &#x27;1/16(P)&#x27;]
-[&#x27;[]&#x27;]
-### check BCM Port state ###
-[&#x27;xe15(&#x27;, &#x27;41)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;SFI&#x27;, &#x27;9216&#x27;]
-### check lacp MaxMember 8 ###
-[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;NONE&#x27;, &#x27;-&#x27;, &#x27;work:&#x27;, &#x27;1/15(P)*&#x27;, &#x27;protect:&#x27;, &#x27;1/16(P)&#x27;]
-[&#x27;[]&#x27;]
-[&#x27;xe15(&#x27;, &#x27;41)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;SFI&#x27;, &#x27;9216&#x27;]
-[&#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Ok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;]
-<br/></div></td></tr></tbody>
-      <tbody class="skipped results-table-row">
-        <tr>
-          <td class="col-result">Skipped</td>
-          <td class="col-name">pytest_m5216.py::Test_m6424::test_015_service_feature</td>
-          <td class="col-duration">0.00</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_basic.py&#x27;, 178, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
-      <tbody class="skipped results-table-row">
-        <tr>
-          <td class="col-result">Skipped</td>
-          <td class="col-name">pytest_m5216.py::Test_m6424::test_021_max_vlan_4k</td>
-          <td class="col-duration">0.00</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_basic.py&#x27;, 194, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
       <tbody class="skipped results-table-row">
         <tr>
           <td class="col-result">Skipped</td>
@@ -323,25 +279,7 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
-            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_basic.py&#x27;, 326, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
-      <tbody class="skipped results-table-row">
-        <tr>
-          <td class="col-result">Skipped</td>
-          <td class="col-name">pytest_m5216.py::Test_m6424::test_043_basic_ntp_time_zone</td>
-          <td class="col-duration">0.00</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_basic.py&#x27;, 345, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
-      <tbody class="skipped results-table-row">
-        <tr>
-          <td class="col-result">Skipped</td>
-          <td class="col-name">pytest_m5216.py::Test_m6424::test_044_max_ntp_server</td>
-          <td class="col-duration">0.00</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_basic.py&#x27;, 370, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_basic.py&#x27;, 317, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
       <tbody class="skipped results-table-row">
         <tr>
           <td class="col-result">Skipped</td>
@@ -350,7 +288,43 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
-            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_basic.py&#x27;, 469, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_basic.py&#x27;, 458, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_m5216.py::Test_m6424::test_015_service_feature</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_m5216.py&#x27;, 40, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_m5216.py::Test_m6424::test_021_max_vlan_4k</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_m5216.py&#x27;, 44, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_m5216.py::Test_m6424::test_043_basic_ntp_time_zone</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_m5216.py&#x27;, 48, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_m5216.py::Test_m6424::test_044_max_ntp_server</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_m5216.py&#x27;, 52, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
       <tbody class="skipped results-table-row">
         <tr>
           <td class="col-result">Skipped</td>
@@ -359,12 +333,12 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
-            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_m5216.py&#x27;, 37, &#x27;Skipped: unconditional skip&#x27;)<br/> -----------------------------Captured log teardown------------------------------ <br/>ERROR    root:pytest_basic.py:63 teardown_class<br/></div></td></tr></tbody>
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.4\\pytest_m5216.py&#x27;, 57, &#x27;Skipped: unconditional skip&#x27;)<br/> -----------------------------Captured log teardown------------------------------ <br/>ERROR    root:pytest_basic.py:51 teardown_class<br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_001_maximum_number_of_vty</td>
-          <td class="col-duration">184.87</td>
+          <td class="col-duration">183.65</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -375,7 +349,7 @@ Number of sessions: 39
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_002_vty_configure</td>
-          <td class="col-duration">51.62</td>
+          <td class="col-duration">51.75</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -386,7 +360,7 @@ Number of sessions: 8
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_003_user_account</td>
-          <td class="col-duration">68.20</td>
+          <td class="col-duration">68.00</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -397,9 +371,9 @@ LAB3(config)# username actus role network-admin password encrypted actus1234
 LAB3(config)# end
 LAB3# 
  Line       User      Host(s)               Login Time  Mode
- ttyS0      root      -                     00:06:13    Exec
+ ttyS0      root      -                     00:04:19    Exec
  pts/0      actus     192.168.0.157         00:00:01    -
- console    root      NETCONF               00:07:34    Exec
+ console    root      NETCONF               00:16:51    Exec
 Successful login - Username: actus, Password: actus1234
 True
 configure terminal
@@ -416,9 +390,9 @@ LAB3(config)# username hfrn role network-operator password encrypted hfrn1234
 LAB3(config)# end
 LAB3# 
  Line       User      Host(s)               Login Time  Mode
- ttyS0      root      -                     00:06:32    Exec
+ ttyS0      root      -                     00:04:38    Exec
  pts/0      hfrn      192.168.0.157         00:00:00    -
- console    root      NETCONF               00:07:53    Exec
+ console    root      NETCONF               00:17:10    Exec
 Successful login - Username: hfrn, Password: hfrn1234
 True
 configure terminal
@@ -435,9 +409,9 @@ LAB3(config)# username cisco role network-viewer password encrypted cisco1234
 LAB3(config)# end
 LAB3# 
  Line       User      Host(s)               Login Time  Mode
- ttyS0      root      -                     00:06:52    Exec
+ ttyS0      root      -                     00:04:58    Exec
  pts/0      cisco     192.168.0.157         00:00:01    -
- console    root      NETCONF               00:08:13    Exec
+ console    root      NETCONF               00:17:30    Exec
 Successful login - Username: cisco, Password: cisco1234
 True
 configure terminal
@@ -454,34 +428,34 @@ False
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_011_static_route</td>
-          <td class="col-duration">35.81</td>
+          <td class="col-duration">36.09</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
             <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### static route Configuration TEST #####
 PING 168.126.63.1 (168.126.63.1) 56(84) bytes of data.
-64 bytes from 168.126.63.1: icmp_seq=1 ttl=54 time=2.65 ms
-64 bytes from 168.126.63.1: icmp_seq=2 ttl=54 time=2.16 ms
-64 bytes from 168.126.63.1: icmp_seq=3 ttl=54 time=2.16 ms
-64 bytes from 168.126.63.1: icmp_seq=4 ttl=54 time=2.15 ms
-64 bytes from 168.126.63.1: icmp_seq=5 ttl=54 time=2.14 ms
+64 bytes from 168.126.63.1: icmp_seq=1 ttl=54 time=2.92 ms
+64 bytes from 168.126.63.1: icmp_seq=2 ttl=54 time=5.62 ms
+64 bytes from 168.126.63.1: icmp_seq=3 ttl=54 time=3.38 ms
+64 bytes from 168.126.63.1: icmp_seq=4 ttl=54 time=5.29 ms
+64 bytes from 168.126.63.1: icmp_seq=5 ttl=54 time=2.96 ms
 
 --- 168.126.63.1 ping statistics ---
-5 packets transmitted, 5 received, 0% packet loss, time 4031ms
-rtt min/avg/max/mdev = 2.140/2.255/2.654/0.199 ms
+5 packets transmitted, 5 received, 0% packet loss, time 4032ms
+rtt min/avg/max/mdev = 2.925/4.035/5.622/1.177 ms
 <br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_012_trace_route</td>
-          <td class="col-duration">25.79</td>
+          <td class="col-duration">26.34</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
             <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### TraceRT Test #####
  1?: [LOCALHOST]                                         pmtu 1500
- 1:  192.168.0.2                                           1.146ms 
- 1:  192.168.0.2                                           1.065ms 
+ 1:  192.168.0.2                                           1.061ms 
+ 1:  192.168.0.2                                           1.000ms 
 
 192.168.0.2
 <br/></div></td></tr></tbody>
@@ -489,18 +463,18 @@ rtt min/avg/max/mdev = 2.140/2.255/2.654/0.199 ms
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_013_tcp_dump</td>
-          <td class="col-duration">17.44</td>
+          <td class="col-duration">15.34</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
             <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### TCP_DUMP Test #####
-tcpdump count: 694
+tcpdump count: 659
 <br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_014_mirror_configure</td>
-          <td class="col-duration">33.93</td>
+          <td class="col-duration">34.46</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -513,7 +487,7 @@ mirror dst: 1/2, dir: transmit, src: 1/17
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_022_max_service_256</td>
-          <td class="col-duration">379.94</td>
+          <td class="col-duration">375.90</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -530,7 +504,7 @@ mirror dst: 1/2, dir: transmit, src: 1/17
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_031_static_lag</td>
-          <td class="col-duration">85.50</td>
+          <td class="col-duration">120.18</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -544,8 +518,34 @@ mirror dst: 1/2, dir: transmit, src: 1/17
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m5216.py::Test_m6424::test_032_basic_lacp</td>
+          <td class="col-duration">222.97</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### LACP Basic Test #####
+### check lacp active Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/16(P)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FA&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x3f&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FA&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3f&#x27;]&quot;]
+### check lacp passive Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/16(P)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x3e&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3e&#x27;]&quot;]
+### check lacp MaxMember 1 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;1&#x27;, &#x27;1/16(D)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FP&#x27;, &#x27;standby&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x6&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3e&#x27;]&quot;]
+### check BCM Port state ###
+[&#x27;xe15(&#x27;, &#x27;41)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;SFI&#x27;, &#x27;9216&#x27;]
+### check lacp MaxMember 8 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/16(P)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x3e&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3e&#x27;]&quot;]
+[&#x27;xe15(&#x27;, &#x27;41)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Forward&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;SFI&#x27;, &#x27;9216&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_033_basic_eoam</td>
-          <td class="col-duration">184.61</td>
+          <td class="col-duration">184.62</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -578,7 +578,7 @@ mirror dst: 1/2, dir: transmit, src: 1/17
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_041_basic_lldp</td>
-          <td class="col-duration">372.36</td>
+          <td class="col-duration">376.33</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -635,7 +635,7 @@ PRINT TLV Count: 40 40
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_051_basic_pm_configure</td>
-          <td class="col-duration">38.05</td>
+          <td class="col-duration">38.93</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -650,7 +650,7 @@ PRINT TLV Count: 40 40
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_052_basic_pm_csv</td>
-          <td class="col-duration">36.32</td>
+          <td class="col-duration">36.44</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -663,7 +663,7 @@ PRINT TLV Count: 40 40
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_053_mng_gw_config</td>
-          <td class="col-duration">66.29</td>
+          <td class="col-duration">66.13</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -678,7 +678,7 @@ Reserved Actions: gate mon &amp; reboot
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_054_mng_process_config</td>
-          <td class="col-duration">69.06</td>
+          <td class="col-duration">69.28</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -687,14 +687,14 @@ Reserved Actions: gate mon &amp; reboot
 [&#x27;enable&#x27;, &#x27;2&#x27;, &#x27;enable&#x27;, &#x27;5&#x27;, &#x27;restart&#x27;, &#x27;dead&#x27;, &#x27;fail&#x27;]
 20
 Reserved Actions: mstpd &amp; restart
-plog-0004-00000454-mstpd.log
+plog-0004-00000458-mstpd.log
 [True, True, True]
 <br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_055_mng_mem_config_</td>
-          <td class="col-duration">27.02</td>
+          <td class="col-duration">27.34</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -707,7 +707,7 @@ plog-0004-00000454-mstpd.log
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">pytest_m5216.py::Test_m6424::test_099_check_plog</td>
-          <td class="col-duration">15.35</td>
+          <td class="col-duration">15.00</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">

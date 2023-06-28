@@ -37,18 +37,6 @@ class TestClass():
     lagin = ['']
     blockport = ''
 
-    # dut1 = '192.168.0.201'
-    # dut2 = '192.168.0.202'
-    # nni = '1/25'
-    # lagin = ['1/23,1/24']
-    # blockport = '1/6,1/23-1/24'
-
-    # dut1 = '192.168.0.211'
-    # dut2 = '192.168.0.202' 
-    # nni = '1/17'
-    # lagin = ['1/15','1/16']
-    # blockport = '1/6,1/15-1/16'
-
     @classmethod
     def setup_class(cls,): # setUP_class(cls) -> unittest
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -175,7 +163,6 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
-    @pytest.mark.skip() #Because the GNMI implementation is not complete, this test item is skipped.
     def test_015_service_feature(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " service_feature " + "#" * 5
@@ -191,7 +178,6 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
-    @pytest.mark.skip() #Because the system is hanging, this test item is skipped.
     def test_021_max_vlan_4k(self):
         logging.info(sys._getframe(0).f_code.co_name) 
         testName =  sys._getframe(0).f_code.co_name 
@@ -347,7 +333,6 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
-    @pytest.mark.skip() #Because the feature hase a bug, this test item is skipped.
     def test_043_basic_ntp_time_zone(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " NTP Basic & TIME ZONE Test " + "#" * 5
@@ -372,7 +357,6 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
-    @pytest.mark.skip() #Because the feature hase a bug, this test item is skipped.
     def test_044_max_ntp_server(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Maximum NTP Server Test " + "#" * 5
@@ -514,6 +498,8 @@ if __name__ == "__main__":
     file_name = f"report_{timestamp}.html"
 
     # Construct the arguments string
+    args_str = '--html=report/report.html --self-contained-html '+ __file__
+    args_str = ' --capture=tee-sys '+ __file__
     args_str = f"--html=report/{file_name} {__file__}"
 
     args = args_str.split(" ")
