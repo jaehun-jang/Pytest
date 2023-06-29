@@ -69,5 +69,14 @@ def ExceptionLog(testName):
 
 
      
-
-             
+ ### function to check the product type, which is either m6424 or not ### 
+def checkProcuctType(host):
+    with bc.connect(host) as child:
+        showproduct = child.send_command ("sh fruinfo system ")
+        checkproduct = showproduct.split()
+        search_string = 'M6424'
+        if search_string in checkproduct:
+            return '6424'
+        else:
+            return 'other'
+                

@@ -84,9 +84,12 @@ if __name__ == "__main__":
     file_name = f"report_{timestamp}.html"
 
     # Construct the arguments string
+    args_str = '--html=report/report.html --self-contained-html '+ __file__
+    args_str = ' --capture=tee-sys '+ __file__
     args_str = f"--html=report/{file_name} {__file__}"
 
     args = args_str.split(" ")
     pytest.main(args, plugins=[MyPlugin()])
+
 
 
