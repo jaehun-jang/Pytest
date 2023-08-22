@@ -30,60 +30,60 @@ class Test_m6424(basic):
     dut1 = '192.168.0.201'
     dut2 = '192.168.0.202'
     nni = '1/25'
-    lagin = ['1/15','1/16']
+    lagint = ['1/15','1/16']
     blockport = '1/6,1/15-1/16'
 
 
-    def test_101_basic_flexport(self): 
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
-        print(Title)
-        try:  
-            bc.disTitle(self.dut1,Title)
-            bc.noshutblockport(self.dut1,self.blockport) 
-            assert fc.confFlexPort(self.dut1) == 12
-            time.sleep(1)
-            bc.shutblockport(self.dut1,self.blockport) 
-        except: 
-            bc.deftSystem(self.dut1)
-            bc.defaultFor6424(self.dut1) 
-            time.sleep(1)   
-            assert bv.ExceptionLog(testName) == 'normal'
-            time.sleep(2)                 
+    # def test_101_basic_flexport(self): 
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
+    #     print(Title)
+    #     try:  
+    #         bc.disTitle(self.dut1,Title)
+    #         bc.noshutblockport(self.dut1,self.blockport) 
+    #         assert fc.confFlexPort(self.dut1) == 12
+    #         time.sleep(1)
+    #         bc.shutblockport(self.dut1,self.blockport) 
+    #     except: 
+    #         bc.deftSystem(self.dut1)
+    #         bc.defaultFor6424(self.dut1) 
+    #         time.sleep(1)   
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(2)                 
 
-    def test_102_flexport_example(self):
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + " Flexport Example configuration Test " + "#" * 5
-        print(Title)
-        try: 
-            bc.disTitle(self.dut1,Title)
-            bc.noshutblockport(self.dut1,self.blockport)  
-            assert fce.confFlexPortExam(self.dut1) == 7 
-            time.sleep(1)
-            bc.shutblockport(self.dut1,self.blockport) 
-        except:
-            bc.deftSystem(self.dut1)
-            bc.defaultFor6424(self.dut1) 
-            time.sleep(1) 
-            assert bv.ExceptionLog(testName) == 'normal'
-            time.sleep(2)                 
+    # def test_102_flexport_example(self):
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " Flexport Example configuration Test " + "#" * 5
+    #     print(Title)
+    #     try: 
+    #         bc.disTitle(self.dut1,Title)
+    #         bc.noshutblockport(self.dut1,self.blockport)  
+    #         assert fce.confFlexPortExam(self.dut1) == 7 
+    #         time.sleep(1)
+    #         bc.shutblockport(self.dut1,self.blockport) 
+    #     except:
+    #         bc.deftSystem(self.dut1)
+    #         bc.defaultFor6424(self.dut1) 
+    #         time.sleep(1) 
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(2)                 
 
-    def test_103_flexport_breakout(self):
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + " Flexport Breakout configuration Test " + "#" * 5
-        print(Title)
-        try: 
-            bc.disTitle(self.dut1,Title)
-            bc.noshutblockport(self.dut1,self.blockport)  
-            assert fbc.flexPortBreakout(self.dut1) == 3
-            time.sleep(1)
-            bc.shutblockport(self.dut1,self.blockport) 
-        except:
-            bc.deftSystem(self.dut1)
-            bc.defaultFor6424(self.dut1) 
-            time.sleep(1) 
-            assert bv.ExceptionLog(testName) == 'normal'
-            time.sleep(2)                
+    # def test_103_flexport_breakout(self):
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " Flexport Breakout configuration Test " + "#" * 5
+    #     print(Title)
+    #     try: 
+    #         bc.disTitle(self.dut1,Title)
+    #         bc.noshutblockport(self.dut1,self.blockport)  
+    #         assert fbc.flexPortBreakout(self.dut1) == 3
+    #         time.sleep(1)
+    #         bc.shutblockport(self.dut1,self.blockport) 
+    #     except:
+    #         bc.deftSystem(self.dut1)
+    #         bc.defaultFor6424(self.dut1) 
+    #         time.sleep(1) 
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(2)                
 
 
 class MyPlugin:

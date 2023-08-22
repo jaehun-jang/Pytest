@@ -83,7 +83,7 @@ def chgMgmtTlv(child):
 
 def lldptimer(host):
     with bc.connect(host) as child: 
-        command = ['lldp tx-interval 5 ','lldp transmit-delay 1','lldp reinit 1', ]
+        command = ['lldp transmit-delay 1','lldp reinit 1', 'lldp tx-interval 5 ']
         child.send_config_set(command)
     
 ###################################################################################
@@ -93,6 +93,7 @@ def confBasicLldp(dut1,dut2,nni):
     with bc.connect(dut1) as child: 
         result = []
         print('#' * 3 + ' check lacp default tlv ' + '#' * 3)
+        time.sleep(3) 
         lldptimer(dut1)
         lldptimer(dut2)
         time.sleep(10) 
