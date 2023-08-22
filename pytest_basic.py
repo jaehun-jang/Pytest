@@ -116,7 +116,7 @@ class TestClass():
             bc.disTitle(self.dut1,Title)
             radius.configAaaRadius(self.dut1) 
             guiradius.startRadiusServer() 
-            time.sleep(15)      
+            time.sleep(2)      
             assert radius.checklogin(self.dut1) == 6                        
             time.sleep(2)
             guiradius.stopRadiusServer()
@@ -341,23 +341,23 @@ class TestClass():
 #             time.sleep(5)
 
 #     @pytest.mark.skip() #Because the feature hase a bug, this test item is skipped.
-#     def test_042_basic_twamp(self):
-#         testName =  sys._getframe(0).f_code.co_name 
-#         Title = "#" * 5 + " TWAMP Basic Test " + "#" * 5
-#         print(Title)
-#         try:         
-#             bc.disTitle(self.dut1,Title)
-#             mc.crtServi(self.dut1,1,1,self.nni) # svc = 1, uni = 1  
-#             twc.conftwamp(self.dut1)
-#             guitwamp.twampclient()        
-#             assert twv.checkTwampResult(self.dut1) == 20                        
-#             time.sleep(1)
-#             twc.removetwamp(self.dut1)
-#             time.sleep(5)                
-#         except:              
-#             twc.removetwamp(self.dut1) 
-#             assert bv.ExceptionLog(testName) == 'normal'
-#             time.sleep(5)
+    # def test_042_basic_twamp(self):
+    #     testName =  sys._getframe(0).f_code.co_name 
+    #     Title = "#" * 5 + " TWAMP Basic Test " + "#" * 5
+    #     print(Title)
+    #     try:         
+    #         bc.disTitle(self.dut1,Title)
+    #         mc.crtServi(self.dut1,1,1,self.nni) # svc = 1, uni = 1  
+    #         twc.conftwamp(self.dut1)
+    #         guitwamp.twampclient()        
+    #         assert twv.checkTwampResult(self.dut1) == 20                        
+    #         time.sleep(1)
+    #         twc.removetwamp(self.dut1)
+    #         time.sleep(5)                
+    #     except:              
+    #         twc.removetwamp(self.dut1) 
+    #         assert bv.ExceptionLog(testName) == 'normal'
+    #         time.sleep(5)
 
 #     def test_043_basic_ntp_time_zone(self):
 #         testName =  sys._getframe(0).f_code.co_name 
