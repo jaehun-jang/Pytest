@@ -80,14 +80,19 @@ def check_mirror(host,nni,direction):
                 else:
                     return False 
 
+
 def check_feature(host,connection,state):
     if connection == 'telnet':
         with bc.telnet(host) as child:
             result = []  
             gnmi = child.send_command('show gnmi agent')
+            '// Added to remove empty space //'
+            shGnmi_split = (gnmi.splitlines())
+            gnmi_list = [line for line in shGnmi_split if line.strip()] 
+            
             netconf = child.send_command('show netconf agent')       
             ssh = child.send_command('show ssh server')               
-            result.append(gnmi.splitlines()[1].split()[1])         
+            result.append(gnmi_list[1].split(':')[1].strip())         
             result.append(netconf.splitlines()[1].split()[1])
             result.append(ssh.splitlines()[0].split()[2])
             print(result)            
@@ -108,8 +113,8 @@ def check_feature(host,connection,state):
             if result_count == 1:
                 return True
             else:
-                return False     
-    
+                return False  
+             
 ##################################################################################
     
 def tcpdump(dut1): 

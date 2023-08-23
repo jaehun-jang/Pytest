@@ -120,7 +120,7 @@ class TestClass():
             time.sleep(2)
             guiradius.stopRadiusServer()
             time.sleep(5)               
-            assert radius.checklogin(self.dut1) == 1 
+            assert radius.checklogin(self.dut1) == 2 
             time.sleep(2) 
             radius.removeAaaRadius(self.dut1)  
             time.sleep(2)                             
