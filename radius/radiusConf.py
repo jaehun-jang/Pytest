@@ -96,7 +96,8 @@ def checklogin(host):
     new_users = [
         ('admin', 'hfrn','network-admin'),
         ('operator', 'hfrn','network-operator'),
-        ('viewer', 'hfrn','network-viewer')
+        ('viewer', 'hfrn','network-viewer'),
+        ('root', 'admin','network-admin')
     ]
     okcount = [] 
 

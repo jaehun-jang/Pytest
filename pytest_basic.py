@@ -3,7 +3,6 @@
 
 import pytest, sys, time, os, logging ,datetime
 import subprocess
-
 import guictl.twamp as guitwamp    
 import guictl.radius as guiradius                   
 import basic.basicConf as bc

@@ -11,23 +11,12 @@ def startRadiusServer():
     pyautogui.press('enter')
     time.sleep(5)  # 
 
-    # Permit 
-    pyautogui.click(792, 524)
-    time.sleep(10)  # 
-
+    # Start RADIUS Server 
+    pyautogui.alert('Please Start RADIUS Server')
 
 def stopRadiusServer():
-    # Service 
-    pyautogui.click(128, 93)
-    time.sleep(1.5)  # 
-
-    # Stop 
-    pyautogui.click(128, 90)
-    time.sleep(1.5)  # 
-
-    # Click close the program button  
-    pyautogui.click(975, 63)
-    time.sleep(1.5)  # 
+    # Stop RADIUS Server 
+    pyautogui.alert('Please Stop RADIUS Server')
 
 # def radiusServer():
 #     # Open Windows start manu
