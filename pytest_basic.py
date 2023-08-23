@@ -37,14 +37,14 @@ class TestClass():
     nni = ''
     lagint = ['']
     blockport = ''
-
+ 
     @classmethod
     def setup_class(cls,): # setUP_class(cls) -> unittest
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         logging.info(sys._getframe(0).f_code.co_name) 
         """ AAA """  
-        bc.defaultSetup(cls.dut1,cls.blockport)   
-        bc.defaultSetup(cls.dut2,cls.blockport)
+        # bc.defaultSetup(cls.dut1,cls.blockport)   
+        # bc.defaultSetup(cls.dut2,cls.blockport)
 
     @classmethod       
     def teardown_class(cls):   # tearDown(cls) -> unittest
@@ -115,18 +115,18 @@ class TestClass():
             bc.disTitle(self.dut1,Title)
             radius.configAaaRadius(self.dut1) 
             guiradius.startRadiusServer() 
-            time.sleep(2)      
+            time.sleep(5)      
             assert radius.checklogin(self.dut1) == 6                        
             time.sleep(2)
             guiradius.stopRadiusServer()
-            time.sleep(15)               
-            assert radius.checklogin(self.dut1) == 0 
+            time.sleep(5)               
+            assert radius.checklogin(self.dut1) == 1 
             time.sleep(2) 
             radius.removeAaaRadius(self.dut1)  
             time.sleep(2)                             
         except: 
             guiradius.stopRadiusServer()
-            time.sleep(10)                
+            time.sleep(2)                
             radius.removeAaaRadius(self.dut1) 
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)

@@ -1,16 +1,22 @@
 
-import pytest, sys, time, os, logging ,datetime
+import pytest, sys, time, os, logging ,datetime ,pyautogui
 from netmiko import ConnectHandler
 import basic.basicConf as bc
 
+RADIUS_Server1 = '192.168.0.157'
+RADIUS_Server2 = '192.168.6.1'
 
 def configAaaRadius(host):
     with bc.connect(host) as child:
         child.enable()
         config_commands = [
-            "radius-server host 192.168.0.157 key radius auth-port 1812",
+            # f"radius-server host {RADIUS_Server1} key radius auth-port 1812",
+            f"radius-server host {RADIUS_Server2} key radius auth-port 1812",
+            "radius-server retransmit 1",
+            "radius-server timeout 1", 
             "aaa auth login default group radius",
-            "aaa auth login default fallback error local" 
+            "aaa auth login default fallback error local", 
+            "aaa auth attempts login 0"
         ]
         output = child.send_config_set(config_commands)
         print(output)
@@ -19,9 +25,13 @@ def removeAaaRadius(host):
     with bc.connect(host) as child:
         child.enable()
         config_commands = [
+            "no aaa auth attempts login ",
             "no aaa auth login default group radius",
-            "no aaa auth login default fallback error local", 
-            "no radius-server host 192.168.0.157"
+            "no aaa auth login default fallback error local",
+            "no radius-server retransmit ",
+            "no radius-server timeout ",
+            # f"no radius-server host {RADIUS_Server1}",             
+            f"no radius-server host {RADIUS_Server2}"
         ]
         output = child.send_config_set(config_commands)
         print(output)
@@ -91,37 +101,37 @@ def checklogin(host):
         'ip': host,
         'username': 'root',
         'password': 'admin',
-        'port': 23
+        'port': 23,
     }
     new_users = [
+        ('root', 'admin','network-admin'),
         ('admin', 'hfrn','network-admin'),
         ('operator', 'hfrn','network-operator'),
         ('viewer', 'hfrn','network-viewer'),
-        ('root', 'admin','network-admin')
     ]
     okcount = [] 
 
-    '// For SSH Connection //'
-    for new_username, new_password, role in new_users:  
-        print('# For RADIUS authentication with SSH #')
-        result = login_with_credentials(ssh_device, new_username, new_password, role)
-        print(result)
-        if result == True:
-            okcount.append('Ok')
-        else:
-            okcount.append('Nok')
-        time.sleep(1.5) 
-
     '// For Telnet Connection //'
+    print('# For RADIUS authentication with Telnet #')
     for new_username, new_password, role in new_users:  
-        print('# For RADIUS authentication with Telnet #')
         result = login_with_credentials(telnet_device, new_username, new_password, role)
         print(result)
         if result == True:
             okcount.append('Ok')
         else:
             okcount.append('Nok')
-        time.sleep(1.5) 
+        time.sleep(2) 
+
+    '// For SSH Connection //'
+    print('# For RADIUS authentication with SSH #')
+    for new_username, new_password, role in new_users:  
+        result = login_with_credentials(ssh_device, new_username, new_password, role)
+        print(result)
+        if result == True:
+            okcount.append('Ok')
+        else:
+            okcount.append('Nok')
+        time.sleep(2) 
 
     print(okcount)
     return okcount.count('Ok')
