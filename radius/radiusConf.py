@@ -102,6 +102,7 @@ def checklogin(host):
         'username': 'root',
         'password': 'admin',
         'port': 23,
+        'timeout': 30,
     }
     new_users = [
         ('root', 'admin','network-admin'),
