@@ -33,7 +33,7 @@ class Test_m6424(basic):
     lagint = ['1/15','1/16']
     blockport = '1/6,1/15-1/16'
 
-    @pytest.mark.skip() 
+    # @pytest.mark.skip() 
     def test_101_basic_flexport(self): 
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
@@ -51,7 +51,7 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2) 
           
-    @pytest.mark.skip() 
+    # @pytest.mark.skip() 
     def test_102_flexport_example(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Example configuration Test " + "#" * 5
@@ -69,7 +69,7 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)  
 
-    @pytest.mark.skip() 
+    # @pytest.mark.skip() 
     def test_103_flexport_breakout(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Breakout configuration Test " + "#" * 5
