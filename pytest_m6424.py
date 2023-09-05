@@ -22,6 +22,7 @@ from pytest_basic import TestClass as basic
 
 # TestCase
 class Test_m6424(basic): 
+# class Test_m6424(): 
 
 # ##### -----------------------------------------------------
 # ##### ------- Flexport Function Test ----------------------
@@ -34,7 +35,25 @@ class Test_m6424(basic):
     blockport = '1/6,1/15-1/16'
 
     # @pytest.mark.skip() 
-    def test_101_basic_flexport(self): 
+    def test_101_change_profile_roe(self): 
+        testName =  sys._getframe(0).f_code.co_name 
+        Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
+        print(Title)
+        profile = 'roe'
+        try:  
+            bc.disTitle(self.dut1,Title)
+            bc.chgProfile(self.dut1,profile)
+            time.sleep(1)   
+            assert bv.checkProfile(self.dut1,profile) == True
+        except: 
+            bc.deftSystem(self.dut1)
+            bc.defaultFor6424(self.dut1,self.blockport) 
+            time.sleep(1)   
+            assert bv.ExceptionLog(testName) == 'normal'
+            time.sleep(2) 
+            
+    # @pytest.mark.skip() 
+    def test_102_basic_flexport(self): 
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
         print(Title)
@@ -46,13 +65,13 @@ class Test_m6424(basic):
             bc.shutblockport(self.dut1,self.blockport) 
         except: 
             bc.deftSystem(self.dut1)
-            bc.defaultFor6424(self.dut1) 
+            bc.defaultFor6424(self.dut1,self.blockport) 
             time.sleep(1)   
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2) 
           
     # @pytest.mark.skip() 
-    def test_102_flexport_example(self):
+    def test_103_flexport_example(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Example configuration Test " + "#" * 5
         print(Title)
@@ -64,13 +83,13 @@ class Test_m6424(basic):
             bc.shutblockport(self.dut1,self.blockport) 
         except:
             bc.deftSystem(self.dut1)
-            bc.defaultFor6424(self.dut1) 
+            bc.defaultFor6424(self.dut1,self.blockport) 
             time.sleep(1) 
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)  
 
     # @pytest.mark.skip() 
-    def test_103_flexport_breakout(self):
+    def test_104_flexport_breakout(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Breakout configuration Test " + "#" * 5
         print(Title)
@@ -82,7 +101,7 @@ class Test_m6424(basic):
             bc.shutblockport(self.dut1,self.blockport) 
         except:
             bc.deftSystem(self.dut1)
-            bc.defaultFor6424(self.dut1) 
+            bc.defaultFor6424(self.dut1,self.blockport) 
             time.sleep(1) 
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)                

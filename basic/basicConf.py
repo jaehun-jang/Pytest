@@ -221,6 +221,16 @@ def deftSystem(host):
         reload += child.send_command_timing('y')
         time.sleep(180) 
 
+def chgProfile(host,profile):
+    with connect(host) as child:   
+        child.send_command('write memory') 
+        write = child.send_command_timing(f'write profile {profile}')
+        write += child.send_command_timing('y')
+        reload = child.send_command_timing('reload')
+        reload += child.send_command_timing('n')
+        reload += child.send_command_timing('y')
+        time.sleep(180) 
+        
 def deliproute(host):
     with connect(host) as sub_child:
         sub_child.send_config_set('no ip route 0.0.0.0/0 192.168.0.2')

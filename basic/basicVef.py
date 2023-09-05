@@ -80,3 +80,37 @@ def checkProcuctType(host):
         else:
             return 'other'
                 
+
+def checkProfile(host,profile):
+    with bc.connect(host) as child:
+        cmd_out = child.send_command ("sh profile current ")
+        cmd_out_split = (cmd_out.splitlines())
+        result =  cmd_out_split[0].split(':')[1].strip() 
+        print(result)  
+        if profile in result:
+            return True
+        else:
+            return False
+        
+
+def splitSample(host,connection,state):
+    if connection == 'telnet':
+        with bc.telnet(host) as child:
+            result = []  
+            gnmi = child.send_command('show gnmi agent')
+            '// Added to remove empty space //'
+            shGnmi_split = (gnmi.splitlines())
+            gnmi_list = [line for line in shGnmi_split if line.strip()] 
+            
+            netconf = child.send_command('show netconf agent')       
+            ssh = child.send_command('show ssh server')               
+            result.append(gnmi_list[1].split(':')[1].strip())         
+            result.append(netconf.splitlines()[1].split()[1])
+            result.append(ssh.splitlines()[0].split()[2])
+            print(result)            
+            result_count = result.count(state)
+            print(result_count)
+            if result_count == 3:
+                return True
+            else:
+                return False
