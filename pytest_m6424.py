@@ -21,8 +21,8 @@ from pytest_basic import TestClass as basic
 #######################  PYTEST   ##########################
 
 # TestCase
-class Test_m6424(basic): 
-# class Test_m6424(): 
+# class Test_m6424(basic): 
+class Test_m6424(): 
 
 # ##### -----------------------------------------------------
 # ##### ------- Flexport Function Test ----------------------
@@ -59,6 +59,7 @@ class Test_m6424(basic):
         print(Title)
         try:  
             bc.disTitle(self.dut1,Title)
+            bc.defaultSetup(self.dut1,self.blockport)   
             bc.noshutblockport(self.dut1,self.blockport) 
             assert fc.confFlexPort(self.dut1) == 12
             time.sleep(1)
