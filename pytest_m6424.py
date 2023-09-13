@@ -21,8 +21,8 @@ from pytest_basic import TestClass as basic
 #######################  PYTEST   ##########################
 
 # TestCase
-# class Test_m6424(basic): 
-class Test_m6424(): 
+class Test_m6424(basic): 
+# class Test_m6424(): 
 
 # ##### -----------------------------------------------------
 # ##### ------- Flexport Function Test ----------------------
@@ -40,6 +40,7 @@ class Test_m6424():
         Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
         print(Title)
         profile = 'roe'
+        # profile = 'ethernet'
         try:  
             bc.disTitle(self.dut1,Title)
             bc.chgProfile(self.dut1,profile)
