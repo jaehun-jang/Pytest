@@ -32,7 +32,7 @@ class Test_m6424(basic):
     dut2 = '192.168.0.202'
     nni = '1/25'
     lagint = ['1/15','1/16']
-    blockport = '1/6,1/15-1/16'
+    blockport = '1/6,1/10-1/16'
 
     # @pytest.mark.skip() 
     def test_101_change_profile_roe(self): 

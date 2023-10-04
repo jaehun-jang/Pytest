@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>report_20231004_1522.html</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    let visibleString = getQueryParameter('visible') || 'all';
+    visibleString = visibleString.toLowerCase();
+    const checkedItems = visibleString.split(',');
+
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++) {
+        filterItems[i].hidden = false;
+
+        if (visibleString != 'all') {
+            filterItems[i].checked = checkedItems.includes(filterItems[i].getAttribute('data-test-result'));
+            filterTable(filterItems[i]);
+        }
+    }
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>report_20231004_1522.html</h1>
+    <p>Report generated on 04-Oct-2023 at 16:09:57 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
+    <h2>Summary</h2>
+    <p>27 tests ran in 2865.70 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">25 passed</span>, <input checked="true" class="filter" data-test-result="skipped" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">2 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">2 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_04_AAA_RADIUS</td>
+          <td class="col-duration">83.77</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;pytest_m6424.Test_m6424 object at 0x000002113F674CD0&gt;<br/><br/>    def test_04_AAA_RADIUS(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; AAA with RADIUS Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(self.dut1,Title)<br/>            radius.configAaaRadius(self.dut1)<br/>            guiradius.startRadiusServer()<br/>            time.sleep(5)<br/>&gt;           assert radius.checklogin(self.dut1) == 6<br/><span class="error">E           AssertionError</span><br/><br/>pytest_basic.py:119: AssertionError<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;pytest_m6424.Test_m6424 object at 0x000002113F674CD0&gt;<br/><br/>    def test_04_AAA_RADIUS(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; AAA with RADIUS Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(self.dut1,Title)<br/>            radius.configAaaRadius(self.dut1)<br/>            guiradius.startRadiusServer()<br/>            time.sleep(5)<br/>            assert radius.checklogin(self.dut1) == 6<br/>            time.sleep(2)<br/>            guiradius.stopRadiusServer()<br/>            time.sleep(5)<br/>            assert radius.checklogin(self.dut1) == 2<br/>            time.sleep(2)<br/>            radius.removeAaaRadius(self.dut1)<br/>            time.sleep(2)<br/>        except:<br/>            guiradius.stopRadiusServer()<br/>            time.sleep(2)<br/>            radius.removeAaaRadius(self.dut1)<br/>&gt;           assert bv.ExceptionLog(testName) == &#x27;normal&#x27;<br/><span class="error">E           AssertionError</span><br/><br/>pytest_basic.py:131: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>##### AAA with RADIUS Test #####
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  radius-server host 192.168.6.1 key radius auth-port 1812
+LAB1(config)# radius-server retransmit 1
+LAB1(config)# radius-server timeout 1
+LAB1(config)# aaa auth login default group radius
+LAB1(config)# aaa auth login default fallback error local
+LAB1(config)# aaa auth attempts login 0
+LAB1(config)#  end
+LAB1# 
+# For RADIUS authentication with Telnet #
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     01:05:33    Exec
+ pts/0      root      192.168.0.157         00:00:01    -
+ console    root      NETCONF               01:07:51    Exec
+# Check user privilige #
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#   username radius password radius123
+LAB1(config)#  end
+LAB1# 
+Successful login - Username: root, Password: admin
+True
+Failed login - Username: admin, Password: hfrn
+Login failed: 192.168.0.201
+False
+Failed login - Username: operator, Password: hfrn
+Login failed: 192.168.0.201
+False
+Failed login - Username: viewer, Password: hfrn
+Login failed: 192.168.0.201
+False
+# For RADIUS authentication with SSH #
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     01:05:56    Exec
+ pts/0      root      192.168.0.157         00:00:00    -
+ console    root      NETCONF               01:08:14    Exec
+# Check user privilige #
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#   username radius password radius123
+LAB1(config)#  end
+LAB1# 
+Successful login - Username: root, Password: admin
+True
+Failed login - Username: admin, Password: hfrn
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+Failed login - Username: operator, Password: hfrn
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+Failed login - Username: viewer, Password: hfrn
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+[&#x27;Ok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Ok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;]
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  no aaa auth attempts login
+LAB1(config)# no aaa auth login default group radius
+LAB1(config)# no aaa auth login default fallback error local
+LAB1(config)# no radius-server retransmit
+LAB1(config)# no radius-server timeout
+LAB1(config)# no radius-server host 192.168.6.1
+LAB1(config)#  end
+LAB1# 
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_033_basic_eoam</td>
+          <td class="col-duration">127.16</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;pytest_m6424.Test_m6424 object at 0x000002113F672210&gt;<br/><br/>    def test_033_basic_eoam(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; EOAM Basic Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(self.dut1,Title)<br/>            mc.crtServi(self.dut2,1,1,self.nni) # svc = 1, uni = 1<br/>            eoc.confEoam(self.dut2,self.nni)<br/>            mc.crtServi(self.dut1,1,1,self.nni) # svc = 1, uni = 1<br/>            time.sleep(3)<br/>&gt;           assert eoc.confBasicEoam(self.dut1,self.dut2,self.nni) == 8<br/><span class="error">E           AssertionError</span><br/><br/>pytest_basic.py:310: AssertionError<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;pytest_m6424.Test_m6424 object at 0x000002113F672210&gt;<br/><br/>    def test_033_basic_eoam(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; EOAM Basic Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(self.dut1,Title)<br/>            mc.crtServi(self.dut2,1,1,self.nni) # svc = 1, uni = 1<br/>            eoc.confEoam(self.dut2,self.nni)<br/>            mc.crtServi(self.dut1,1,1,self.nni) # svc = 1, uni = 1<br/>            time.sleep(3)<br/>            assert eoc.confBasicEoam(self.dut1,self.dut2,self.nni) == 8<br/>            mc.dltServi(self.dut1,1,1)# svc = 1, uni = 1<br/>            eoc.removeEoam(self.dut2,self.nni)<br/>            mc.dltServi(self.dut2,1,1)# svc = 1, uni = 1<br/>            time.sleep(5)<br/>        except:<br/>            eoc.removeEoam(self.dut1,self.nni)<br/>            mc.dltServi(self.dut1,1,1)# svc = 1, uni = 1<br/>            eoc.removeEoam(self.dut2,self.nni)<br/>            mc.dltServi(self.dut2,1,1)# svc = 1, uni = 1<br/>&gt;           assert bv.ExceptionLog(testName) == &#x27;normal&#x27;<br/><span class="error">E           AssertionError</span><br/><br/>pytest_basic.py:320: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>##### EOAM Basic Test #####
+### Ethernet OAM Passive Mode ###
+[&#x27;Mode:&#x27;, &#x27;passive&#x27;]
+[&#x27;Ok&#x27;]
+### Ethernet OAM Active Mode ###
+[&#x27;Mode:&#x27;, &#x27;active&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM dying-gasp ###
+[&#x27;Dying-Gasp:&#x27;, &#x27;disable&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM link-fault ###
+[&#x27;Link-Fault:&#x27;, &#x27;disable&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM link-monitor ###
+[&#x27;Status:&#x27;, &#x27;supported(on)&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM Loopback Test(start) ###
+[&#x27;Loopback&#x27;, &#x27;status:&#x27;, &#x27;local&#x27;, &#x27;loopback&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM Loopback Test(stop) ###
+[&#x27;Loopback&#x27;, &#x27;status:&#x27;, &#x27;no&#x27;, &#x27;loopback&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+[&#x27;Tx&#x27;, &#x27;:&#x27;, &#x27;15&#x27;, &#x27;|&#x27;, &#x27;Rx&#x27;, &#x27;:&#x27;, &#x27;0&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Nok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_042_basic_twamp</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.8\\pytest_basic.py&#x27;, 342, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_056_mng_evm_config_</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.8\\pytest_basic.py&#x27;, 483, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_001_maximum_number_of_vty</td>
+          <td class="col-duration">91.81</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VTY Session TEST #####
+Number of sessions: 39
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_002_vty_configure</td>
+          <td class="col-duration">24.83</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VTY Session Configuration TEST #####
+Number of sessions: 8
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_003_user_account</td>
+          <td class="col-duration">52.23</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### User Account Configuration TEST #####
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  username actus role network-admin password encrypted actus1234
+LAB1(config)#  end
+LAB1# 
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     01:04:16    Exec
+ pts/0      actus     192.168.0.157         00:00:00    -
+ console    root      NETCONF               01:06:34    Exec
+Successful login - Username: actus, Password: actus1234
+True
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  no username actus
+LAB1(config)#  end
+LAB1# 
+Failed login - Username: actus, Password: actus1234
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  username hfrn role network-operator password encrypted hfrn1234
+LAB1(config)#  end
+LAB1# 
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     01:04:32    Exec
+ pts/0      hfrn      192.168.0.157         00:00:01    -
+ console    root      NETCONF               01:06:50    Exec
+Successful login - Username: hfrn, Password: hfrn1234
+True
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  no username hfrn
+LAB1(config)#  end
+LAB1# 
+Failed login - Username: hfrn, Password: hfrn1234
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  username cisco role network-viewer password encrypted cisco1234
+LAB1(config)#  end
+LAB1# 
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     01:04:47    Exec
+ pts/0      cisco     192.168.0.157         00:00:00    -
+ console    root      NETCONF               01:07:05    Exec
+Successful login - Username: cisco, Password: cisco1234
+True
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  no username cisco
+LAB1(config)#  end
+LAB1# 
+Failed login - Username: cisco, Password: cisco1234
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_011_static_route</td>
+          <td class="col-duration">27.14</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### static route Configuration TEST #####
+PING 168.126.63.1 (168.126.63.1) 56(84) bytes of data.
+64 bytes from 168.126.63.1: icmp_seq=1 ttl=56 time=3.73 ms
+64 bytes from 168.126.63.1: icmp_seq=2 ttl=56 time=1.92 ms
+64 bytes from 168.126.63.1: icmp_seq=3 ttl=56 time=1.98 ms
+64 bytes from 168.126.63.1: icmp_seq=4 ttl=56 time=1.91 ms
+64 bytes from 168.126.63.1: icmp_seq=5 ttl=56 time=1.96 ms
+64 bytes from 168.126.63.1: icmp_seq=6 ttl=56 time=1.98 ms
+64 bytes from 168.126.63.1: icmp_seq=7 ttl=56 time=1.95 ms
+64 bytes from 168.126.63.1: icmp_seq=8 ttl=56 time=1.95 ms
+64 bytes from 168.126.63.1: icmp_seq=9 ttl=56 time=1.44 ms
+64 bytes from 168.126.63.1: icmp_seq=10 ttl=56 time=1.93 ms
+
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_012_trace_route</td>
+          <td class="col-duration">15.16</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### TraceRT Test #####
+traceroute to 168.126.63.1 (168.126.63.1), 30 hops max, 46 byte packets
+ 1  192.168.0.2 (192.168.0.2)  0.461 ms  0.428 ms  0.437 ms
+ 2
+192.168.0.2
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_013_tcp_dump</td>
+          <td class="col-duration">9.98</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### TCP_DUMP Test #####
+tcpdump count: 407
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_014_mirror_configure</td>
+          <td class="col-duration">18.95</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Mirror Test #####
+mirror dst: 1/2, dir: both, src: 1/25
+mirror dst: 1/2, dir: transmit, src: 1/25
+[True, True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_015_service_feature</td>
+          <td class="col-duration">43.23</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### service_feature #####
+[&#x27;disabled&#x27;, &#x27;disabled&#x27;, &#x27;disabled&#x27;]
+3
+[&#x27;enabled&#x27;, &#x27;enabled&#x27;, &#x27;enabled&#x27;]
+3
+[&#x27;disabled&#x27;]
+1
+[&#x27;enabled&#x27;]
+1
+[True, True, True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_021_max_vlan_4k</td>
+          <td class="col-duration">49.91</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VLAN TEST    #####
+show vlan summary
+Number of VLAN: 4095
+show vlan summary
+Number of VLAN: 1
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_022_max_service_256</td>
+          <td class="col-duration">234.49</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of of SVCs TEST    #####
+### check Nmmber of SVCs ###
+ 256
+### check Nmmber of UNIs ###
+24
+### check Nmmber of SEPs ###
+256
+0
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_031_static_lag</td>
+          <td class="col-duration">78.49</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Link Aggregation Test #####
+### check static channel-group ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;NONE&#x27;, &#x27;-&#x27;, &#x27;work:&#x27;, &#x27;1/15(P)*&#x27;, &#x27;protect:&#x27;, &#x27;1/16(P)&#x27;]
+### check BCM Port state ###
+[&#x27;xe15(&#x27;, &#x27;16)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_032_basic_lacp</td>
+          <td class="col-duration">156.90</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### LACP Basic Test #####
+### check lacp active Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/16(P)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FA&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x3f&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FA&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3f&#x27;]&quot;]
+### check lacp passive Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/16(P)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x3e&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3e&#x27;]&quot;]
+### check lacp MaxMember 1 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;1&#x27;, &#x27;1/16(D)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FP&#x27;, &#x27;standby&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x6&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3e&#x27;]&quot;]
+### check BCM Port state ###
+[&#x27;xe15(&#x27;, &#x27;16)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+### check lacp MaxMember 8 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/16(P)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x3e&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3e&#x27;]&quot;]
+[&#x27;xe15(&#x27;, &#x27;16)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Forward&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_041_basic_lldp</td>
+          <td class="col-duration">250.49</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### LLDP Basic Test #####
+### check lacp default tlv ###
+PRINT: 40
+### check lldp disable all tlv ###
+PRINT: 0
+### check lldp enable all tlv###
+PRINT: 40
+### change lldp TLV to enable/disable for each tlv###
+### no 8021-org-spec ###
+PRINT TLV Count: 39 39
+PRINT TLV Count: 38 38
+PRINT TLV Count: 37 37
+PRINT TLV Count: 34 34
+### no 8023-org-spec ###
+PRINT TLV Count: 32 32
+PRINT TLV Count: 30 30
+PRINT TLV Count: 29 29
+PRINT TLV Count: 22 22
+PRINT TLV Count: 18 18
+### no basic ###
+PRINT TLV Count: 14 14
+PRINT TLV Count: 14 14
+PRINT TLV Count: 11 11
+PRINT TLV Count: 11 11
+PRINT TLV Count: 11 11
+###  8021-org-spec ###
+PRINT TLV Count: 12 12
+PRINT TLV Count: 13 13
+PRINT TLV Count: 14 14
+PRINT TLV Count: 17 17
+###  8023-org-spec ###
+PRINT TLV Count: 19 19
+PRINT TLV Count: 21 21
+PRINT TLV Count: 22 22
+PRINT TLV Count: 29 29
+PRINT TLV Count: 33 33
+###  basic ###
+PRINT TLV Count: 37 37
+PRINT TLV Count: 37 37
+PRINT TLV Count: 40 40
+PRINT TLV Count: 40 40
+PRINT TLV Count: 40 40
+### check lldp setMgmtTlv ###
+[&#x27;Management address Subtype  &#x27;, &#x27; All 802&#x27;]
+### check lldp setLldpTimer ###
+[&#x27;Time To Live    &#x27;, &#x27; 40&#x27;]
+### check lldp chgMgmtTlv ###
+[&#x27;Interface Number            &#x27;, &#x27; 25001  &#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_043_basic_ntp_time_zone</td>
+          <td class="col-duration">38.38</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### NTP Basic &amp; TIME ZONE Test #####
+Server status: *~106.247.248.106
+Current time: 15  KST Wed Oct 04 2023
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_044_max_ntp_server</td>
+          <td class="col-duration">39.51</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Maximum NTP Server Test #####
+server count: 4
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_051_basic_pm_configure</td>
+          <td class="col-duration">22.14</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic PM Config Test #####
+[&#x27;Disable&#x27;, &#x27;Disable&#x27;, &#x27;Disable&#x27;, &#x27;Disable&#x27;]
+4
+[&#x27;Enable&#x27;, &#x27;Enable&#x27;, &#x27;Enable&#x27;, &#x27;Enable&#x27;]
+4
+[True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_052_basic_pm_csv</td>
+          <td class="col-duration">20.83</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic PM CSV Test #####
+[&#x27;Disable&#x27;, &#x27;Disable&#x27;, &#x27;FTP&#x27;, &#x27;-&#x27;, &#x27;-&#x27;, &#x27;Off&#x27;, &#x27;Off&#x27;, &#x27;Off&#x27;, &#x27;Off&#x27;, &#x27;-&#x27;, &#x27;-&#x27;, &#x27;15&#x27;, &#x27;GMT+0&#x27;]
+[&#x27;Enable&#x27;, &#x27;Enable&#x27;, &#x27;SFTP&#x27;, &#x27;csv&#x27;, &#x27;192.168.0.157&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;10&#x27;, &#x27;Local&#x27;]
+[True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_053_mng_gw_config</td>
+          <td class="col-duration">56.72</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic MNG Gateway Configuration Test #####
+[&#x27;enable&#x27;, &#x27;10&#x27;, &#x27;1&#x27;, &#x27;192.168.0.2&#x27;, &#x27;success&#x27;, &#x27;normal&#x27;]
+[&#x27;enable&#x27;, &#x27;11&#x27;, &#x27;2&#x27;, &#x27;10.1.1.1&#x27;, &#x27;failure&#x27;, &#x27;fail&#x27;]
+17
+Reserved Actions: gate mon &amp; reboot
+[True, True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_054_mng_process_config</td>
+          <td class="col-duration">55.19</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic MNG Process Configuration Test #####
+[&#x27;disable&#x27;, &#x27;20&#x27;, &#x27;disable&#x27;, &#x27;60&#x27;, &#x27;reboot&#x27;, &#x27;alive&#x27;, &#x27;normal&#x27;]
+[&#x27;enable&#x27;, &#x27;2&#x27;, &#x27;enable&#x27;, &#x27;5&#x27;, &#x27;restart&#x27;, &#x27;dead&#x27;, &#x27;fail&#x27;]
+20
+Reserved Actions: mstpd &amp; restart
+plog-0000-0000000f-mstpd.log
+[True, True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_055_mng_mem_config_</td>
+          <td class="col-duration">17.54</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic MNG Memory Configuration Test #####
+[&#x27;disable&#x27;, &#x27;60&#x27;, &#x27;10&#x27;, &#x27;5&#x27;, &#x27;80 %&#x27;, &#x27;60&#x27;, &#x27;normal&#x27;, &#x27;normal&#x27;]
+[&#x27;enable&#x27;, &#x27;11&#x27;, &#x27;10&#x27;, &#x27;1&#x27;, &#x27;20 %&#x27;, &#x27;10&#x27;, &#x27;normal&#x27;, &#x27;normal&#x27;]
+[True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_099_check_plog</td>
+          <td class="col-duration">9.49</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### check plog #####
+ls: plog*: No such file or directory
+ls
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_101_change_profile_roe</td>
+          <td class="col-duration">211.55</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Flexport Basic configuration Test #####
+roe
+<br/> -------------------------------Captured log call-------------------------------- <br/>ERROR    paramiko.transport:transport.py:1893 Socket exception: 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다 (10054)<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_102_basic_flexport</td>
+          <td class="col-duration">764.27</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Flexport Basic configuration Test #####
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+% There is no such interface
+disable
+16
+16
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+enable
+12
+12
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+cpri
+12
+12
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+60(Gb)
+12
+12
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+20(Gb)
+12
+12
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+4915
+8
+8
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+2457
+8
+8
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+50(Gb)
+12
+12
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+ethernet
+16
+16
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+50(Gb)
+12
+12
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+20(Gb)
+8
+8
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+(ge)
+8
+8
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_103_flexport_example</td>
+          <td class="col-duration">306.13</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Flexport Example configuration Test #####
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+cpri
+12
+12
+
+60(Gb)
+2
+2
+
+60(Gb)
+4
+4
+
+60(Gb)
+6
+6
+
+50(Gb)
+2
+2
+
+50(Gb)
+4
+4
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+1/19  ------------------------------------------------------------------------------------------------
+
+  5sec               0               0               0|               0               0               0
+  1min               0               0               0|               0               0               0
+  5min               0               0               0|               0               0               0
+ethernet
+16
+16
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_104_flexport_breakout</td>
+          <td class="col-duration">58.78</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Flexport Breakout configuration Test #####
+
+i/o bandwidth pool
+------------------------------------
+No  name  total   reserved   free   
+------------------------------------
+ 1  pool1  400(Gb)  320(Gb)   80(Gb)
+ 2  pool2  400(Gb)  320(Gb)   80(Gb)
+------------------------------------
+
+flexport group status
+------------------------------------------------------------------------
+No.  state    type       max-bw    reserved  pool  member    active-port
+------------------------------------------------------------------------
+ 1   enable   ethernet    10(GbE)    20(Gb)  pool1 1/1,1/2   1/1,1/2  
+ 2   enable   ethernet    10(GbE)    20(Gb)  pool1 1/3,1/4   1/3,1/4  
+ 3   enable   ethernet    10(GbE)    20(Gb)  pool1 1/5,1/6   1/5,1/6  
+ 4   enable   ethernet    10(GbE)    20(Gb)  pool1 1/7,1/8   1/7,1/8  
+ 5   enable   ethernet    10(GbE)    20(Gb)  pool1 1/9,1/10  1/9,1/10 
+ 6   enable   ethernet    10(GbE)    20(Gb)  pool1 1/11,1/12 1/11,1/12
+ 7   enable   ethernet    10(GbE)    20(Gb)  pool2 1/13,1/14 1/13,1/14
+ 8   enable   ethernet    10(GbE)    20(Gb)  pool2 1/15,1/16 1/15,1/16
+ 9   enable   ethernet    10(GbE)    20(Gb)  pool2 1/17,1/18 1/17,1/18
+10   enable   ethernet    10(GbE)    20(Gb)  pool2 1/19,1/20 1/19,1/20
+11   enable   ethernet    10(GbE)    20(Gb)  pool2 1/21,1/22 1/21,1/22
+12   enable   ethernet    10(GbE)    20(Gb)  pool2 1/23,1/24 1/23,1/24
+13   enable   ethernet    25(GbE)   100(Gb)  pool1 breakout  1/25/1,1/25/2,1/25/3,1/25/4
+14   enable   ethernet   100(GbE)   100(Gb)  pool1 1/26      1/26     
+15   enable   ethernet   100(GbE)   100(Gb)  pool2 1/27      1/27     
+16   enable   ethernet   100(GbE)   100(Gb)  pool2 1/28      1/28     
+------------------------------------------------------------------------
+*max-bw   : maximum bandwidth per interface
+*reserved : reserved system core bandwidth for port
+[&#x27;Ok&#x27;]
+
+i/o bandwidth pool
+------------------------------------
+No  name  total   reserved   free   
+------------------------------------
+ 1  pool1  400(Gb)  260(Gb)  140(Gb)
+ 2  pool2  400(Gb)  320(Gb)   80(Gb)
+------------------------------------
+
+flexport group status
+------------------------------------------------------------------------
+No.  state    type       max-bw    reserved  pool  member    active-port
+------------------------------------------------------------------------
+ 1   enable   ethernet    10(GbE)    20(Gb)  pool1 1/1,1/2   1/1,1/2  
+ 2   enable   ethernet    10(GbE)    20(Gb)  pool1 1/3,1/4   1/3,1/4  
+ 3   enable   ethernet    10(GbE)    20(Gb)  pool1 1/5,1/6   1/5,1/6  
+ 4   enable   ethernet    10(GbE)    20(Gb)  pool1 1/7,1/8   1/7,1/8  
+ 5   enable   ethernet    10(GbE)    20(Gb)  pool1 1/9,1/10  1/9,1/10 
+ 6   enable   ethernet    10(GbE)    20(Gb)  pool1 1/11,1/12 1/11,1/12
+ 7   enable   ethernet    10(GbE)    20(Gb)  pool2 1/13,1/14 1/13,1/14
+ 8   enable   ethernet    10(GbE)    20(Gb)  pool2 1/15,1/16 1/15,1/16
+ 9   enable   ethernet    10(GbE)    20(Gb)  pool2 1/17,1/18 1/17,1/18
+10   enable   ethernet    10(GbE)    20(Gb)  pool2 1/19,1/20 1/19,1/20
+11   enable   ethernet    10(GbE)    20(Gb)  pool2 1/21,1/22 1/21,1/22
+12   enable   ethernet    10(GbE)    20(Gb)  pool2 1/23,1/24 1/23,1/24
+13   enable   ethernet    25(GbE)   100(Gb)  pool1 breakout  1/25/1,1/25/2,1/25/3,1/25/4
+14   enable   ethernet    10(GbE)    40(Gb)  pool1 breakout  1/26/1,1/26/2,1/26/3,1/26/4
+15   enable   ethernet   100(GbE)   100(Gb)  pool2 1/27      1/27     
+16   enable   ethernet   100(GbE)   100(Gb)  pool2 1/28      1/28     
+------------------------------------------------------------------------
+*max-bw   : maximum bandwidth per interface
+*reserved : reserved system core bandwidth for port
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;]
+
+i/o bandwidth pool
+------------------------------------
+No  name  total   reserved   free   
+------------------------------------
+ 1  pool1  400(Gb)  320(Gb)   80(Gb)
+ 2  pool2  400(Gb)  320(Gb)   80(Gb)
+------------------------------------
+
+flexport group status
+------------------------------------------------------------------------
+No.  state    type       max-bw    reserved  pool  member    active-port
+------------------------------------------------------------------------
+ 1   enable   ethernet    10(GbE)    20(Gb)  pool1 1/1,1/2   1/1,1/2  
+ 2   enable   ethernet    10(GbE)    20(Gb)  pool1 1/3,1/4   1/3,1/4  
+ 3   enable   ethernet    10(GbE)    20(Gb)  pool1 1/5,1/6   1/5,1/6  
+ 4   enable   ethernet    10(GbE)    20(Gb)  pool1 1/7,1/8   1/7,1/8  
+ 5   enable   ethernet    10(GbE)    20(Gb)  pool1 1/9,1/10  1/9,1/10 
+ 6   enable   ethernet    10(GbE)    20(Gb)  pool1 1/11,1/12 1/11,1/12
+ 7   enable   ethernet    10(GbE)    20(Gb)  pool2 1/13,1/14 1/13,1/14
+ 8   enable   ethernet    10(GbE)    20(Gb)  pool2 1/15,1/16 1/15,1/16
+ 9   enable   ethernet    10(GbE)    20(Gb)  pool2 1/17,1/18 1/17,1/18
+10   enable   ethernet    10(GbE)    20(Gb)  pool2 1/19,1/20 1/19,1/20
+11   enable   ethernet    10(GbE)    20(Gb)  pool2 1/21,1/22 1/21,1/22
+12   enable   ethernet    10(GbE)    20(Gb)  pool2 1/23,1/24 1/23,1/24
+13   enable   ethernet   100(GbE)   100(Gb)  pool1 1/25      1/25     
+14   enable   ethernet   100(GbE)   100(Gb)  pool1 1/26      1/26     
+15   enable   ethernet   100(GbE)   100(Gb)  pool2 1/27      1/27     
+16   enable   ethernet   100(GbE)   100(Gb)  pool2 1/28      1/28     
+------------------------------------------------------------------------
+*max-bw   : maximum bandwidth per interface
+*reserved : reserved system core bandwidth for port
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/> -----------------------------Captured log teardown------------------------------ <br/>ERROR    root:pytest_basic.py:52 teardown_class<br/></div></td></tr></tbody></table></body></html>
