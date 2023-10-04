@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>report_20230919_2104.html</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    let visibleString = getQueryParameter('visible') || 'all';
+    visibleString = visibleString.toLowerCase();
+    const checkedItems = visibleString.split(',');
+
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++) {
+        filterItems[i].hidden = false;
+
+        if (visibleString != 'all') {
+            filterItems[i].checked = checkedItems.includes(filterItems[i].getAttribute('data-test-result'));
+            filterTable(filterItems[i]);
+        }
+    }
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>report_20230919_2104.html</h1>
+    <p>Report generated on 19-Sep-2023 at 21:08:17 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
+    <h2>Summary</h2>
+    <p>1 tests ran in 209.05 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">0 passed</span>, <input checked="true" class="filter" data-test-result="skipped" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">3 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">1 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_102_basic_flexport</td>
+          <td class="col-duration">208.57</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;pytest_m6424.Test_m6424 object at 0x0000028AE4708290&gt;<br/><br/>    def test_102_basic_flexport(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; Flexport Basic configuration Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(self.dut1,Title)<br/>            bc.defaultSetup(self.dut1,self.blockport)<br/>            bc.noshutblockport(self.dut1,self.blockport)<br/>&gt;           assert fc.confFlexPort(self.dut1) == 12<br/><br/>pytest_m6424.py:65: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/>flexport\flexConf.py:188: in confFlexPort<br/>    result.append(fv.checkFlexP(action,host))<br/>flexport\flexVef.py:46: in checkFlexP<br/>    checkProcess = sub_child.send_command(&#x27;sh interface statistics avg-type 1/19&#x27;)<br/>C:\Users\LG\AppData\Local\Programs\Python\Python311\Lib\site-packages\netmiko\utilities.py:592: in wrapper_decorator<br/>    return func(self, *args, **kwargs)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>self = &lt;netmiko.cisco.cisco_ios.CiscoIosSSH object at 0x0000028AE47D5DD0&gt;<br/>command_string = &#x27;sh interface statistics avg-type 1/19\n&#x27;, expect_string = None, read_timeout = 10.0<br/>delay_factor = None, max_loops = None, auto_find_prompt = True, strip_prompt = True, strip_command = True<br/>normalize = True, use_textfsm = False, textfsm_template = None, use_ttp = False, ttp_template = None<br/>use_genie = False, cmd_verify = True<br/><br/>        @select_cmd_verify<br/>        def send_command(<br/>            self,<br/>            command_string: str,<br/>            expect_string: Optional[str] = None,<br/>            read_timeout: float = 10.0,<br/>            delay_factor: Optional[float] = None,<br/>            max_loops: Optional[int] = None,<br/>            auto_find_prompt: bool = True,<br/>            strip_prompt: bool = True,<br/>            strip_command: bool = True,<br/>            normalize: bool = True,<br/>            use_textfsm: bool = False,<br/>            textfsm_template: Optional[str] = None,<br/>            use_ttp: bool = False,<br/>            ttp_template: Optional[str] = None,<br/>            use_genie: bool = False,<br/>            cmd_verify: bool = True,<br/>        ) -&gt; Union[str, List[Any], Dict[str, Any]]:<br/>            &quot;&quot;&quot;Execute command_string on the SSH channel using a pattern-based mechanism. Generally<br/>            used for show commands. By default this method will keep waiting to receive data until the<br/>            network device prompt is detected. The current network device prompt will be determined<br/>            automatically.<br/>    <br/>            :param command_string: The command to be executed on the remote device.<br/>    <br/>            :param expect_string: Regular expression pattern to use for determining end of output.<br/>                If left blank will default to being based on router prompt.<br/>    <br/>            :param read_timeout: Maximum time to wait looking for pattern. Will raise ReadTimeout<br/>                if timeout is exceeded.<br/>    <br/>            :param delay_factor: Deprecated in Netmiko 4.x. Will be eliminated in Netmiko 5.<br/>    <br/>            :param max_loops: Deprecated in Netmiko 4.x. Will be eliminated in Netmiko 5.<br/>    <br/>            :param auto_find_prompt: Use find_prompt() to override base prompt<br/>    <br/>            :param strip_prompt: Remove the trailing router prompt from the output (default: True).<br/>    <br/>            :param strip_command: Remove the echo of the command from the output (default: True).<br/>    <br/>            :param normalize: Ensure the proper enter is sent at end of command (default: True).<br/>    <br/>            :param use_textfsm: Process command output through TextFSM template (default: False).<br/>    <br/>            :param textfsm_template: Name of template to parse output with; can be fully qualified<br/>                path, relative path, or name of file in current directory. (default: None).<br/>    <br/>            :param use_ttp: Process command output through TTP template (default: False).<br/>    <br/>            :param ttp_template: Name of template to parse output with; can be fully qualified<br/>                path, relative path, or name of file in current directory. (default: None).<br/>    <br/>            :param use_genie: Process command output through PyATS/Genie parser (default: False).<br/>    <br/>            :param cmd_verify: Verify command echo before proceeding (default: True).<br/>            &quot;&quot;&quot;<br/>    <br/>            # Time to delay in each read loop<br/>            loop_delay = 0.025<br/>    <br/>            if self.read_timeout_override:<br/>                read_timeout = self.read_timeout_override<br/>    <br/>            if self.delay_factor_compat:<br/>                # For compatibility calculate the old equivalent read_timeout<br/>                # i.e. what it would have been in Netmiko 3.x<br/>                if delay_factor is None:<br/>                    tmp_delay_factor = self.global_delay_factor<br/>                else:<br/>                    tmp_delay_factor = self.select_delay_factor(delay_factor)<br/>                compat_timeout = calc_old_timeout(<br/>                    max_loops=max_loops,<br/>                    delay_factor=tmp_delay_factor,<br/>                    loop_delay=0.2,<br/>                    old_timeout=self.timeout,<br/>                )<br/>                msg = f&quot;&quot;&quot;\n<br/>    You have chosen to use Netmiko&#x27;s delay_factor compatibility mode for<br/>    send_command. This will revert Netmiko to behave similarly to how it<br/>    did in Netmiko 3.x (i.e. to use delay_factor/global_delay_factor and<br/>    max_loops).<br/>    <br/>    Using these parameters Netmiko has calculated an effective read_timeout<br/>    of {compat_timeout} and will set the read_timeout to this value.<br/>    <br/>    Please convert your code to that new format i.e.:<br/>    <br/>        net_connect.send_command(cmd, read_timeout={compat_timeout})<br/>    <br/>    And then disable delay_factor_compat.<br/>    <br/>    delay_factor_compat will be removed in Netmiko 5.x.\n&quot;&quot;&quot;<br/>                warnings.warn(msg, DeprecationWarning)<br/>    <br/>                # Override the read_timeout with Netmiko 3.x way :-(<br/>                read_timeout = compat_timeout<br/>    <br/>            else:<br/>                # No need for two deprecation messages so only display this if not using<br/>                # delay_factor_compat<br/>                if delay_factor is not None or max_loops is not None:<br/>                    msg = &quot;&quot;&quot;\n<br/>    Netmiko 4.x has deprecated the use of delay_factor/max_loops with<br/>    send_command. You should convert all uses of delay_factor and max_loops<br/>    over to read_timeout=x where x is the total number of seconds to wait<br/>    before timing out.\n&quot;&quot;&quot;<br/>                    warnings.warn(msg, DeprecationWarning)<br/>    <br/>            if expect_string is not None:<br/>                search_pattern = expect_string<br/>            else:<br/>                search_pattern = self._prompt_handler(auto_find_prompt)<br/>    <br/>            if normalize:<br/>                command_string = self.normalize_cmd(command_string)<br/>    <br/>            # Start the clock<br/>            start_time = time.time()<br/>            self.write_channel(command_string)<br/>            new_data = &quot;&quot;<br/>    <br/>            cmd = command_string.strip()<br/>            if cmd and cmd_verify:<br/>                new_data = self.command_echo_read(cmd=cmd, read_timeout=10)<br/>    <br/>            MAX_CHARS = 2_000_000<br/>            DEQUE_SIZE = 20<br/>            output = &quot;&quot;<br/>            # Check only the past N-reads. This is for the case where the output is<br/>            # very large (i.e. searching a very large string for a pattern a whole bunch of times)<br/>            past_n_reads: Deque[str] = deque(maxlen=DEQUE_SIZE)<br/>            first_line_processed = False<br/>    <br/>            # Keep reading data until search_pattern is found or until read_timeout<br/>            while time.time() - start_time &lt; read_timeout:<br/>                if new_data:<br/>                    output += new_data<br/>                    past_n_reads.append(new_data)<br/>    <br/>                    # Case where we haven&#x27;t processed the first_line yet (there is a potential issue<br/>                    # in the first line (in cases where the line is repainted).<br/>                    if not first_line_processed:<br/>                        output, first_line_processed = self._first_line_handler(<br/>                            output, search_pattern<br/>                        )<br/>                        # Check if we have already found our pattern<br/>                        if re.search(search_pattern, output):<br/>                            break<br/>    <br/>                    else:<br/>                        if len(output) &lt;= MAX_CHARS:<br/>                            if re.search(search_pattern, output):<br/>                                break<br/>                        else:<br/>                            # Switch to deque mode if output is greater than MAX_CHARS<br/>                            # Check if pattern is in the past n reads<br/>                            if re.search(search_pattern, &quot;&quot;.join(past_n_reads)):<br/>                                break<br/>    <br/>                time.sleep(loop_delay)<br/>                new_data = self.read_channel()<br/>    <br/>            else:  # nobreak<br/>                msg = f&quot;&quot;&quot;<br/>    Pattern not detected: {repr(search_pattern)} in output.<br/>    <br/>    Things you might try to fix this:<br/>    1. Explicitly set your pattern using the expect_string argument.<br/>    2. Increase the read_timeout to a larger value.<br/>    <br/>    You can also look at the Netmiko session_log or debug log for more information.<br/>    <br/>    &quot;&quot;&quot;<br/>&gt;               raise ReadTimeout(msg)<br/><span class="error">E               netmiko.exceptions.ReadTimeout: </span><br/><span class="error">E               Pattern not detected: &#x27;LAB1\\#&#x27; in output.</span><br/><span class="error">E               </span><br/><span class="error">E               Things you might try to fix this:</span><br/><span class="error">E               1. Explicitly set your pattern using the expect_string argument.</span><br/><span class="error">E               2. Increase the read_timeout to a larger value.</span><br/><span class="error">E               </span><br/><span class="error">E               You can also look at the Netmiko session_log or debug log for more information.</span><br/><br/>C:\Users\LG\AppData\Local\Programs\Python\Python311\Lib\site-packages\netmiko\base_connection.py:1790: ReadTimeout<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;pytest_m6424.Test_m6424 object at 0x0000028AE4708290&gt;<br/><br/>    def test_102_basic_flexport(self):<br/>        testName =  sys._getframe(0).f_code.co_name<br/>        Title = &quot;#&quot; * 5 + &quot; Flexport Basic configuration Test &quot; + &quot;#&quot; * 5<br/>        print(Title)<br/>        try:<br/>            bc.disTitle(self.dut1,Title)<br/>            bc.defaultSetup(self.dut1,self.blockport)<br/>            bc.noshutblockport(self.dut1,self.blockport)<br/>            assert fc.confFlexPort(self.dut1) == 12<br/>            time.sleep(1)<br/>            bc.shutblockport(self.dut1,self.blockport)<br/>        except:<br/>&gt;           bc.deftSystem(self.dut1)<br/><br/>pytest_m6424.py:69: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/>basic\basicConf.py:216: in deftSystem<br/>    child.send_command(&#x27;write memory&#x27;)<br/>C:\Users\LG\AppData\Local\Programs\Python\Python311\Lib\site-packages\netmiko\utilities.py:592: in wrapper_decorator<br/>    return func(self, *args, **kwargs)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>self = &lt;netmiko.cisco.cisco_ios.CiscoIosSSH object at 0x0000028AE499C450&gt;<br/>command_string = &#x27;write memory\n&#x27;, expect_string = None, read_timeout = 10.0, delay_factor = None<br/>max_loops = None, auto_find_prompt = True, strip_prompt = True, strip_command = True, normalize = True<br/>use_textfsm = False, textfsm_template = None, use_ttp = False, ttp_template = None, use_genie = False<br/>cmd_verify = True<br/><br/>        @select_cmd_verify<br/>        def send_command(<br/>            self,<br/>            command_string: str,<br/>            expect_string: Optional[str] = None,<br/>            read_timeout: float = 10.0,<br/>            delay_factor: Optional[float] = None,<br/>            max_loops: Optional[int] = None,<br/>            auto_find_prompt: bool = True,<br/>            strip_prompt: bool = True,<br/>            strip_command: bool = True,<br/>            normalize: bool = True,<br/>            use_textfsm: bool = False,<br/>            textfsm_template: Optional[str] = None,<br/>            use_ttp: bool = False,<br/>            ttp_template: Optional[str] = None,<br/>            use_genie: bool = False,<br/>            cmd_verify: bool = True,<br/>        ) -&gt; Union[str, List[Any], Dict[str, Any]]:<br/>            &quot;&quot;&quot;Execute command_string on the SSH channel using a pattern-based mechanism. Generally<br/>            used for show commands. By default this method will keep waiting to receive data until the<br/>            network device prompt is detected. The current network device prompt will be determined<br/>            automatically.<br/>    <br/>            :param command_string: The command to be executed on the remote device.<br/>    <br/>            :param expect_string: Regular expression pattern to use for determining end of output.<br/>                If left blank will default to being based on router prompt.<br/>    <br/>            :param read_timeout: Maximum time to wait looking for pattern. Will raise ReadTimeout<br/>                if timeout is exceeded.<br/>    <br/>            :param delay_factor: Deprecated in Netmiko 4.x. Will be eliminated in Netmiko 5.<br/>    <br/>            :param max_loops: Deprecated in Netmiko 4.x. Will be eliminated in Netmiko 5.<br/>    <br/>            :param auto_find_prompt: Use find_prompt() to override base prompt<br/>    <br/>            :param strip_prompt: Remove the trailing router prompt from the output (default: True).<br/>    <br/>            :param strip_command: Remove the echo of the command from the output (default: True).<br/>    <br/>            :param normalize: Ensure the proper enter is sent at end of command (default: True).<br/>    <br/>            :param use_textfsm: Process command output through TextFSM template (default: False).<br/>    <br/>            :param textfsm_template: Name of template to parse output with; can be fully qualified<br/>                path, relative path, or name of file in current directory. (default: None).<br/>    <br/>            :param use_ttp: Process command output through TTP template (default: False).<br/>    <br/>            :param ttp_template: Name of template to parse output with; can be fully qualified<br/>                path, relative path, or name of file in current directory. (default: None).<br/>    <br/>            :param use_genie: Process command output through PyATS/Genie parser (default: False).<br/>    <br/>            :param cmd_verify: Verify command echo before proceeding (default: True).<br/>            &quot;&quot;&quot;<br/>    <br/>            # Time to delay in each read loop<br/>            loop_delay = 0.025<br/>    <br/>            if self.read_timeout_override:<br/>                read_timeout = self.read_timeout_override<br/>    <br/>            if self.delay_factor_compat:<br/>                # For compatibility calculate the old equivalent read_timeout<br/>                # i.e. what it would have been in Netmiko 3.x<br/>                if delay_factor is None:<br/>                    tmp_delay_factor = self.global_delay_factor<br/>                else:<br/>                    tmp_delay_factor = self.select_delay_factor(delay_factor)<br/>                compat_timeout = calc_old_timeout(<br/>                    max_loops=max_loops,<br/>                    delay_factor=tmp_delay_factor,<br/>                    loop_delay=0.2,<br/>                    old_timeout=self.timeout,<br/>                )<br/>                msg = f&quot;&quot;&quot;\n<br/>    You have chosen to use Netmiko&#x27;s delay_factor compatibility mode for<br/>    send_command. This will revert Netmiko to behave similarly to how it<br/>    did in Netmiko 3.x (i.e. to use delay_factor/global_delay_factor and<br/>    max_loops).<br/>    <br/>    Using these parameters Netmiko has calculated an effective read_timeout<br/>    of {compat_timeout} and will set the read_timeout to this value.<br/>    <br/>    Please convert your code to that new format i.e.:<br/>    <br/>        net_connect.send_command(cmd, read_timeout={compat_timeout})<br/>    <br/>    And then disable delay_factor_compat.<br/>    <br/>    delay_factor_compat will be removed in Netmiko 5.x.\n&quot;&quot;&quot;<br/>                warnings.warn(msg, DeprecationWarning)<br/>    <br/>                # Override the read_timeout with Netmiko 3.x way :-(<br/>                read_timeout = compat_timeout<br/>    <br/>            else:<br/>                # No need for two deprecation messages so only display this if not using<br/>                # delay_factor_compat<br/>                if delay_factor is not None or max_loops is not None:<br/>                    msg = &quot;&quot;&quot;\n<br/>    Netmiko 4.x has deprecated the use of delay_factor/max_loops with<br/>    send_command. You should convert all uses of delay_factor and max_loops<br/>    over to read_timeout=x where x is the total number of seconds to wait<br/>    before timing out.\n&quot;&quot;&quot;<br/>                    warnings.warn(msg, DeprecationWarning)<br/>    <br/>            if expect_string is not None:<br/>                search_pattern = expect_string<br/>            else:<br/>                search_pattern = self._prompt_handler(auto_find_prompt)<br/>    <br/>            if normalize:<br/>                command_string = self.normalize_cmd(command_string)<br/>    <br/>            # Start the clock<br/>            start_time = time.time()<br/>            self.write_channel(command_string)<br/>            new_data = &quot;&quot;<br/>    <br/>            cmd = command_string.strip()<br/>            if cmd and cmd_verify:<br/>                new_data = self.command_echo_read(cmd=cmd, read_timeout=10)<br/>    <br/>            MAX_CHARS = 2_000_000<br/>            DEQUE_SIZE = 20<br/>            output = &quot;&quot;<br/>            # Check only the past N-reads. This is for the case where the output is<br/>            # very large (i.e. searching a very large string for a pattern a whole bunch of times)<br/>            past_n_reads: Deque[str] = deque(maxlen=DEQUE_SIZE)<br/>            first_line_processed = False<br/>    <br/>            # Keep reading data until search_pattern is found or until read_timeout<br/>            while time.time() - start_time &lt; read_timeout:<br/>                if new_data:<br/>                    output += new_data<br/>                    past_n_reads.append(new_data)<br/>    <br/>                    # Case where we haven&#x27;t processed the first_line yet (there is a potential issue<br/>                    # in the first line (in cases where the line is repainted).<br/>                    if not first_line_processed:<br/>                        output, first_line_processed = self._first_line_handler(<br/>                            output, search_pattern<br/>                        )<br/>                        # Check if we have already found our pattern<br/>                        if re.search(search_pattern, output):<br/>                            break<br/>    <br/>                    else:<br/>                        if len(output) &lt;= MAX_CHARS:<br/>                            if re.search(search_pattern, output):<br/>                                break<br/>                        else:<br/>                            # Switch to deque mode if output is greater than MAX_CHARS<br/>                            # Check if pattern is in the past n reads<br/>                            if re.search(search_pattern, &quot;&quot;.join(past_n_reads)):<br/>                                break<br/>    <br/>                time.sleep(loop_delay)<br/>                new_data = self.read_channel()<br/>    <br/>            else:  # nobreak<br/>                msg = f&quot;&quot;&quot;<br/>    Pattern not detected: {repr(search_pattern)} in output.<br/>    <br/>    Things you might try to fix this:<br/>    1. Explicitly set your pattern using the expect_string argument.<br/>    2. Increase the read_timeout to a larger value.<br/>    <br/>    You can also look at the Netmiko session_log or debug log for more information.<br/>    <br/>    &quot;&quot;&quot;<br/>&gt;               raise ReadTimeout(msg)<br/><span class="error">E               netmiko.exceptions.ReadTimeout: </span><br/><span class="error">E               Pattern not detected: &#x27;LAB1\\#&#x27; in output.</span><br/><span class="error">E               </span><br/><span class="error">E               Things you might try to fix this:</span><br/><span class="error">E               1. Explicitly set your pattern using the expect_string argument.</span><br/><span class="error">E               2. Increase the read_timeout to a larger value.</span><br/><span class="error">E               </span><br/><span class="error">E               You can also look at the Netmiko session_log or debug log for more information.</span><br/><br/>C:\Users\LG\AppData\Local\Programs\Python\Python311\Lib\site-packages\netmiko\base_connection.py:1790: ReadTimeout<br/> ------------------------------Captured stdout call------------------------------ <br/>##### Flexport Basic configuration Test #####
+
+ifc                              Tx                   |                           Rx 
+  time           Ucast           Mcast           Bcast|           Ucast           Mcast           Bcast
+% There is no such interface
+disable
+16
+16
+
+<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_101_change_profile_roe</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.7\\pytest_m6424.py&#x27;, 37, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_103_flexport_example</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.7\\pytest_m6424.py&#x27;, 75, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_m6424.py::Test_m6424::test_104_flexport_breakout</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v0.7\\pytest_m6424.py&#x27;, 93, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody></table></body></html>
