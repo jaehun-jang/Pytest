@@ -15,400 +15,317 @@ def disTitle(child,Title):
 
 ################################################################################### 
         
-def check_mng_gw(child,state):
-    successExpect = ['enable','10','1','192.168.0.2','success','normal']
-    failureExpect = ['enable','11','2','10.1.1.1','failure','fail']
-    result = []  
-    command = child.send_command('show mng ping') 
-    cmd_split = (command.splitlines())
-    command_list = [line for line in cmd_split if line.strip()] 
-    # print(type(command_list),command_list )               
-    result.append(command_list[2].split()[2]) 
-    result.append(command_list[3].split()[2])
-    result.append(command_list[4].split()[2])  
-    result.append(command_list[5].split()[3]) 
-    result.append(command_list[10].split()[3]) 
-    result.append(command_list[11].split()[3])         
-    print(result)            
-    if state == 'normal':           
-        if successExpect == result:
-            return True
-        else:
-            return False
-    if state == 'failure':           
-        if failureExpect == result:
-            return True
-        else:
-            return False
+# def check_mng_gw(child,state):
+#     successExpect = ['enable','10','1','192.168.0.2','success','normal']
+#     failureExpect = ['enable','11','2','10.1.1.1','failure','fail']
+#     result = []  
+#     command = child.send_command('show mng ping') 
+#     cmd_split = (command.splitlines())
+#     command_list = [line for line in cmd_split if line.strip()] 
+#     # print(type(command_list),command_list )               
+#     result.append(command_list[2].split()[2]) 
+#     result.append(command_list[3].split()[2])
+#     result.append(command_list[4].split()[2])  
+#     result.append(command_list[5].split()[3]) 
+#     result.append(command_list[10].split()[3]) 
+#     result.append(command_list[11].split()[3])         
+#     print(result)            
+#     if state == 'normal':           
+#         if successExpect == result:
+#             return True
+#         else:
+#             return False
+#     if state == 'failure':           
+#         if failureExpect == result:
+#             return True
+#         else:
+#             return False
 
-def check_mng_process(child,state):        
-    successExpect = ['disable','20','disable','60','reboot','alive','normal']
-    failureExpect = ['enable','2','enable','5','restart','dead','fail']
-    result = []  
-    command = child.send_command('show mng process') 
-    cmd_split = (command.splitlines())
-    command_list = [line for line in cmd_split if line.strip()]             
-    result.append(command_list[2].split()[2]) 
-    result.append(command_list[3].split()[2])
-    result.extend(command_list[6].split()[1:4])  
-    result.extend(command_list[19].split()[2:4])        
-    print(result)            
-    if state == 'normal':           
-        if successExpect == result:
-            return True
-        else:
-            return False
-    if state == 'failure':           
-        if failureExpect == result:
-            return True
-        else:
-            return False
-        
-def check_mng_memory(child,state):
-    successExpect = ['disable','60','10','5','80 %','60','normal','normal']
-    failureExpect = ['enable','11','10','1','20 %','10','normal','normal']
-    result = []  
-    command = child.send_command('show mng memory') 
-    cmd_split = (command.splitlines())
-    command_list = [line for line in cmd_split if line.strip()] 
-    # print(command_list)            
-    result.append(command_list[2].split(':')[1].strip()) 
-    result.append(command_list[3].split(':')[1].strip()) 
-    result.append(command_list[4].split(':')[1].strip())  
-    result.append(command_list[5].split(':')[1].strip()) 
-    result.append(command_list[6].split(':')[1].strip())   
-    result.append(command_list[7].split(':')[1].strip())   
-    result.append(command_list[13].split(':')[1].strip())   
-    result.append(command_list[15].split(':')[1].strip())        
-    print(result)            
-    if state == 'normal':           
-        if successExpect == result:
-            return True
-        else:
-            return False
-    if state == 'failure':           
-        if failureExpect == result:
-            return True
-        else:
-            return False
+# def check_mng_evm(child,state):
+#     command = child.send_command('show mng evm') 
+#     cmd_split = (command.splitlines())
+#     command_list = [line for line in cmd_split if line.strip()]                        
+#     print(len(command_list))
+#     if len(command_list) >= 15:
+#         if state == 'gw':
+#             process = command_list[15].split(':')[1].strip()  
+#             action = command_list[16].split(':')[1].strip()     
+#             print(f'Reserved Actions: {process} & {action}')        
+#             if 'gate mon' == process and 'reboot' == action:
+#                 return True
+#             else:
+#                 return False
+#         elif state == 'process':
+#             process = command_list[15].split(':')[1].strip() 
+#             action = command_list[16].split(':')[1].strip()    
+#             print(f'Reserved Actions: {process} & {action}')        
+#             if 'mstpd' == process and 'restart' == action:
+#                 return True
+#             else:
+#                 return False
+#         elif state == 'memory':
+#             process = command_list[15].split(':')[1].strip() 
+#             action = command_list[16].split(':')[1].strip()    
+#             print(f'Reserved Actions: {process} & {action}')        
+#             if 'memory mon' == process and 'reboot' == action:
+#                 return True
+#             else:
+#                 return False
+#         elif state == 'watchdog':
+#             result1 = command_list[10].split(':')[1].strip()   
+#             result2 = command_list[11].split(':')[1].strip()     
+#             print(result1,result2)        
+#             if 'Normal' == result1 and '1' == result2:
+#                 return True
+#             else:
+#                 return False
+#     else:
+#         return False
 
-def check_mng_evm_conf(child,state):
-    successExpect = ['Disable','Disable','30','5','Normal','0']
-    failureExpect = ['Enable','enable','10','1','Lockout','1']
-    result = []  
-    command = child.send_command('show mng evm') 
-    cmd_split = (command.splitlines())
-    command_list = [line for line in cmd_split if line.strip()] 
-    # print(command_list)            
-    result.append(command_list[2].split(':')[1].strip()) 
-    result.append(command_list[3].split(':')[1].strip()) 
-    result.append(command_list[4].split(':')[1].strip())  
-    result.append(command_list[5].split(':')[1].strip()) 
-    result.append(command_list[10].split(':')[1].strip())   
-    result.append(command_list[11].split(':')[1].strip())          
-    print(result)            
-    if state == 'normal':           
-        if successExpect == result:
-            return True
-        else:
-            return False
-    if state == 'failure':           
-        if failureExpect == result:
-            return True
-        else:
-            return False
+def stpModeCheck(child):
+    # To reduce process time, this method uses child processes.
+    command_output = child.send_command('show spanning-tree')
+    lines = command_output.splitlines()
+    for line in lines:
+        columns = line.split()           
+        # Check spanning-tree Mode
+        if columns and columns[0] == 'spanning-tree': 
+            xstp = columns[3] 
+            print(f"The Spanning mode is {xstp}") 
+ 
+def stpPortStateCheck(child,interface):
+    # To reduce process time, this method uses child processes.
+    command_output = child.send_command('show spanning-tree')
+    lines = command_output.splitlines()
+    for line in lines:
+        columns = line.split()           
+        if columns and columns[0] == interface: 
+            state = columns[2] 
+            print(f"The Spanning port state is {state}")
+            return state
+
+def get_stp_addrAndPri(dut):
+    with bc.connect(dut) as child:
+        command_output = child.send_command('show spanning-tree')
+        lines = command_output.splitlines()
+
+        root_address = None
+        bridge_address = None
+        reading_root = False
+        reading_bridge = False
+
+        for line in lines:
+            columns = line.split()
+            if not columns:
+                continue
+
+            if columns[0] == 'ROOT':
+                reading_root = True
+                reading_bridge = False
+                rootPri = columns[3] 
+            elif columns[0] == 'BRIDGE':
+                reading_bridge = True
+                reading_root = False
+                bridgePri = columns[3] 
+            if reading_root and columns[0] == 'address':
+                root_address = columns[1]
+            elif reading_bridge and columns[0] == 'address':
+                bridge_address = columns[1]
                 
-def check_mng_evm(child,state):
-    command = child.send_command('show mng evm') 
-    cmd_split = (command.splitlines())
-    command_list = [line for line in cmd_split if line.strip()]                        
-    print(len(command_list))
-    if len(command_list) >= 15:
-        if state == 'gw':
-            process = command_list[15].split(':')[1].strip()  
-            action = command_list[16].split(':')[1].strip()     
-            print(f'Reserved Actions: {process} & {action}')        
-            if 'gate mon' == process and 'reboot' == action:
-                return True
-            else:
-                return False
-        elif state == 'process':
-            process = command_list[15].split(':')[1].strip() 
-            action = command_list[16].split(':')[1].strip()    
-            print(f'Reserved Actions: {process} & {action}')        
-            if 'mstpd' == process and 'restart' == action:
-                return True
-            else:
-                return False
-        elif state == 'memory':
-            process = command_list[15].split(':')[1].strip() 
-            action = command_list[16].split(':')[1].strip()    
-            print(f'Reserved Actions: {process} & {action}')        
-            if 'memory mon' == process and 'reboot' == action:
-                return True
-            else:
-                return False
-        elif state == 'watchdog':
-            result1 = command_list[10].split(':')[1].strip()   
-            result2 = command_list[11].split(':')[1].strip()     
-            print(result1,result2)        
-            if 'Normal' == result1 and '1' == result2:
-                return True
-            else:
-                return False
-    else:
-        return False
+        print('root_address: ', root_address, 'bridge_address: ', bridge_address)
+        print('root_pri: ', rootPri, 'bridge_Pri: ', bridgePri)
+        return root_address, bridge_address, rootPri, bridgePri
+                     
+def check_stp_PortRole(dut2,mode):
+    # Define the list of interfaces you want to check
+    intList = ['1/10','1/11', '1/12', '1/13', '1/15', '1/16']  
 
-##################################################################################
-   
-def mngGwConf(dut1):
-    result = []
-    with bc.connect(dut1) as child:
-        gw_success_config = [
-            'mng configuration',
-            'ping monitor type gw 192.168.0.2', 
-            'ping monitor type interval 10', 
-            'ping monitor type threshold 1', 
-            'enable ping monitor'
-            ]
-        child.send_config_set(gw_success_config)
-        time.sleep(10)
-        result.append(check_mng_gw(child,'normal'))
+    # Define the expected result as a dictionary
+    expectResult = {
+        '1/10': 'Edge',
+        '1/11': 'Desg',
+        '1/12': 'Bakp',
+        '1/13': 'Desg',
+        '1/15': 'Root',
+        '1/16': 'Altn',
+    }
 
-        gw_failure_config = [
-            'mng configuration',
-            'ping monitor type gw 10.1.1.1', 
-            'ping monitor type interval 11', 
-            'ping monitor type threshold 2', 
-            'enable ping monitor'
-            ]
-        child.send_config_set(gw_failure_config)
-        time.sleep(30)
-        result.append(check_mng_gw(child,'failure'))
-        time.sleep(1)        
-        result.append(check_mng_evm(child,'gw'))
-        print(result)
+    # Initialize the portRoles dictionary with default values
+    readResult = {
+        '1/10': 'Unknown',
+        '1/11': 'Unknown',
+        '1/12': 'Unknown',
+        '1/13': 'Unknown',
+        '1/15': 'Unknown',
+        '1/16': 'Unknown',
+    }
+    with bc.connect(dut2) as child:
+        command_output = child.send_command('show spanning-tree')
+        lines = command_output.splitlines()
 
-        if result.count(True) == 3 :
-            return True
-        else:
-            return False
+        for line in lines:
+            columns = line.split()
+            
+            # Check if the line starts with the spanning-tree 
+            if columns and columns[0] == 'spanning-tree': 
+                xstp = columns[3] 
+                print(f"The Spanning mode is {xstp}")   
+                                                   
+        for interface in intList:
+            for index, line in enumerate(lines):
+                columns = line.split()
 
-def mngProcessConf(dut1):    
-    result = []
-    with bc.connect(dut1) as child:
-        proc_enable_config = [
-            'mng configuration',
-            'process monitor type process all enable ',
-            'process monitor type process all action restart',
-            'process monitor type process all threshold 5 ',
-            'process monitor type interval 2',
-            'enable process monitor '
-            ]
-        result.append(check_mng_process(child,'normal'))
-        time.sleep(1)
-        child.send_config_set(proc_enable_config)  
-        time.sleep(5)
-        killall_process(dut1)
-        time.sleep(5) 
+                # Check if the line starts with the interface name
+                if columns and columns[0] == interface:
+                    # print(f"The index, including the interface {interface}, is {index}.")
 
-    with bc.connect(dut1) as child:   # To avoid the console prompt hanging,       
-        time.sleep(1)
-        result.append(check_mng_process(child,'failure'))
-        time.sleep(12)               
-        result.append(check_mng_evm(child,'process'))
-        time.sleep(1)
-        remove_plog(dut1)
-        print(result)
-        if result.count(True) == 3 :
-            return True
-        else:
-            return False
+                    if  intList[0] == interface:  
+                        # Check edge-port 
+                        readResult[interface] = columns[5] 
+                    else:                  
+                        # Store the readResult in the dictionary
+                        readResult[interface] = columns[1]
+                
+    # Print the port roles for the specified interfaces
+    # for interface, role in readResult.items():
+    #     print(f"Interface {interface}: Port Role is {role}")
 
-def mngMemoryConf(dut1):
-    result = []
-    with bc.connect(dut1) as child:
-        mem_enable_config = [
-            'mng configuration',
-            'memory monitor type count 1 ',
-            'memory monitor type duration 10',
-            'memory monitor type interval 10',
-            'memory monitor type period 11 ',
-            'memory monitor type usage 20',
-            'enable memory monitor'
-            ]
-        result.append(check_mng_memory(child,'normal'))
-        time.sleep(1)
-        child.send_config_set(mem_enable_config)  
-        time.sleep(1)      
-        result.append(check_mng_memory(child,'failure'))
-        time.sleep(1)              
-        print(result)
-        if result.count(True) == 2 :
-            return True
-        else:
-            return False
-
-# def mngEvmConf(dut1):
-#     result = []
-#     with bc.connect(dut1) as child:
-#         evm_enable_config = [
-#             'mng configuration',
-#             'evm tcpdump 100',
-#             'evm lockout count 1',
-#             'evm lockout interval 10 ',
-#             'enable evm watchdog',
-#             'enable evm lockout',
-#             ]
-#         mem_enable_config = [
-#             'mng configuration',
-#             'memory monitor type count 1 ',
-#             'memory monitor type duration 10',
-#             'memory monitor type interval 10',
-#             'memory monitor type period 11 ',
-#             'memory monitor type usage 20',
-#             'enable memory monitor'
-#             ]
-#         result.append(check_mng_evm_conf(child,'normal'))
-#         time.sleep(1)
-#         child.send_config_set(evm_enable_config)  
-#         time.sleep(1)
-#         child.send_config_set(mem_enable_config)
-#         child.send_command('write memory')
-#         generate_mrmory_overload(dut1)                
-#         time.sleep(300) 
-
-def mngEvmConf(dut1):
-    result = []
-    with bc.connect(dut1) as child:
-        evm_enable_config = [
-            'mng configuration',
-            'evm tcpdump 100',
-            'evm lockout count 1',
-            'evm lockout interval 10 ',
-            'enable evm watchdog',
-            'enable evm lockout',
-            ]
-        gw_failure_config = [
-            'mng configuration',
-            'ping monitor type gw 10.1.1.1', 
-            'ping monitor type interval 11', 
-            'ping monitor type threshold 2', 
-            'enable ping monitor'
-            ]
-        result.append(check_mng_evm_conf(child,'normal'))
-        time.sleep(1)
-        child.send_config_set(evm_enable_config)  
-        time.sleep(1)
-        child.send_config_set(gw_failure_config)
-        child.send_command('write memory')            
-        time.sleep(180) 
-
-    with bc.connect(dut1) as child:                
-        result.append(check_mng_evm_conf(child,'failure'))
-        time.sleep(1)               
-    if result.count(True) == 2 :
+    print("Read Roles:", readResult)
+    print("Expected Result:", expectResult)
+    
+    # Compare readResult with expectResult
+    if readResult == expectResult and xstp == mode:
         return True
     else:
         return False
-
-def enable_evm(host):
-    with bc.connect(host) as child:
-        config_commands =['mng configuration','enable evm watchdog','enable evm lockout']
-        child.send_config_set(config_commands )
-        time.sleep(1)
-
-def disable_evm(host):
-    with bc.connect(host) as child:
-        config_commands =['mng configuration','disable evm watchdog','disable evm lockout']
-        child.send_config_set(config_commands )
-        time.sleep(1)
-
-def default_mng_gw_config(dut1):
-    with bc.connect(dut1) as child:
-        default_config_commands = [
-            'mng configuration',
-            'no ping monitor type gw',
-            'no ping monitor type interval', 
-            'no ping monitor type threshold', 
-            'disable ping monitor'
-            ]
-        child.send_config_set(default_config_commands)
-        time.sleep(1)
-
-def default_mng_process_config(dut1):
-    with bc.connect(dut1) as child:
-        default_config_commands = [
-            'mng configuration',
-            'process monitor type process all action reboot',             
-            'no process monitor type process all',
-            'no process monitor type process all threshold', 
-            'no process monitor type interval',
-            'disable process monitor'
-            ]
-        child.send_config_set(default_config_commands)
-        time.sleep(1)
-
-def default_mng_mem_config(dut1):
-    with bc.connect(dut1) as child:
-        default_config_commands = [
-            'mng configuration',
-            'no memory monitor type duration',
-            'memory monitor type period 60',
-            'no memory monitor type interval',
-            'no memory monitor type usage',
-            'memory monitor type count 5',
-            'disable memory monitor '
-            ]
-        child.send_config_set(default_config_commands)
-        time.sleep(1)
-
-def default_mng_evm_config(dut1):
-    with bc.connect(dut1) as child:
-        default_config_commands = [
-            'mng configuration',
-            'no evm tcpdump',
-            'no evm lockout count',
-            'no evm lockout interval ',
-            'disable evm watchdog ',
-            'disable evm lockout '
-            ]
-        child.send_config_set(default_config_commands)
-        child.send_command('write memory')
-        time.sleep(1)
-
-# def killall_process(host):
-#     with bc.connect(host) as child:
-#         child.send_command('debug no-auth')
-#         child.send_command('system-shell', expect_string='sh-4.3#')
-#         child.send_command('killall mstpd', expect_string='sh-4.3#')
-#         child.send_command('exit', expect_string='logout')
-#         time.sleep(1)
-
-def killall_process(host):
-    with bc.connect(host) as child:  
-        child.send_command('debug no-auth') 
-        shell = child.send_command_timing('system-shell')
-        shell += child.send_command_timing('killall mstpd')
-        time.sleep(2)
-        shell += child.send_command_timing('killall imish') # To avoid the console prompt hanging, 
-
-def generate_mrmory_overload(host):
-    with bc.connect(host) as child:  
-        child.send_command('debug no-auth') 
-        shell = child.send_command_timing('system-shell')
-        shell += child.send_command_timing('cat /dev/zero | head -c 1000m | tail')
-        time.sleep(10)             
-
-def remove_plog(host):
-    with bc.connect(host) as child:
-        show_plog = child.send_command('show process plog')
-        plogs = show_plog.splitlines()
-        plog = show_plog.splitlines()[0].split(':')[0]  
-        print(plog)
-        if plog == 'ls':
-            pass
-        else:
-            for i in plogs:
-                child.send_command('remove file log ' + i)
+                                                      
+def check_stp_PortState(dut,mode):
+    normalport = '1/10'
+    blockport = '1/12'
+       
+    with bc.connect(dut) as child:
+        stp_mode_config =[
+        f'spanning mode {mode}'
+        ]
+        child.send_config_set(stp_mode_config) 
         
+        # Check spanning-tree Mode
+        stpModeCheck(child) 
+                 
+        if mode == 'stp': 
+            expectResult = ['LSN','LRN','FWD','BLK']
+            readResult = []
+            # Check the STP state of the interface.
+            readResult.append(stpPortStateCheck(child,normalport))
+            time.sleep(15) 
+            readResult.append(stpPortStateCheck(child,normalport))
+            time.sleep(15)            
+            readResult.append(stpPortStateCheck(child,normalport))
+            time.sleep(2)            
+            readResult.append(stpPortStateCheck(child,blockport)) 
+            
+            print("Read Roles:", readResult)                    
+            # Compare readResult with expectResult
+            if readResult == expectResult:
+                return True
+            else:
+                return False  
+
+        else: 
+            expectResult = ['DSC','FWD','DSC']
+            readResult = []
+            # Check the STP state of the interface.
+            readResult.append(stpPortStateCheck(child,normalport))
+            time.sleep(5)            
+            readResult.append(stpPortStateCheck(child,normalport))
+            time.sleep(1)             
+            readResult.append(stpPortStateCheck(child,blockport))  
+                        
+            print("Read Roles:", readResult)  
+            # Compare readResult with expectResult
+            if readResult == expectResult:
+                return True
+            else:
+                return False    
+
+def check_stp_RouteBridge(dut,mode):     
+    result =[] 
+    syspri = 4096
+    bridge = 32768 
+    with bc.connect(dut) as child:  
+        # Check spanning-tree Mode
+        stpModeCheck(child) 
+        # Check current root bridge
+        time.sleep(2) 
+                
+        # Check the bridge which has higher MAC address is elected as root bridge.
+        root_address, bridge_address, root_pri, bridge_pri = get_stp_addrAndPri(dut)
+        if root_address ==  bridge_address:
+            result.append('True')
+        else:
+            result.append('False') 
+
+        # Configure STP system priority                    
+        stpSystemPri(dut,mode,syspri)
+        time.sleep(3) 
+        
+        root_address, bridge_address, root_pri, bridge_pri = get_stp_addrAndPri(dut)
+        
+        if root_address == bridge_address and (root_pri == '4096' or root_pri == '4097'):
+            result.append('True')
+        else:
+            result.append('False') 
+            
+        # Configure STP system priority   
+        stpSystemPri(dut,mode,bridge)
+        time.sleep(3) 
+                                    
+    print(result)
+    if result == ['False', 'True']:
+        return True
+    else:
+        return False
+#################################################################################
+
+def stpSystemPri(dut,mode,syspri):
+    with bc.connect(dut) as child:
+        if mode == 'mst':            
+            stp_mode_config =[
+            f'spanning-tree mst 0 priority {syspri}'
+            ]
+            child.send_config_set(stp_mode_config)  
+            
+        else:                
+            stp_mode_config =[
+            f'spanning-tree priority {syspri}'
+            ]
+            child.send_config_set(stp_mode_config)  
+                                                                                                       
+def stpModeConf(devices,mode):
+    for device in devices:
+        with bc.connect(device) as child:
+            stp_mode_config =[
+            f'spanning mode disable',
+            f'spanning mode {mode}'
+            ]
+            child.send_config_set(stp_mode_config)  
+            
+def stpEdgePortConf(device):
+    with bc.connect(device) as child:
+        stp_edgeport_config =[
+            'interface 1/10',
+            'spanning port type edge'
+        ]
+        child.send_config_set(stp_edgeport_config)  
+        time.sleep(1)
+
+def stpPortRoleConf(devices,mode):
+    for device in devices:
+        # Configure a spanning-tree Mode on each devices
+        stpModeConf(device,mode)
+        time.sleep(1)
+         # Configure a spanning-tree Edge-Port on each devices
+        stpEdgePortConf(device)
+        time.sleep(1)
+                                                         
+

@@ -122,16 +122,30 @@ def defaultFor5216(host,blockport):
             child.send_config_set(hostname_config[host])
             time.sleep(1)
 
-def noshutblockport(host,blockport): 
-    with connect(host) as child:   
-        config_set = [f'interface range {blockport}', 'no shutdown']
-        child.send_config_set(config_set)
+def noshutblockport(hosts,blockport): 
+    for host in hosts:
+        with connect(host) as child:   
+            config_set = [f'interface range {blockport}', 'no shutdown']
+            child.send_config_set(config_set)
 
-def shutblockport(host,blockport): 
-    with connect(host) as child:              
-        config_set = [f'interface range {blockport}', 'shutdown']
-        child.send_config_set(config_set)
+def shutblockport(hosts,blockport):
+    for host in hosts: 
+        with connect(host) as child:              
+            config_set = [f'interface range {blockport}', 'shutdown']
+            child.send_config_set(config_set)
 
+def noshutStpBlockPort(hosts,stpblockport): 
+    for host in hosts: 
+        with connect(host) as child:   
+            config_set = [f'interface range {stpblockport}', 'no shutdown']
+            child.send_config_set(config_set)
+
+def shutStpBlockPort(hosts,stpblockport): 
+    for host in hosts: 
+        with connect(host) as child:              
+            config_set = [f'interface range {stpblockport}', 'shutdown']
+            child.send_config_set(config_set)
+                        
 ### Create maximum numberof VLAN  ###	  
 def crtVlan(host,vlans):
     with connect(host) as sub_child:
