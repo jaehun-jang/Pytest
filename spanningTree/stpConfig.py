@@ -2,7 +2,7 @@
 
 # $language = "python"
 # $interface = "1.0"
-
+import pytest, sys, time, os, logging ,datetime
 from logging import root
 import time, paramiko
 import basic.basicConf as bc
@@ -85,6 +85,7 @@ def disTitle(child,Title):
 def stpModeCheck(child):
     # To reduce process time, this method uses child processes.
     command_output = child.send_command('show spanning-tree')
+    # print(command_output)
     lines = command_output.splitlines()
     for line in lines:
         columns = line.split()           
@@ -135,7 +136,32 @@ def get_stp_addrAndPri(dut):
         print('root_address: ', root_address, 'bridge_address: ', bridge_address)
         print('root_pri: ', rootPri, 'bridge_Pri: ', bridgePri)
         return root_address, bridge_address, rootPri, bridgePri
-                     
+
+def get_stp_cli_result(child,string,cloum):
+    command_output = child.send_command('show spanning-tree')
+    lines = command_output.splitlines()
+    for line in lines:
+        columns = line.split() 
+        # print(columns)          
+        # Check spanning-tree Mode
+        if columns and columns[0] == string : 
+            result = columns[cloum] 
+            print(f"The result reding spanning CLI is {result} ")
+            return result 
+                                 
+# def get_stp_cli_result(dut,string,cloum):
+#     with bc.connect(dut) as child:
+#         # To reduce process time, this method uses child processes.
+#         command_output = child.send_command('show spanning-tree')
+#         lines = command_output.splitlines()
+#         for line in lines:
+#             columns = line.split()           
+#             # Check spanning-tree Mode
+#             if columns and columns[0] == string : 
+#                 result = columns[1] 
+#                 print(f"The result reding spanning CLI is {result} ")
+#                 return result 
+                                                                  
 def check_stp_PortRole(dut2,mode):
     # Define the list of interfaces you want to check
     intList = ['1/10','1/11', '1/12', '1/13', '1/15', '1/16']  
@@ -275,7 +301,7 @@ def check_stp_RouteBridge(dut,mode):
             result.append('True')
         else:
             result.append('False') 
-            
+                           
         # Configure STP system priority   
         stpSystemPri(dut,mode,bridge)
         time.sleep(3) 
@@ -285,7 +311,67 @@ def check_stp_RouteBridge(dut,mode):
         return True
     else:
         return False
-#################################################################################
+
+def check_stp_system_config(devices):     
+    result =[]
+    cloum = 0
+    string = '1/15'
+    
+    dut = devices[2]
+    with bc.connect(dut) as child:  # Connect to DUT3 
+        # Check spanning-tree Mode
+        stpModeCheck(child) 
+        time.sleep(2) 
+                  
+        # Check the bridge which has higher MAC address is elected as root bridge.        
+        cloum = 1  # Get Port role of the interface      
+        Portrole = get_stp_cli_result(child,string,cloum)
+        # Costvalue = get_stp_cli_result(dut,string,cloum)
+        print(Portrole)     
+        time.sleep(2)
+        
+        cloum = 3  # cost value of the interface            
+        Costvalue = get_stp_cli_result(child,string,cloum)
+        # Costvalue = get_stp_cli_result(dut,string,cloum)
+        print(Costvalue)  
+        time.sleep(2)  
+           
+        if Portrole ==  'Altn' and Costvalue == '2000':
+            result.append('True')
+        else:
+            result.append('False') 
+        
+        # Configure STP Path-Cost as Shot                    
+        stpPathCost(dut,'short')
+        time.sleep(3) 
+        
+        cloum = 1  # Get Port role of the interface      
+        Portrole = get_stp_cli_result(child,string,cloum)
+        # Costvalue = get_stp_cli_result(dut,string,cloum)
+        print(Portrole)     
+        time.sleep(2)
+        
+        cloum = 3  # cost value of the interface            
+        Costvalue = get_stp_cli_result(child,string,cloum)
+        # Costvalue = get_stp_cli_result(dut,string,cloum)
+        print(Costvalue)  
+        time.sleep(2)  
+        
+        if Portrole ==  'Desg' and Costvalue == '2':
+            result.append('True')
+        else:
+            result.append('False') 
+
+        # Configure STP Path-Cost as Shot                    
+        stpPathCost(dut,'long')
+        time.sleep(5) 
+        
+    print(result)                                            
+    if result == ['True','True']:
+        return True
+    else:
+        return False
+    
 
 def stpSystemPri(dut,mode,syspri):
     with bc.connect(dut) as child:
@@ -302,30 +388,40 @@ def stpSystemPri(dut,mode,syspri):
             child.send_config_set(stp_mode_config)  
                                                                                                        
 def stpModeConf(devices,mode):
-    for device in devices:
+    for device in devices:    
         with bc.connect(device) as child:
-            stp_mode_config =[
-            f'spanning mode disable',
-            f'spanning mode {mode}'
-            ]
+            stp_mode_disable = f'spanning mode disable'
+            child.send_config_set(stp_mode_disable)  
+            time.sleep(2) 
+            stp_mode_config = f'spanning mode {mode}'
             child.send_config_set(stp_mode_config)  
+                       
+def stpEdgePortConf(devices):
+    for device in devices:  
+        with bc.connect(device) as child:
+            stp_edgeport_config =[
+                'interface 1/10',
+                'spanning port type edge'
+            ]
+            child.send_config_set(stp_edgeport_config)  
+            time.sleep(1)
             
-def stpEdgePortConf(device):
-    with bc.connect(device) as child:
+def noStpEdgePortConf(devices):
+    for device in devices:  
+        with bc.connect(device) as child:
+            stp_edgeport_config =[
+                'interface 1/10',
+                'no spanning port type edge'
+            ]
+            child.send_config_set(stp_edgeport_config)  
+            time.sleep(1)
+            
+def stpPathCost(dut, mode):
+    with bc.connect(dut) as child:
         stp_edgeport_config =[
-            'interface 1/10',
-            'spanning port type edge'
+            f'spanning-tree pathcost method {mode}',
         ]
         child.send_config_set(stp_edgeport_config)  
         time.sleep(1)
-
-def stpPortRoleConf(devices,mode):
-    for device in devices:
-        # Configure a spanning-tree Mode on each devices
-        stpModeConf(device,mode)
-        time.sleep(1)
-         # Configure a spanning-tree Edge-Port on each devices
-        stpEdgePortConf(device)
-        time.sleep(1)
-                                                         
+                                           
 

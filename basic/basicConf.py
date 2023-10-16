@@ -63,64 +63,26 @@ def connectbcm(host):
 def disTitle(host,Title):
     with connect(host) as child:
         child.send_command(Title)
- 
-### default SetUp  ###	  
-def defaultSetup(host,blockport):
-    with connect(host) as child:
-        child.enable()
-        default_config = ["logging console", "aaa auth attempts login 0"]
-        child.send_config_set(default_config)
-        int_shutdown_config = f'interface range {blockport}', "shutdown"
-        child.send_config_set(int_shutdown_config)
-        time.sleep(1)
-        hostname_config = {
-            "192.168.0.201": "hostname LAB1",
-            "192.168.0.202": "hostname LAB2",
-            "192.168.0.211": "hostname LAB3", 
-            "192.168.0.212": "hostname LAB4"
-            } 
-        """  Using Dictionary """
-        if host in hostname_config:
-            child.send_config_set(hostname_config[host])
-            time.sleep(1)
 
-def defaultFor6424(host,blockport):
-    with connect(host) as child:
-        child.enable()
-        default_config = ["logging console", "aaa auth attempts login 0"]
-        child.send_config_set(default_config)
-        int_shutdown_config = f'interface range {blockport}', "shutdown"
-        child.send_config_set(int_shutdown_config)
-        time.sleep(1)
-        hostname_config = {
-            "192.168.0.201": "hostname LAB1",
-            "192.168.0.202": "hostname LAB2",
-            "192.168.0.211": "hostname LAB3", 
-            "192.168.0.212": "hostname LAB4"
-            } 
-        """  Using Dictionary """
-        if host in hostname_config:
-            child.send_config_set(hostname_config[host])
+def defaultSetup(devices,blockport):
+    for host in devices:    
+        with connect(host) as child:
+            child.enable()
+            default_config = ["logging console", "aaa auth attempts login 0"]
+            child.send_config_set(default_config)
+            int_shutdown_config = f'interface range {blockport}', "shutdown"
+            child.send_config_set(int_shutdown_config)
             time.sleep(1)
-
-def defaultFor5216(host,blockport):
-    with connect(host) as child:
-        child.enable()
-        default_config = ["logging console", "aaa auth attempts login 0"]
-        child.send_config_set(default_config)
-        int_shutdown_config = f'interface range {blockport}', "shutdown"
-        child.send_config_set(int_shutdown_config)
-        time.sleep(1)
-        hostname_config = {
-            "192.168.0.201": "hostname LAB1",
-            "192.168.0.202": "hostname LAB2",
-            "192.168.0.211": "hostname LAB3", 
-            "192.168.0.212": "hostname LAB4"
-            } 
-        """  Using Dictionary """
-        if host in hostname_config:
-            child.send_config_set(hostname_config[host])
-            time.sleep(1)
+            hostname_config = {
+                "192.168.0.201": "hostname LAB1",
+                "192.168.0.202": "hostname LAB2",
+                "192.168.0.203": "hostname LAB3", 
+                "192.168.0.211": "hostname LAB4"
+                } 
+            """  Using Dictionary """
+            if host in hostname_config:
+                child.send_config_set(hostname_config[host])
+                time.sleep(1)
 
 def noshutblockport(hosts,blockport): 
     for host in hosts:
