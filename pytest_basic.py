@@ -530,7 +530,11 @@ class TestClass():
             stpc.noStpEdgePortConf(self.deviceAll)
             stpc.stpModeConf(self.deviceAll,mode)
             assert stpc.check_stp_PortRole(self.dut2,mode) == False            
-            time.sleep(2)              
+            time.sleep(2)
+            bc.shutblockport(self.deviceAll,self.blockport)
+            bc.noshutStpBlockPort(self.deviceAll,self.stpblockport)
+            stpc.stpc.stpModeConf(self.deviceAll,'disable')                            
+            time.sleep(3)
         except:
             bc.shutblockport(self.deviceAll,self.blockport)
             bc.noshutStpBlockPort(self.deviceAll,self.stpblockport)
@@ -552,7 +556,11 @@ class TestClass():
             assert stpc.check_stp_PortState(self.dut2,mode) == True
             mode = 'mst' 
             assert stpc.check_stp_PortState(self.dut2,mode) == True           
-            time.sleep(2)              
+            time.sleep(2)
+            bc.shutblockport(self.deviceAll,self.blockport)
+            bc.noshutStpBlockPort(self.deviceAll,self.stpblockport)
+            stpc.stpc.stpModeConf(self.deviceAll,'disable')               
+            time.sleep(3)
         except:
             bc.shutblockport(self.deviceAll,self.blockport)
             bc.noshutStpBlockPort(self.deviceAll,self.stpblockport)
@@ -580,7 +588,11 @@ class TestClass():
             stpc.stpModeConf(self.deviceAll,mode)
             time.sleep(5) 
             assert stpc.check_stp_RouteBridge(self.dut2,mode) == True            
-            time.sleep(2)              
+            time.sleep(2)
+            bc.shutblockport(self.deviceAll,self.blockport)
+            bc.noshutStpBlockPort(self.deviceAll,self.stpblockport)
+            stpc.stpc.stpModeConf(self.deviceAll,'disable')               
+            time.sleep(3)
         except:
             bc.shutblockport(self.deviceAll,self.blockport)
             bc.noshutStpBlockPort(self.deviceAll,self.stpblockport)
@@ -610,7 +622,11 @@ class TestClass():
             assert stpc.check_stp_system_config(self.deviceAll) == True 
             mode = 'disable' 
             stpc.stpModeConf(self.deviceAll,mode)     
-            time.sleep(2)              
+            time.sleep(2)
+            bc.shutblockport(self.deviceAll,self.blockport)
+            bc.noshutStpBlockPort(self.deviceAll,self.stpblockport)
+            stpc.stpc.stpModeConf(self.deviceAll,'disable')               
+            time.sleep(3)
         except:
             bc.shutblockport(self.deviceAll,self.blockport)
             bc.noshutStpBlockPort(self.deviceAll,self.stpblockport)
