@@ -349,6 +349,13 @@ def default_mng_process_config(dut1):
         child.send_config_set(default_config_commands)
         time.sleep(1)
 
+        reinit_mstpd = [
+            'spanning mode mstp',
+            'spanning mode disable',             
+            ]
+        child.send_config_set(reinit_mstpd)
+        time.sleep(1)
+        
 def default_mng_mem_config(dut1):
     with bc.connect(dut1) as child:
         default_config_commands = [

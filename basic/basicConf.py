@@ -60,9 +60,10 @@ def connectbcm(host):
     return device
                       
 ### Print Title  ###	
-def disTitle(host,Title):
-    with connect(host) as child:
-        child.send_command(Title)
+def disTitle(devices,Title):
+    for host in devices: 
+        with connect(host) as child:
+            child.send_command(Title)
 
 def defaultSetup(devices,blockport):
     for host in devices:    
@@ -89,24 +90,28 @@ def noshutblockport(hosts,blockport):
         with connect(host) as child:   
             config_set = [f'interface range {blockport}', 'no shutdown']
             child.send_config_set(config_set)
+            time.sleep(1) 
 
 def shutblockport(hosts,blockport):
     for host in hosts: 
         with connect(host) as child:              
             config_set = [f'interface range {blockport}', 'shutdown']
             child.send_config_set(config_set)
+            time.sleep(1) 
 
 def noshutStpBlockPort(hosts,stpblockport): 
     for host in hosts: 
         with connect(host) as child:   
             config_set = [f'interface range {stpblockport}', 'no shutdown']
             child.send_config_set(config_set)
+            time.sleep(1) 
 
 def shutStpBlockPort(hosts,stpblockport): 
     for host in hosts: 
         with connect(host) as child:              
             config_set = [f'interface range {stpblockport}', 'shutdown']
             child.send_config_set(config_set)
+            time.sleep(1) 
                         
 ### Create maximum numberof VLAN  ###	  
 def crtVlan(host,vlans):
@@ -223,3 +228,9 @@ def translate(host):
         config_set = [f'flexport-group 9', 'max-speed 25 ']
         child.send_config_set(config_set)
         time.sleep(1.5)
+        
+def sendConfigSet(host,config_set):
+    with connect(host) as child:
+        child.send_config_set(config_set)
+        time.sleep(1.5)
+        

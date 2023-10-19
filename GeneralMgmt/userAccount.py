@@ -60,10 +60,10 @@ def useraccount(host):
         command = create_user(net_connect, new_username, new_password, role)
         if command == False:
             break
-        time.sleep(1.5)
+        time.sleep(2)
 
         net_connect.disconnect()
-        time.sleep(1.5)
+        time.sleep(2)
 
         result = login_with_credentials(device_info, new_username, new_password)
         print(result)
@@ -71,16 +71,16 @@ def useraccount(host):
             okcount.append('Ok')
         else:
             okcount.append('Nok')
-        time.sleep(1.5) 
+        time.sleep(2) 
 
         net_connect = ConnectHandler(**device_info)
         command = delete_user(net_connect, new_username)
         if command == False:
             break
-        time.sleep(1.5) 
+        time.sleep(2) 
 
         net_connect.disconnect()
-        time.sleep(1.5)
+        time.sleep(2)
 
         result = login_with_credentials(device_info, new_username, new_password)      
         print(result)
@@ -88,10 +88,10 @@ def useraccount(host):
             okcount.append('Ok')
         else:
             okcount.append('Nok')
-        time.sleep(1.5) 
+        time.sleep(2) 
 
         net_connect.disconnect()
-        time.sleep(1.5) 
+        time.sleep(2) 
 
     print(okcount)
     return okcount.count('Ok')

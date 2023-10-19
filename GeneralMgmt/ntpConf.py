@@ -25,7 +25,7 @@ def checkntpconf(host):
     with bc.connect(host) as child:  
         command = child.send_command('show ntp associations')        
         cmd_split = command.splitlines()[1].split()
-        # print(cmd_split)       
+        print(cmd_split)       
         readResult = str(cmd_split[0])
         print(f"Server status: {readResult}")
         if readResult == '*~106.247.248.106':
