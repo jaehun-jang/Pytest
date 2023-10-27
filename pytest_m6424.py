@@ -39,7 +39,7 @@ class Test_m6424(basic):
     blockport = '1/6,1/10-1/16'
     stpblockport = '1/25'
 
-    @pytest.mark.skip() 
+    # @pytest.mark.skip() 
     def test_101_change_profile_roe(self): 
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
@@ -47,7 +47,7 @@ class Test_m6424(basic):
         profile = 'roe'
         # profile = 'ethernet'
         try:  
-            bc.disTitle(self.dut1,Title)
+            bc.disTitle([self.dut1],Title)
             bc.chgProfile(self.dut1,profile)
             time.sleep(1)   
             assert bv.checkProfile(self.dut1,profile) == True
@@ -58,18 +58,18 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2) 
             
-    @pytest.mark.skip() 
+    # @pytest.mark.skip() 
     def test_102_basic_flexport(self): 
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
         print(Title)
         try:  
-            bc.disTitle(self.dut1,Title)
-            bc.defaultSetup(self.dut1,self.blockport)   
-            bc.noshutblockport(self.dut1,self.blockport) 
+            bc.disTitle([self.dut1],Title)
+            bc.defaultSetup([self.dut1],self.blockport)   
+            bc.noshutblockport([self.dut1],self.blockport) 
             assert fc.confFlexPort(self.dut1) == 12
             time.sleep(1)
-            bc.shutblockport(self.dut1,self.blockport) 
+            bc.shutblockport([self.dut1],self.blockport) 
         except: 
             bc.deftSystem(self.dut1)
             bc.defaultFor6424(self.dut1,self.blockport) 
@@ -77,17 +77,17 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2) 
           
-    @pytest.mark.skip() 
+    # @pytest.mark.skip() 
     def test_103_flexport_example(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Example configuration Test " + "#" * 5
         print(Title)
         try: 
-            bc.disTitle(self.dut1,Title)
-            bc.noshutblockport(self.dut1,self.blockport)  
+            bc.disTitle([self.dut1],Title)
+            bc.noshutblockport([self.dut1],self.blockport)  
             assert fce.confFlexPortExam(self.dut1) == 7 
             time.sleep(1)
-            bc.shutblockport(self.dut1,self.blockport) 
+            bc.shutblockport([self.dut1],self.blockport) 
         except:
             bc.deftSystem(self.dut1)
             bc.defaultFor6424(self.dut1,self.blockport) 
@@ -95,17 +95,17 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)  
 
-    @pytest.mark.skip() 
+    # @pytest.mark.skip() 
     def test_104_flexport_breakout(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Breakout configuration Test " + "#" * 5
         print(Title)
         try: 
-            bc.disTitle(self.dut1,Title)
-            bc.noshutblockport(self.dut1,self.blockport)  
+            bc.disTitle([self.dut1],Title)
+            bc.noshutblockport([self.dut1],self.blockport)  
             assert fbc.flexPortBreakout(self.dut1) == 3
             time.sleep(1)
-            bc.shutblockport(self.dut1,self.blockport) 
+            bc.shutblockport([self.dut1],self.blockport) 
         except:
             bc.deftSystem(self.dut1)
             bc.defaultFor6424(self.dut1,self.blockport) 
