@@ -1051,7 +1051,7 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
                         
-    def test_099_check_plog(self):
+    def test_1000_check_plog(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " check plog " + "#" * 5
         print(Title)
