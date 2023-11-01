@@ -71,6 +71,11 @@ xSTP Function added
 071_xstp_with_LACP
 
 
+## V1.0 ##
+(2023-10-27)
+First distribution of version with completed L2 functions.
 
 
+## V1.1 ##
+(2023-10-30)
 

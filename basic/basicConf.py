@@ -247,7 +247,8 @@ def translate(host):
         config_set = [f'flexport-group 9', 'max-speed 25 ']
         child.send_config_set(config_set)
         time.sleep(1.5)
-        
+
+### Send CLI in configuration mode ###          
 def sendConfigSet(host,command):
     with connect(host) as child:
         child.send_config_set(command)

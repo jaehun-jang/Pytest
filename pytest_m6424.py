@@ -113,7 +113,25 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)                
 
-
+    # @pytest.mark.skip() 
+    def test_105_change_defaultProfile(self): 
+        testName =  sys._getframe(0).f_code.co_name 
+        Title = "#" * 5 + " change defult profile " + "#" * 5
+        print(Title)
+        profile = 'ethernet'
+        try:  
+            bc.disTitle([self.dut1],Title)
+            bc.chgProfile(self.dut1,profile)
+            time.sleep(1)   
+            assert bv.checkProfile(self.dut1,profile) == True
+            bc.defaultSetup([self.dut1],self.blockport) 
+        except: 
+            bc.deftSystem(self.dut1)
+            bc.defaultFor6424(self.dut1,self.blockport) 
+            time.sleep(1)   
+            assert bv.ExceptionLog(testName) == 'normal'
+            time.sleep(2) 
+            
 class MyPlugin:
     def pytest_sessionfinish(self):
         pass
