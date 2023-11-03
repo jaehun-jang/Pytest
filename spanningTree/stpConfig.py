@@ -473,11 +473,13 @@ def check_stp_PortState(dut,mode):
                 return False  
 
         else: 
-            expectResult = ['DSC','FWD','DSC']
+            expectResult = ['DSC','LRN','FWD','DSC']
             readResult = []
             # Check the STP state of the interface.
             readResult.append(stpPortStateCheck(child,normalport))
-            time.sleep(5)            
+            time.sleep(1.5)  
+            readResult.append(stpPortStateCheck(child,normalport))
+            time.sleep(2)           
             readResult.append(stpPortStateCheck(child,normalport))
             time.sleep(1)             
             readResult.append(stpPortStateCheck(child,blockport))  
