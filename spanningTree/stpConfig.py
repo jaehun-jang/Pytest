@@ -18,7 +18,7 @@ def disTitle(child,Title):
 def stpModeCheck(dut):
     with bc.connect(dut) as child:
         command_output = child.send_command('show spanning-tree')
-        print(command_output)
+        # print(command_output)
         lines = command_output.splitlines()
         for line in lines:
             columns = line.split()           
@@ -477,7 +477,7 @@ def check_stp_PortState(dut,mode):
             readResult = []
             # Check the STP state of the interface.
             readResult.append(stpPortStateCheck(child,normalport))
-            time.sleep(1.5)  
+            time.sleep(3.5)  
             readResult.append(stpPortStateCheck(child,normalport))
             time.sleep(2)           
             readResult.append(stpPortStateCheck(child,normalport))
@@ -486,6 +486,10 @@ def check_stp_PortState(dut,mode):
                         
             print("Read Roles:", readResult)  
             # Compare readResult with expectResult
+            
+            stpModeCheck(dut) 
+            time.sleep(2)  
+            
             if readResult == expectResult:
                 return True
             else:
@@ -768,8 +772,9 @@ def check_stp_EdgePort(devs,mode):
         result.append('False')
     
     # Enable STP on dut#3 
-    stpModeConf([devs[2]],mode)
-    
+    stpModeConf([devs[2]],mode) 
+    stpPathCost(devs[2],'short') 
+      
     if mode == 'stp':
         time.sleep(15) # To ensure forward delay (DIS -> LSN)
     else:
@@ -785,22 +790,23 @@ def check_stp_EdgePort(devs,mode):
     
     if reString == 'point-to-point':
         result.append('True')
-    else: # If DUT don't resceive  
-        bc.sendConfigSet(devs[1],["int 1/13", "shutdown"])
-        time.sleep(2) 
-        bc.sendConfigSet(devs[1],["int 1/13", "no shutdown"]) 
-        time.sleep(2) 
-        reString = get_cli_result(devs[1],command,startString,cloum) 
-        time.sleep(3) 
-        if reString == 'point-to-point':
-            result.append('True')
-        else:             
-            result.append('False') 
+    # else: # If DUT don't resceive  
+    #     bc.sendConfigSet(devs[1],["int 1/13", "shutdown"])
+    #     time.sleep(2) 
+    #     bc.sendConfigSet(devs[1],["int 1/13", "no shutdown"]) 
+    #     time.sleep(2) 
+    #     reString = get_cli_result(devs[1],command,startString,cloum) 
+    #     time.sleep(3) 
+    #     if reString == 'point-to-point':
+    #         result.append('True')
+    else:             
+        result.append('False') 
                    
     time.sleep(5) 
    
     noStpEdgePortConf(devs[1],startString)     
-
+    # Set pathcost as long
+    stpPathCost(devs[2],'long') 
     # Disable STP on dut#3 
     stpModeConf([devs[2]],'disable')
     

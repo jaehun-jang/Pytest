@@ -2,7 +2,6 @@
 # $interface = "1.0"
 
 import pytest, sys, time, os, logging ,datetime
-import subprocess
 import guictl.twamp as guitwamp    
 import guictl.radius as guiradius                   
 import basic.basicConf as bc
@@ -28,6 +27,7 @@ import radius.radiusConf as radius
 import pm.pmConfig as pmc
 import mngConfig.mngConfig as mngc
 import spanningTree.stpConfig as stpc
+import pandas as pd
 #######################  PYTEST   ##########################
 
 # TestCase
