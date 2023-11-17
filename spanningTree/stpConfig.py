@@ -1285,7 +1285,44 @@ def check_xstp_with_LACP(devs):
         return True
     else:
         False 
-                                                   
+
+
+def mstpMultiInstance(devs):
+    for dev in devs:    
+        with bc.connect(dev) as child:
+        # To configure MST Multi instance.  
+            command1 = [
+                'vlan 2-3',
+                'interface range 1/10,1/11-1/16',
+                'switchport mode trunk',
+                'switchport trunk allowed vlan 1-3' 
+            ]
+            bc.sendConfigSet(dev,command1)
+
+            command2 = [
+                'spanning-tree mst configuration',
+                'instance 1 vlan 2',
+                'instance 2 vlan 3'   
+            ]
+            bc.sendConfigSet(dev,command2)
+
+def noMstpMultiInstance(devs):
+    for dev in devs:    
+        with bc.connect(dev) as child:
+        # To configure MST Multi instance. 
+            command1 = [
+                'spanning-tree mst configuration',
+                'no instance 1',
+                'no instance 2' 
+            ]
+            bc.sendConfigSet(dev,command1)
+            command2 = [
+                'interface range 1/10,1/11-1/16',
+                'switchport mode access',
+                'no vlan 2-3'
+            ]
+            bc.sendConfigSet(dev,command2)
+                                                  
 ##############################################################################
         
 def stpSystemPri(dut,mode,syspri):
@@ -1445,40 +1482,4 @@ def noStpPortCostConf(dut,str):
         ]
         child.send_config_set(stp_bpduguard_config)  
         time.sleep(1)
-
-def mstpMultiInstance(devs):
-    for dev in devs:    
-        with bc.connect(dev) as child:
-        # To configure MST Multi instance.  
-            command1 = [
-                'vlan 2-3',
-                'interface range 1/10,1/11-1/16',
-                'switchport mode trunk',
-                'switchport trunk allowed vlan 1-3' 
-            ]
-            bc.sendConfigSet(dev,command1)
-
-            command2 = [
-                'spanning-tree mst configuration',
-                'instance 1 vlan 2',
-                'instance 2 vlan 3'   
-            ]
-            bc.sendConfigSet(dev,command2)
-
-def noMstpMultiInstance(devs):
-    for dev in devs:    
-        with bc.connect(dev) as child:
-        # To configure MST Multi instance. 
-            command1 = [
-                'spanning-tree mst configuration',
-                'no instance 1',
-                'no instance 2' 
-            ]
-            bc.sendConfigSet(dev,command1)
-            command2 = [
-                'interface range 1/10,1/11-1/16',
-                'switchport mode access',
-                'no vlan 2-3'
-            ]
-            bc.sendConfigSet(dev,command2)
 
