@@ -445,8 +445,9 @@ def check_stp_PortState(dut,mode):
        
     with bc.connect(dut) as child:
         stp_mode_config =[
-        f'spanning mode {mode}'       
-        ]
+            'spanning-tree enable', # This CLI is added here to reduce enable time.  
+            f'spanning mode {mode}',    
+            ]
         child.send_config_set(stp_mode_config)     
                          
         if mode == 'stp': 
@@ -1324,6 +1325,17 @@ def noMstpMultiInstance(devs):
             bc.sendConfigSet(dev,command2)
                                                   
 ##############################################################################
+def stpEnaDisConf(devs,mode):
+    for dev in devs:    
+        with bc.connect(dev) as child:
+            if mode == 'enable':
+                stp_mode_config = 'spanning enable'
+                child.send_config_set(stp_mode_config)
+                time.sleep(1) 
+            elif mode == 'disable':
+                stp_mode_config = 'no spanning enable'
+                child.send_config_set(stp_mode_config)
+                time.sleep(1)             
         
 def stpSystemPri(dut,mode,syspri):
     with bc.connect(dut) as child:

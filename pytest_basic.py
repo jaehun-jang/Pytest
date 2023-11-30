@@ -420,11 +420,13 @@ class TestClass():
             bc.noshutblockport(self.devAll,self.blockport)
             bc.shutStpBlockPort(self.devAll,self.stpblockport) 
             time.sleep(10)
-            ##########################################################
-                         
+            ##########################################################              
             mode = 'disable' # For reinitialize MSTPD
             stpc.stpModeConf(self.devAll,mode) 
-            time.sleep(3)                 
+            time.sleep(3)
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
+            time.sleep(3)                  
             mode = 'stp'
             stpc.stpModeConf(self.devAll,mode)
             stpc.stpSystemPri(self.dut1,mode,4096)
@@ -441,7 +443,7 @@ class TestClass():
             time.sleep(10)  
             assert stpc.check_stp_PortRole(self.dut2,'mstp') == True
             mode = 'disable'       
-            stpc.stpModeConf(self.devAll,mode)
+            stpc.stpEnaDisConf(self.devAll,mode)
             assert stpc.check_stp_PortRole(self.dut2,mode) == False            
             time.sleep(2)
             ### To clear the STP test, block ports or unblock them###
@@ -451,7 +453,7 @@ class TestClass():
         except:
             # bc.shutblockport(self.devAll,self.blockport)
             # bc.noshutStpBlockPort(self.devAll,self.stpblockport)
-            stpc.stpModeConf(self.devAll,'disable')             
+            stpc.stpEnaDisConf(self.devAll,'disable')            
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
             
@@ -470,10 +472,10 @@ class TestClass():
             assert stpc.check_stp_PortState(self.dut2,mode) == True           
             time.sleep(2)
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')              
+            stpc.stpEnaDisConf(self.devAll,'disable')             
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5) 
     
@@ -483,6 +485,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'stp'
             stpc.stpModeConf(self.devAll,mode)
@@ -498,10 +502,10 @@ class TestClass():
             assert stpc.check_stp_RouteBridge(self.dut2,mode) == True            
             time.sleep(2)
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)   
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')               
+            stpc.stpEnaDisConf(self.devAll,'disable')               
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5) 
 
@@ -511,6 +515,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'stp'
             stpc.stpModeConf(self.devAll,mode)
@@ -525,10 +531,10 @@ class TestClass():
             time.sleep(10) 
             assert stpc.check_stp_system_config(self.dut3) == True 
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)    
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')               
+            stpc.stpEnaDisConf(self.devAll,'disable')              
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5) 
             
@@ -538,6 +544,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)       
             mode = 'stp'
             stpc.stpModeConf(self.devAll,mode)
@@ -552,10 +560,10 @@ class TestClass():
             time.sleep(15) 
             assert stpc.check_stp_timer_config(self.devAll) == True 
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)    
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')               
+            stpc.stpEnaDisConf(self.devAll,'disable')              
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5) 
                                               
@@ -565,6 +573,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'stp'
             stpc.stpModeConf(self.devAll,mode)
@@ -579,10 +589,10 @@ class TestClass():
             time.sleep(10) 
             assert stpc.check_stp_RootGuard(self.devAll,mode) == True 
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)    
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')
+            stpc.stpEnaDisConf(self.devAll,'disable')
             bc.sendConfigSet(self.dut1,['interface 1/14','no shutdown'])                             
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
@@ -593,6 +603,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'stp'
             stpc.stpModeConf(self.devAll,mode)
@@ -607,10 +619,10 @@ class TestClass():
             time.sleep(10) 
             assert stpc.check_stp_BpduGuard(self.devAll) == True 
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)    
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable') 
+            stpc.stpEnaDisConf(self.devAll,'disable') 
             stpc.noStpBpduGuardConf(self.dut3)                 
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
@@ -621,6 +633,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'stp'
             stpc.stpModeConf(self.devAll,mode)
@@ -635,10 +649,10 @@ class TestClass():
             time.sleep(10) 
             assert stpc.check_stp_BpduFilter(self.dut3,mode) == True 
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)    
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable') 
+            stpc.stpEnaDisConf(self.devAll,'disable')
             stpc.noStpBpduFilterConf(self.dut2)                 
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
@@ -649,6 +663,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'stp'
             stpc.stpModeConf(self.dut1and2,mode)
@@ -663,10 +679,10 @@ class TestClass():
             time.sleep(10) 
             assert stpc.check_stp_EdgePort(self.devAll,mode) == True 
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable') 
+            stpc.stpEnaDisConf(self.devAll,'disable')
             stpc.noStpEdgePortConf(self.dut2,'1/13')                 
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
@@ -677,6 +693,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'stp'
             stpc.stpModeConf(self.dut1and2,mode)
@@ -691,10 +709,10 @@ class TestClass():
             time.sleep(10) 
             assert stpc.check_stp_PortPri(self.devAll) == True 
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable') 
+            stpc.stpEnaDisConf(self.devAll,'disable') 
             stpc.noStpPortPridConf(self.dut1,'1/16')                 
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
@@ -705,6 +723,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'stp'
             stpc.stpModeConf(self.dut1and2,mode)
@@ -719,10 +739,10 @@ class TestClass():
             time.sleep(10) 
             assert stpc.check_stp_PortCost(self.devAll) == True 
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable') 
+            stpc.stpEnaDisConf(self.devAll,'disable') 
             stpc.noStpPortCostConf(self.dut1,'1/16')               
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
@@ -733,6 +753,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'mst'
             stpc.stpModeConf(self.devAll,mode)
@@ -743,10 +765,10 @@ class TestClass():
             ######################################
             assert stpc.check_mstp_MultiInstance(self.devAll) == True       
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')               
+            stpc.stpEnaDisConf(self.devAll,'disable')              
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
@@ -756,6 +778,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'mst'
             stpc.stpModeConf(self.devAll,mode)
@@ -764,10 +788,10 @@ class TestClass():
             # time.sleep(5)  
             assert stpc.check_mstp_priority_of_instance(self.devAll) == True       
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')           
+            stpc.stpEnaDisConf(self.devAll,'disable')          
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
@@ -777,6 +801,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'mst'
             stpc.stpModeConf(self.devAll,mode)
@@ -785,10 +811,10 @@ class TestClass():
             # time.sleep(5)  
             assert stpc.check_mstp_interface_cost(self.devAll) == True       
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')           
+            stpc.stpEnaDisConf(self.devAll,'disable')          
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
   
@@ -798,6 +824,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'mst'
             stpc.stpModeConf(self.devAll,mode)
@@ -806,10 +834,10 @@ class TestClass():
             # time.sleep(5)  
             assert stpc.check_mstp_interface_pri(self.devAll) == True       
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')           
+            stpc.stpEnaDisConf(self.devAll,'disable')          
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
   
@@ -819,6 +847,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'mst'
             stpc.stpModeConf(self.devAll,mode)
@@ -827,10 +857,10 @@ class TestClass():
             time.sleep(5)  
             assert stpc.check_mstp_region_vlan(self.devAll) == True       
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')           
+            stpc.stpEnaDisConf(self.devAll,'disable')          
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
@@ -840,6 +870,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'mst'
             stpc.stpModeConf(self.devAll,mode)
@@ -848,10 +880,10 @@ class TestClass():
             # time.sleep(5)  
             assert stpc.check_mstp_region_name(self.devAll) == True       
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')           
+            stpc.stpEnaDisConf(self.devAll,'disable')           
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
@@ -861,6 +893,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'mst'
             stpc.stpModeConf(self.devAll,mode)
@@ -869,10 +903,10 @@ class TestClass():
             # time.sleep(5)  
             assert stpc.check_mstp_region_revision(self.devAll) == True       
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')           
+            stpc.stpEnaDisConf(self.devAll,'disable')          
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)  
 
@@ -882,6 +916,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)      
             mode = 'mst'
             stpc.stpModeConf(self.devAll,mode)
@@ -890,14 +926,14 @@ class TestClass():
             # time.sleep(3)  
             assert stpc.check_mstp_portRole_master(self.devAll) == True       
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
             ### Remove MSTP Multi INstances ####
             stpc.noMstpMultiInstance(self.devAll)
             ####################################
             time.sleep(2)                      
         except:
-            stpc.stpModeConf(self.devAll,'disable') 
+            stpc.stpEnaDisConf(self.devAll,'disable')
             time.sleep(2)
             ### Remove MSTP Multi INstances ####
             stpc.noMstpMultiInstance(self.devAll)
@@ -912,13 +948,15 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2)  
             assert stpc.check_STP_compatibility_with_xSTP(self.devAll) == True       
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)     
             time.sleep(2)
         except:
-            stpc.stpModeConf(self.devAll,'disable')                          
+            stpc.stpEnaDisConf(self.devAll,'disable')                          
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
             
@@ -928,6 +966,8 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title) 
+            mode = 'enable' 
+            stpc.stpEnaDisConf(self.devAll,mode) 
             time.sleep(2) 
             mode = 'stp'
             stpc.stpModeConf(self.devAll,mode)
@@ -942,14 +982,14 @@ class TestClass():
             time.sleep(10) 
             assert stpc.check_xstp_with_LACP(self.devAll) == True 
             mode = 'disable' 
-            stpc.stpModeConf(self.devAll,mode)     
+            stpc.stpEnaDisConf(self.devAll,mode)    
             time.sleep(2)
             ### To clear the STP test, block ports or unblock them ###
             bc.shutblockport(self.devAll,self.blockport)
             bc.noshutStpBlockPort(self.devAll,self.stpblockport) 
             ########################################################## 
         except:
-            stpc.stpModeConf(self.devAll,'disable')
+            stpc.stpEnaDisConf(self.devAll,'disable')
             ### To clear the STP test, block ports or unblock them ###
             bc.shutblockport(self.devAll,self.blockport)
             bc.noshutStpBlockPort(self.devAll,self.stpblockport) 
@@ -1069,18 +1109,20 @@ class MyPlugin:
 
 
 if __name__ == "__main__":
-    # Get the current timestamp
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+    
+    # # Get the current timestamp
+    # timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
-    # Create the file name with the timestamp
-    file_name = f"report_{timestamp}.html"
+    # # Create the file name with the timestamp
+    # file_name = f"report_{timestamp}.html"
 
-    # Construct the arguments string
-    args_str = '--html=report/report.html --self-contained-html '+ __file__
-    args_str = ' --capture=tee-sys '+ __file__
-    args_str = f"--html=report/{file_name} {__file__}"
+    # # Construct the arguments string
+    # args_str = '--html=report/report.html --self-contained-html '+ __file__
+    # args_str = ' --capture=tee-sys '+ __file__
+    # args_str = f"--html=report/{file_name} {__file__}"
 
-    args = args_str.split(" ")
-    pytest.main(args, plugins=[MyPlugin()])
+    # args = args_str.split(" ")
+    # pytest.main(args, plugins=[MyPlugin()])
+    pytest.main(plugins=[MyPlugin()])
 
 
