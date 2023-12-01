@@ -22,21 +22,25 @@ from pytest_basic import TestClass as basic
 
 
 # TestCase
-class Test_m6424(basic): 
+class Test_m5216(basic): 
 
 # ##### -----------------------------------------------------
 # ##### ------- Flexport Function Test ----------------------
 # ##### ----------------------------------------------------- 
-
-    dut1 = '192.168.0.211'
+   
+    """ 
+    dut1 = '192.168.0.201'
     dut2 = '192.168.0.202'
-    dut3 = '192.168.0.211' 
-    nni = '1/17'
+    dut3 = '192.168.0.203'
+    dut1and2 = ['192.168.0.201','192.168.0.202']
+    devAll = ['192.168.0.201','192.168.0.202','192.168.0.203']
+    nni = '1/25'
     lagint = ['1/15','1/16']
-    blockport = '1/6,1/15-1/16'
-    stpblockport = ''
+    blockport = '1/6,1/10-1/16'
+    stpblockport = '1/25' 
+    """ 
 
-
+# ##### -----------------------------------------------------
 
     @pytest.mark.skip() #Because the GNMI implementation is not complete, this test item is skipped.
     def test_015_service_feature(self):

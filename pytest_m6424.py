@@ -23,12 +23,12 @@ from pytest_basic import TestClass as basic
 
 # TestCase
 class Test_m6424(basic): 
-# class Test_m6424(): 
 
 # ##### -----------------------------------------------------
 # ##### ------- Flexport Function Test ----------------------
 # ##### -----------------------------------------------------
-   
+
+    """ 
     dut1 = '192.168.0.201'
     dut2 = '192.168.0.202'
     dut3 = '192.168.0.203'
@@ -37,9 +37,12 @@ class Test_m6424(basic):
     nni = '1/25'
     lagint = ['1/15','1/16']
     blockport = '1/6,1/10-1/16'
-    stpblockport = '1/25'
+    stpblockport = '1/25' 
+    """ 
 
-    # @pytest.mark.skip() 
+    
+# ##### -----------------------------------------------------
+
     def test_101_change_profile_roe(self): 
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
@@ -58,7 +61,6 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2) 
             
-    # @pytest.mark.skip() 
     def test_102_basic_flexport(self): 
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Basic configuration Test " + "#" * 5
@@ -77,7 +79,6 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2) 
           
-    # @pytest.mark.skip() 
     def test_103_flexport_example(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Example configuration Test " + "#" * 5
@@ -95,7 +96,6 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)  
 
-    # @pytest.mark.skip() 
     def test_104_flexport_breakout(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " Flexport Breakout configuration Test " + "#" * 5
@@ -113,7 +113,6 @@ class Test_m6424(basic):
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(2)                
 
-    # @pytest.mark.skip() 
     def test_105_change_defaultProfile(self): 
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " change defult profile " + "#" * 5

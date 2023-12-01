@@ -755,7 +755,7 @@ def check_stp_EdgePort(devs,mode):
     stpModeCheck(devs[1]) 
     time.sleep(2)
                                               
-    # Check if the edgeport is configured.                         
+    # Check if the edgeport of DUT#1 is configured.                         
     command = 'sh spanning-tree'
     startString = '1/13'
     cloum = 5   

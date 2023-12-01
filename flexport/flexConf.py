@@ -19,7 +19,10 @@ def disTitle(child,Title):
 ###### Element of Flexport Function  ######
     
 ### Detach ###  
+### Detach ###  
 def detach(child):
+    [child.send_config_set([f"interface 1/{intCon}", 'shutdown']) for intCon in range(1, 29)]
+    time.sleep(1.5)   
     for intCon in range(1, 13):
         flexport_config = f"flexport-group {intCon}"
         detach_config = [f"detach member {i}" for i in range(1, 3)]
@@ -35,6 +38,10 @@ def detach(child):
 
 ### Detach 100G ### 	   
 def detach100g(child):
+    for intCon in range(25,29):
+        intShutSown = [f"interface 1/{intCon}",'shutdown' ]
+        child.send_config_set(intShutSown)
+        time.sleep(1.5) 
     for intCon in range (13, 17, 1):
         config = ["flexport-group " + str(intCon),"detach member all "]   
         child.send_config_set(config)

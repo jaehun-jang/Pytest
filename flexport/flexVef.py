@@ -43,8 +43,8 @@ def checkFlexP(status, host):
         result_list.append(interfacestate.splitlines())
         result_list= str(result_list).split()
         
-        checkProcess = sub_child.send_command('sh interface statistics avg-type 1/19')
-        print(checkProcess)
+        # checkProcess = sub_child.send_command('sh interface statistics avg-type 1/19')
+        # print(checkProcess)
         
         if status in check_dict: 
         # With in, we can check whether the dictionary has a corresponding key.

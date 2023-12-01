@@ -32,17 +32,19 @@ import pandas as pd
 
 # TestCase
 class TestClass():  
+   
+    dut1 = '192.168.0.201'
+    dut2 = '192.168.0.202'
+    dut3 = '192.168.0.203'
+    dut1and2 = ['192.168.0.201','192.168.0.202']
+    devAll = ['192.168.0.201','192.168.0.202','192.168.0.203']
+    nni = '1/25'
+    lagint = ['1/15','1/16']
+    blockport = '1/6,1/10-1/16'
+    stpblockport = '1/25'
 
-    dut1 = '0.0.0.0'
-    dut2 = '0.0.0.0'
-    dut3 = '0.0.0.0'
-    dut1and2 = []
-    devAll = []
-    nni = ''
-    lagint = []
-    blockport = ''
-    stpblockport = ''
- 
+    ###    -----------------------------------------------------
+         
     @classmethod
     def setup_class(cls,): # setUP_class(cls) -> unittest
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -1110,19 +1112,19 @@ class MyPlugin:
 
 if __name__ == "__main__":
     
-    # # Get the current timestamp
-    # timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+    # Get the current timestamp
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
-    # # Create the file name with the timestamp
-    # file_name = f"report_{timestamp}.html"
+    # Create the file name with the timestamp
+    file_name = f"report_{timestamp}.html"
 
-    # # Construct the arguments string
-    # args_str = '--html=report/report.html --self-contained-html '+ __file__
-    # args_str = ' --capture=tee-sys '+ __file__
-    # args_str = f"--html=report/{file_name} {__file__}"
+    # Construct the arguments string
+    args_str = '--html=report/report.html --self-contained-html '+ __file__
+    args_str = ' --capture=tee-sys '+ __file__
+    args_str = f"--html=report/{file_name} {__file__}"
 
-    # args = args_str.split(" ")
-    # pytest.main(args, plugins=[MyPlugin()])
-    pytest.main(plugins=[MyPlugin()])
+    args = args_str.split(" ")
+       
+    pytest.main(args, plugins=[MyPlugin()])
 
 
