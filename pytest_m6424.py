@@ -39,8 +39,7 @@ class Test_m6424(basic):
     blockport = '1/6,1/10-1/16'
     stpblockport = '1/25' 
     """ 
-
-    
+  
 # ##### -----------------------------------------------------
 
     def test_101_change_profile_roe(self): 
