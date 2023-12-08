@@ -49,11 +49,13 @@ def checkNmbrSep(uni,host):
 
 # def checkDflSvc(host):                 
 def checkDflSvc(host):
-    result = 0
+    print('#'*3 + ' check the services are to be deleted ' + '#'*3)   
+    total, service, uni, nni = 0, 0, 0, 0
     with bc.connect(host) as sub_child:
-        result += len(sub_child.send_command('show ethernet service').splitlines())
-        result += len(sub_child.send_command('show ethernet uni').splitlines())
-        result += len(sub_child.send_command('show ethernet nni').splitlines())
+        service += len(sub_child.send_command('show ethernet service').splitlines())
+        uni += len(sub_child.send_command('show ethernet uni').splitlines())
+        nni += len(sub_child.send_command('show ethernet nni').splitlines())
+        total = service + uni + nni
     time.sleep(1)
-    print(result)
-    return result
+    print(f'service: {service}, uni: {uni}, nni: {nni}, total: {total}')
+    return total

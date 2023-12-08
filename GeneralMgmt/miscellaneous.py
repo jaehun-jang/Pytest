@@ -118,15 +118,21 @@ def check_feature(host,connection,state):
 ##################################################################################
     
 def tcpdump(dut1): 
+    value_to_check = '192.168.0.201.ssh'
     with bc.connect(dut1) as child: 
-        command = child.send_command('tcpdump -vi eth0', expect_string= 'length')
+        tcpdump_output = child.send_command('tcpdump -vi eth0', expect_string='length')
         time.sleep(1) 
-        # print(command)
+        # print(tcpdump_output)
         child.write_channel('\x03')
-        result = command.splitlines() 
-        resultlen = len(result) 
-        print(f'tcpdump count: {resultlen}')
-        return resultlen
+        cmd_list = tcpdump_output.splitlines() 
+        print(cmd_list)
+        for line in cmd_list:
+            result = line.split()        
+            print(result)
+            if value_to_check in line:
+                return True
+        else:
+            return False
 
 def traceRT(dut1): 
     dnsserver = '168.126.63.1'

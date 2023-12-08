@@ -113,7 +113,7 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
-    @pytest.mark.skip() 
+    # @pytest.mark.skip() 
     def test_04_AAA_RADIUS(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " AAA with RADIUS Test " + "#" * 5
@@ -177,7 +177,7 @@ class TestClass():
         print(Title)
         try:         
             bc.disTitle(self.devAll,Title)            
-            assert gmis.tcpdump(self.dut1) >= 10
+            assert gmis.tcpdump(self.dut1) == True
             time.sleep(5)                        
         except:              
             assert bv.ExceptionLog(testName) == 'normal'
@@ -666,7 +666,7 @@ class TestClass():
         try:         
             bc.disTitle(self.devAll,Title) 
             mode = 'enable' 
-            stpc.stpEnaDisConf(self.devAll,mode) 
+            stpc.stpEnaDisConf(self.dut1and2,mode) 
             time.sleep(2)      
             mode = 'stp'
             stpc.stpModeConf(self.dut1and2,mode)
@@ -685,7 +685,7 @@ class TestClass():
             time.sleep(2)
         except:
             stpc.stpEnaDisConf(self.devAll,'disable')
-            stpc.noStpEdgePortConf(self.dut2,'1/13')                 
+            stpc.noStpEdgePortConf(self.dut2,['1/10','1/13'])                 
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
   

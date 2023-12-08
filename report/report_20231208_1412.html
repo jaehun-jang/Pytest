@@ -1,0 +1,2596 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>report_20231208_1412.html</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    let visibleString = getQueryParameter('visible') || 'all';
+    visibleString = visibleString.toLowerCase();
+    const checkedItems = visibleString.split(',');
+
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++) {
+        filterItems[i].hidden = false;
+
+        if (visibleString != 'all') {
+            filterItems[i].checked = checkedItems.includes(filterItems[i].getAttribute('data-test-result'));
+            filterTable(filterItems[i]);
+        }
+    }
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>report_20231208_1412.html</h1>
+    <p>Report generated on 08-Dec-2023 at 15:28:17 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
+    <h2>Summary</h2>
+    <p>44 tests ran in 4528.38 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">44 passed</span>, <input checked="true" class="filter" data-test-result="skipped" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">2 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_042_basic_twamp</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v1.1\\pytest_basic.py&#x27;, 349, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_096_mng_evm_config_</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;e:\\Standard_Test_Procedure\\Automation\\pytest\\pytest_suite_v1.1\\pytest_basic.py&#x27;, 1078, &#x27;Skipped: unconditional skip&#x27;)<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_001_maximum_number_of_vty</td>
+          <td class="col-duration">112.97</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VTY Session TEST #####
+Number of sessions: 39
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_002_vty_configure</td>
+          <td class="col-duration">29.34</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VTY Session Configuration TEST #####
+Number of sessions: 8
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_003_user_account</td>
+          <td class="col-duration">69.54</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### User Account Configuration TEST #####
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  username actus role network-admin password encrypted actus1234
+LAB1(config)#  end
+LAB1# 
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:03:14    Exec
+ pts/0      actus     192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:19:35    Exec
+Successful login - Username: actus, Password: actus1234
+True
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  no username actus
+LAB1(config)#  end
+LAB1# 
+Failed login - Username: actus, Password: actus1234
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  username hfrn role network-operator password encrypted hfrn1234
+LAB1(config)#  end
+LAB1# 
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:03:34    Exec
+ pts/0      hfrn      192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:19:55    Exec
+Successful login - Username: hfrn, Password: hfrn1234
+True
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  no username hfrn
+LAB1(config)#  end
+LAB1# 
+Failed login - Username: hfrn, Password: hfrn1234
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  username cisco role network-viewer password encrypted cisco1234
+LAB1(config)#  end
+LAB1# 
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:03:53    Exec
+ pts/0      cisco     192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:20:14    Exec
+Successful login - Username: cisco, Password: cisco1234
+True
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  no username cisco
+LAB1(config)#  end
+LAB1# 
+Failed login - Username: cisco, Password: cisco1234
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_04_AAA_RADIUS</td>
+          <td class="col-duration">200.11</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### AAA with RADIUS Test #####
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  radius-server host 192.168.6.1 key radius auth-port 1812
+LAB1(config)# radius-server retransmit 1
+LAB1(config)# radius-server timeout 1
+LAB1(config)# aaa auth login default group radius
+LAB1(config)# aaa auth login default fallback error local
+LAB1(config)# aaa auth attempts login 0
+LAB1(config)#  end
+LAB1# 
+# For RADIUS authentication with Telnet #
+Failed login - Username: root, Password: admin
+Login failed: 192.168.0.201
+False
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:05:11    Exec
+ pts/0      admin     192.168.0.157         00:00:01    -
+ console    root      NETCONF               00:21:32    Exec
+# Check user privilige #
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#   username radius password radius123
+LAB1(config)#  end
+LAB1# 
+Successful login - Username: admin, Password: hfrn
+True
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:05:16    Exec
+ pts/0      operator  192.168.0.157         00:00:01    -
+ console    root      NETCONF               00:21:37    Exec
+# Check user privilige #
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  username
+               ^
+% Invalid input detected at &#x27;^&#x27; marker.
+
+LAB1(config)#  end
+LAB1# 
+Successful login - Username: operator, Password: hfrn
+True
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:05:21    Exec
+ pts/0      viewer    192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:21:42    Exec
+# Check user privilige #
+      ^
+% Invalid input detected at &#x27;^&#x27; marker.
+
+Successful login - Username: viewer, Password: hfrn
+True
+# For RADIUS authentication with SSH #
+Failed login - Username: root, Password: admin
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:05:29    Exec
+ pts/0      admin     192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:21:50    Exec
+# Check user privilige #
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#   username radius password radius123
+LAB1(config)#  end
+LAB1# 
+Successful login - Username: admin, Password: hfrn
+True
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:05:32    Exec
+ pts/0      operator  192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:21:53    Exec
+# Check user privilige #
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  username
+               ^
+% Invalid input detected at &#x27;^&#x27; marker.
+
+LAB1(config)#  end
+LAB1# 
+Successful login - Username: operator, Password: hfrn
+True
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:05:34    Exec
+ pts/0      viewer    192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:21:55    Exec
+# Check user privilige #
+      ^
+% Invalid input detected at &#x27;^&#x27; marker.
+
+Successful login - Username: viewer, Password: hfrn
+True
+[&#x27;Nok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Nok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+# For RADIUS authentication with Telnet #
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:06:40    Exec
+ pts/0      root      192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:23:01    Exec
+# Check user privilige #
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#   username radius password radius123
+LAB1(config)#  end
+LAB1# 
+Successful login - Username: root, Password: admin
+True
+Failed login - Username: admin, Password: hfrn
+Login failed: 192.168.0.201
+False
+Failed login - Username: operator, Password: hfrn
+Login failed: 192.168.0.201
+False
+Failed login - Username: viewer, Password: hfrn
+Login failed: 192.168.0.201
+False
+# For RADIUS authentication with SSH #
+ Line       User      Host(s)               Login Time  Mode
+ ttyS0      root      -                     00:07:04    Exec
+ pts/0      root      192.168.0.157         00:00:00    -
+ console    root      NETCONF               00:23:25    Exec
+# Check user privilige #
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#   username radius password radius123
+LAB1(config)#  end
+LAB1# 
+Successful login - Username: root, Password: admin
+True
+Failed login - Username: admin, Password: hfrn
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+Failed login - Username: operator, Password: hfrn
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+Failed login - Username: viewer, Password: hfrn
+Authentication to device failed.
+
+Common causes of this problem are:
+1. Invalid username and password
+2. Incorrect SSH-key file
+3. Connecting to the wrong device
+
+Device settings: cisco_ios 192.168.0.201:22
+
+
+Authentication failed.
+False
+[&#x27;Ok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Ok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;, &#x27;Nok&#x27;]
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+LAB1(config)#  no aaa auth attempts login
+LAB1(config)# no aaa auth login default group radius
+LAB1(config)# no aaa auth login default fallback error local
+LAB1(config)# no radius-server retransmit
+LAB1(config)# no radius-server timeout
+LAB1(config)# no radius-server host 192.168.6.1
+LAB1(config)#  end
+LAB1# 
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_011_static_route</td>
+          <td class="col-duration">31.66</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### static route Configuration TEST #####
+PING 168.126.63.1 (168.126.63.1) 56(84) bytes of data.
+64 bytes from 168.126.63.1: icmp_seq=1 ttl=56 time=2.46 ms
+64 bytes from 168.126.63.1: icmp_seq=2 ttl=56 time=2.47 ms
+64 bytes from 168.126.63.1: icmp_seq=3 ttl=56 time=2.60 ms
+64 bytes from 168.126.63.1: icmp_seq=4 ttl=56 time=1.88 ms
+64 bytes from 168.126.63.1: icmp_seq=5 ttl=56 time=2.10 ms
+64 bytes from 168.126.63.1: icmp_seq=6 ttl=56 time=3.31 ms
+64 bytes from 168.126.63.1: icmp_seq=7 ttl=56 time=1.97 ms
+64 bytes from 168.126.63.1: icmp_seq=8 ttl=56 time=2.01 ms
+64 bytes from 168.126.63.1: icmp_seq=9 ttl=56 time=1.92 ms
+64 bytes from 168.126.63.1: icmp_seq=10 ttl=56 time=1.78 ms
+
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_012_trace_route</td>
+          <td class="col-duration">19.72</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### TraceRT Test #####
+traceroute to 168.126.63.1 (168.126.63.1), 30 hops max, 46 byte packets
+ 1  192.168.0.2 (192.168.0.2)  0.445 ms  0.337 ms  0.401 ms
+ 2
+192.168.0.2
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_013_tcp_dump</td>
+          <td class="col-duration">14.39</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### TCP_DUMP Test #####
+[&#x27;tcpdump: listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes&#x27;, &#x27;05:19:10.833876 IP (tos 0x48, ttl 64, id 43886, offset 0, flags [DF], proto TCP (6), length 184)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa1e6 (correct), seq 2531221014:2531221158, ack 3712494267, win 247, length 144&#x27;, &#x27;05:19:10.834703 IP (tos 0x48, ttl 64, id 43887, offset 0, flags [DF], proto TCP (6), length 344)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x487c (correct), seq 144:448, ack 1, win 247, length 304&#x27;, &#x27;05:19:10.834784 IP (tos 0x48, ttl 64, id 43888, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xf8ee (correct), seq 448:720, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.834855 IP (tos 0x48, ttl 64, id 43889, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x078e (correct), seq 720:992, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.834925 IP (tos 0x48, ttl 64, id 43890, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x26b0 (correct), seq 992:1264, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.834994 IP (tos 0x48, ttl 64, id 43891, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x77bc (correct), seq 1264:1536, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.835062 IP (tos 0x48, ttl 64, id 43892, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa2e5 (correct), seq 1536:1808, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.835130 IP (tos 0x48, ttl 64, id 43893, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xd407 (correct), seq 1808:2080, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.835198 IP (tos 0x48, ttl 64, id 43894, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xde3a (correct), seq 2080:2352, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.835265 IP (tos 0x48, ttl 64, id 43895, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x7456 (correct), seq 2352:2624, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.835500 IP (tos 0x0, ttl 128, id 50458, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x398d (correct), ack 720, win 4106, length 0&#x27;, &#x27;05:19:10.835527 IP (tos 0x48, ttl 64, id 43896, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x1143 (correct), seq 2624:2896, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.835562 IP (tos 0x48, ttl 64, id 43897, offset 0, flags [DF], proto TCP (6), length 296)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xe369 (correct), seq 2896:3152, ack 1, win 247, length 256&#x27;, &#x27;05:19:10.835646 IP (tos 0x48, ttl 64, id 43898, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xcb1a (correct), seq 3152:3648, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.835679 IP (tos 0x0, ttl 128, id 50459, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x3660 (correct), ack 1536, win 4103, length 0&#x27;, &#x27;05:19:10.835731 IP (tos 0x48, ttl 64, id 43899, offset 0, flags [DF], proto TCP (6), length 520)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x61d6 (correct), seq 3648:4128, ack 1, win 247, length 480&#x27;, &#x27;05:19:10.835798 IP (tos 0x48, ttl 64, id 43900, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x752d (correct), seq 4128:4400, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.835802 IP (tos 0x0, ttl 128, id 50460, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x3443 (correct), ack 2080, win 4100, length 0&#x27;, &#x27;05:19:10.835885 IP (tos 0x48, ttl 64, id 43901, offset 0, flags [DF], proto TCP (6), length 520)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xd084 (correct), seq 4400:4880, ack 1, win 247, length 480&#x27;, &#x27;05:19:10.835951 IP (tos 0x48, ttl 64, id 43902, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x97ee (correct), seq 4880:5152, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.836016 IP (tos 0x48, ttl 64, id 43903, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x83ae (correct), seq 5152:5424, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.836081 IP (tos 0x48, ttl 64, id 43904, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xfd6d (correct), seq 5424:5696, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.836106 IP (tos 0x0, ttl 128, id 50461, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x321d (correct), ack 2624, win 4106, length 0&#x27;, &#x27;05:19:10.836162 IP (tos 0x48, ttl 64, id 43905, offset 0, flags [DF], proto TCP (6), length 520)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x2c07 (correct), seq 5696:6176, ack 1, win 247, length 480&#x27;, &#x27;05:19:10.836227 IP (tos 0x48, ttl 64, id 43906, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x2a9e (correct), seq 6176:6448, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.836292 IP (tos 0x48, ttl 64, id 43907, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x1b93 (correct), seq 6448:6720, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.836358 IP (tos 0x48, ttl 64, id 43908, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x285d (correct), seq 6720:6992, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.836423 IP (tos 0x48, ttl 64, id 43909, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa7b8 (correct), seq 6992:7264, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.836488 IP (tos 0x48, ttl 64, id 43910, offset 0, flags [DF], proto TCP (6), length 312)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa43e (correct), seq 7264:7536, ack 1, win 247, length 272&#x27;, &#x27;05:19:10.836504 IP (tos 0x0, ttl 128, id 50462, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x300f (correct), ack 3152, win 4104, length 0&#x27;, &#x27;05:19:10.836570 IP (tos 0x48, ttl 64, id 43911, offset 0, flags [DF], proto TCP (6), length 520)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x4101 (correct), seq 7536:8016, ack 1, win 247, length 480&#x27;, &#x27;05:19:10.836625 IP (tos 0x48, ttl 64, id 43912, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xb2e7 (correct), seq 8016:8176, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.836639 IP (tos 0x0, ttl 128, id 50463, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x2c3d (correct), ack 4128, win 4106, length 0&#x27;, &#x27;05:19:10.836681 IP (tos 0x48, ttl 64, id 43913, offset 0, flags [DF], proto TCP (6), length 216)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x1591 (correct), seq 8176:8352, ack 1, win 247, length 176&#x27;, &#x27;05:19:10.836734 IP (tos 0x48, ttl 64, id 43914, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x3d13 (correct), seq 8352:8512, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.836788 IP (tos 0x48, ttl 64, id 43915, offset 0, flags [DF], proto TCP (6), length 216)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x9082 (correct), seq 8512:8688, ack 1, win 247, length 176&#x27;, &#x27;05:19:10.836841 IP (tos 0x48, ttl 64, id 43916, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xe1a9 (correct), seq 8688:8848, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.837175 IP (tos 0x0, ttl 128, id 50464, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x261d (correct), ack 5696, win 4106, length 0&#x27;, &#x27;05:19:10.837187 IP (tos 0x48, ttl 64, id 43917, offset 0, flags [DF], proto TCP (6), length 1368)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x89cf (correct), seq 8848:10176, ack 1, win 247, length 1328&#x27;, &#x27;05:19:10.837209 IP (tos 0x48, ttl 64, id 43918, offset 0, flags [DF], proto TCP (6), length 216)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa7c0 (correct), seq 10176:10352, ack 1, win 247, length 176&#x27;, &#x27;05:19:10.837263 IP (tos 0x48, ttl 64, id 43919, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x5543 (correct), seq 10352:10512, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.837315 IP (tos 0x48, ttl 64, id 43920, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xb924 (correct), seq 10512:10672, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.837367 IP (tos 0x48, ttl 64, id 43921, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x1f1f (correct), seq 10672:10832, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.837475 IP (tos 0x0, ttl 128, id 50465, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x2330 (correct), ack 6448, win 4103, length 0&#x27;, &#x27;05:19:10.837486 IP (tos 0x48, ttl 64, id 43922, offset 0, flags [DF], proto TCP (6), length 376)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xbe41 (correct), seq 10832:11168, ack 1, win 247, length 336&#x27;, &#x27;05:19:10.837503 IP (tos 0x48, ttl 64, id 43923, offset 0, flags [DF], proto TCP (6), length 216)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x270b (correct), seq 11168:11344, ack 1, win 247, length 176&#x27;, &#x27;05:19:10.837587 IP (tos 0x0, ttl 128, id 50466, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x2112 (correct), ack 6992, win 4101, length 0&#x27;, &#x27;05:19:10.837598 IP (tos 0x48, ttl 64, id 43924, offset 0, flags [DF], proto TCP (6), length 376)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x50c2 (correct), seq 11344:11680, ack 1, win 247, length 336&#x27;, &#x27;05:19:10.837808 IP (tos 0x0, ttl 128, id 50467, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x1eed (correct), ack 7536, win 4106, length 0&#x27;, &#x27;05:19:10.837818 IP (tos 0x48, ttl 64, id 43926, offset 0, flags [DF], proto TCP (6), length 712)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x6e2a (correct), seq 11840:12512, ack 1, win 247, length 672&#x27;, &#x27;05:19:10.837835 IP (tos 0x48, ttl 64, id 43927, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x3047 (correct), seq 12512:12672, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.838080 IP (tos 0x0, ttl 128, id 50468, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x1b21 (correct), ack 8512, win 4102, length 0&#x27;, &#x27;05:19:10.838091 IP (tos 0x48, ttl 64, id 43928, offset 0, flags [DF], proto TCP (6), length 1032)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xe270 (correct), seq 12672:13664, ack 1, win 247, length 992&#x27;, &#x27;05:19:10.838111 IP (tos 0x48, ttl 64, id 43929, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa9df (correct), seq 13664:13824, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.838187 IP (tos 0x0, ttl 128, id 50469, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x19d2 (correct), ack 8848, win 4101, length 0&#x27;, &#x27;05:19:10.838324 IP (tos 0x48, ttl 64, id 43933, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xf9ed (correct), seq 14320:14480, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.839439 IP (tos 0x0, ttl 128, id 50470, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x100d (correct), ack 11344, win 4106, length 0&#x27;, &#x27;05:19:10.839452 IP (tos 0x48, ttl 64, id 43934, offset 0, flags [DF], proto TCP (6), length 1500)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [.], cksum 0x8f9d (correct), seq 14480:15940, ack 1, win 247, length 1460&#x27;, &#x27;05:19:10.839457 IP (tos 0x48, ttl 64, id 43935, offset 0, flags [DF], proto TCP (6), length 740)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x0385 (correct), seq 15940:16640, ack 1, win 247, length 700&#x27;, &#x27;05:19:10.839483 IP (tos 0x48, ttl 64, id 43936, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xd551 (correct), seq 16640:16800, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.839537 IP (tos 0x48, ttl 64, id 43937, offset 0, flags [DF], proto TCP (6), length 216)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xb3f5 (correct), seq 16800:16976, ack 1, win 247, length 176&#x27;, &#x27;05:19:10.839555 IP (tos 0x0, ttl 128, id 50471, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x0e1f (correct), ack 11840, win 4104, length 0&#x27;, &#x27;05:19:10.839591 IP (tos 0x48, ttl 64, id 43938, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x1057 (correct), seq 16976:17136, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.839645 IP (tos 0x48, ttl 64, id 43939, offset 0, flags [DF], proto TCP (6), length 216)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa26d (correct), seq 17136:17312, ack 1, win 247, length 176&#x27;, &#x27;05:19:10.839697 IP (tos 0x48, ttl 64, id 43940, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xc245 (correct), seq 17312:17472, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.839806 IP (tos 0x48, ttl 64, id 43942, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x0023 (correct), seq 17648:17808, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.839913 IP (tos 0x48, ttl 64, id 43944, offset 0, flags [DF], proto TCP (6), length 200)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x776c (correct), seq 17984:18144, ack 1, win 247, length 160&#x27;, &#x27;05:19:10.840417 IP (tos 0x0, ttl 128, id 50473, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0x03cd (correct), ack 14480, win 4106, length 0&#x27;, &#x27;05:19:10.840430 IP (tos 0x48, ttl 64, id 43946, offset 0, flags [DF], proto TCP (6), length 1500)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [.], cksum 0x148e (correct), seq 18320:19780, ack 1, win 247, length 1460&#x27;, &#x27;05:19:10.840434 IP (tos 0x48, ttl 64, id 43947, offset 0, flags [DF], proto TCP (6), length 388)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x73b0 (correct), seq 19780:20128, ack 1, win 247, length 348&#x27;, &#x27;05:19:10.840510 IP (tos 0x48, ttl 64, id 43948, offset 0, flags [DF], proto TCP (6), length 632)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xfa07 (correct), seq 20128:20720, ack 1, win 247, length 592&#x27;, &#x27;05:19:10.840594 IP (tos 0x48, ttl 64, id 43949, offset 0, flags [DF], proto TCP (6), length 440)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xae9a (correct), seq 20720:21120, ack 1, win 247, length 400&#x27;, &#x27;05:19:10.840665 IP (tos 0x48, ttl 64, id 43950, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xd577 (correct), seq 21120:21408, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.840736 IP (tos 0x48, ttl 64, id 43951, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xb662 (correct), seq 21408:21696, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.842063 IP (tos 0x48, ttl 64, id 43952, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xc3c8 (correct), seq 21696:21984, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.842396 IP (tos 0x0, ttl 128, id 50474, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xf61c (correct), ack 17984, win 4106, length 0&#x27;, &#x27;05:19:10.842413 IP (tos 0x48, ttl 64, id 43953, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x32b0 (correct), seq 21984:22272, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.842480 IP (tos 0x48, ttl 64, id 43954, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x95d7 (correct), seq 22272:22768, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.842551 IP (tos 0x48, ttl 64, id 43955, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xd85e (correct), seq 22768:23056, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.842557 IP (tos 0x0, ttl 128, id 50475, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xf4ce (correct), ack 18320, win 4104, length 0&#x27;, &#x27;05:19:10.842645 IP (tos 0x48, ttl 64, id 43956, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x391a (correct), seq 23056:23552, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.842715 IP (tos 0x48, ttl 64, id 43957, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa703 (correct), seq 23552:23840, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.842784 IP (tos 0x48, ttl 64, id 43958, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x7be2 (correct), seq 23840:24128, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.842854 IP (tos 0x48, ttl 64, id 43959, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xdbe6 (correct), seq 24128:24416, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.842923 IP (tos 0x48, ttl 64, id 43960, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x7f14 (correct), seq 24416:24704, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.842992 IP (tos 0x48, ttl 64, id 43961, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x80d4 (correct), seq 24704:24992, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.843060 IP (tos 0x48, ttl 64, id 43962, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x69ee (correct), seq 24992:25280, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.843129 IP (tos 0x48, ttl 64, id 43963, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x5fe8 (correct), seq 25280:25568, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.843502 IP (tos 0x0, ttl 128, id 50476, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xedbc (correct), ack 20128, win 4106, length 0&#x27;, &#x27;05:19:10.843514 IP (tos 0x48, ttl 64, id 43964, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x1fb6 (correct), seq 25568:25856, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.843550 IP (tos 0x0, ttl 128, id 50477, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xe9e0 (correct), ack 21120, win 4102, length 0&#x27;, &#x27;05:19:10.843607 IP (tos 0x48, ttl 64, id 43965, offset 0, flags [DF], proto TCP (6), length 744)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xd497 (correct), seq 25856:26560, ack 1, win 247, length 704&#x27;, &#x27;05:19:10.843678 IP (tos 0x48, ttl 64, id 43966, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x5471 (correct), seq 26560:26848, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.843748 IP (tos 0x48, ttl 64, id 43967, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa8c3 (correct), seq 26848:27136, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.843846 IP (tos 0x0, ttl 128, id 50478, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xe55c (correct), ack 22272, win 4106, length 0&#x27;, &#x27;05:19:10.843861 IP (tos 0x48, ttl 64, id 43968, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xcf3c (correct), seq 27136:27424, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.843928 IP (tos 0x48, ttl 64, id 43969, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x6543 (correct), seq 27424:27920, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.843979 IP (tos 0x0, ttl 128, id 50479, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xe061 (correct), ack 23552, win 4101, length 0&#x27;, &#x27;05:19:10.844001 IP (tos 0x48, ttl 64, id 43970, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa108 (correct), seq 27920:28208, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.844059 IP (tos 0x0, ttl 128, id 50480, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xdf3c (correct), ack 23840, win 4106, length 0&#x27;, &#x27;05:19:10.844115 IP (tos 0x48, ttl 64, id 43971, offset 0, flags [DF], proto TCP (6), length 744)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xd4de (correct), seq 28208:28912, ack 1, win 247, length 704&#x27;, &#x27;05:19:10.844155 IP (tos 0x0, ttl 128, id 50481, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xdcfe (correct), ack 24416, win 4104, length 0&#x27;, &#x27;05:19:10.844209 IP (tos 0x48, ttl 64, id 43972, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x6304 (correct), seq 28912:29408, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.844280 IP (tos 0x48, ttl 64, id 43973, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x6df9 (correct), seq 29408:29696, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.844351 IP (tos 0x48, ttl 64, id 43974, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x5ad8 (correct), seq 29696:29984, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.844420 IP (tos 0x48, ttl 64, id 43975, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa335 (correct), seq 29984:30272, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.844423 IP (tos 0x0, ttl 128, id 50482, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xdac1 (correct), ack 24992, win 4101, length 0&#x27;, &#x27;05:19:10.844518 IP (tos 0x48, ttl 64, id 43976, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x0a8f (correct), seq 30272:30768, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.844590 IP (tos 0x48, ttl 64, id 43977, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xd9f7 (correct), seq 30768:31056, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.844661 IP (tos 0x48, ttl 64, id 43978, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x0c9d (correct), seq 31056:31344, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.844731 IP (tos 0x48, ttl 64, id 43979, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x496a (correct), seq 31344:31632, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.844801 IP (tos 0x48, ttl 64, id 43980, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xb357 (correct), seq 31632:31920, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.844808 IP (tos 0x0, ttl 128, id 50483, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xd87c (correct), ack 25568, win 4106, length 0&#x27;, &#x27;05:19:10.844894 IP (tos 0x48, ttl 64, id 43981, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x7282 (correct), seq 31920:32416, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.844965 IP (tos 0x48, ttl 64, id 43982, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x7262 (correct), seq 32416:32704, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.845413 IP (tos 0x0, ttl 128, id 50484, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xd381 (correct), ack 26848, win 4101, length 0&#x27;, &#x27;05:19:10.845425 IP (tos 0x48, ttl 64, id 43983, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x75d6 (correct), seq 32704:32992, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.845496 IP (tos 0x48, ttl 64, id 43984, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x42bb (correct), seq 32992:33488, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.845514 IP (tos 0x0, ttl 128, id 50485, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xd13c (correct), ack 27424, win 4106, length 0&#x27;, &#x27;05:19:10.845589 IP (tos 0x48, ttl 64, id 43985, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x2225 (correct), seq 33488:33984, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.845616 IP (tos 0x0, ttl 128, id 50486, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xcf4e (correct), ack 27920, win 4104, length 0&#x27;, &#x27;05:19:10.845682 IP (tos 0x48, ttl 64, id 43986, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xc651 (correct), seq 33984:34480, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.845752 IP (tos 0x48, ttl 64, id 43987, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x7597 (correct), seq 34480:34768, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.845821 IP (tos 0x48, ttl 64, id 43988, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x453a (correct), seq 34768:35056, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.846108 IP (tos 0x0, ttl 128, id 50487, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xcb6c (correct), ack 28912, win 4106, length 0&#x27;, &#x27;05:19:10.846119 IP (tos 0x48, ttl 64, id 43989, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x92bf (correct), seq 35056:35344, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.846190 IP (tos 0x48, ttl 64, id 43990, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xae88 (correct), seq 35344:35840, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.846316 IP (tos 0x0, ttl 128, id 50488, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xc85f (correct), ack 29696, win 4103, length 0&#x27;, &#x27;05:19:10.846328 IP (tos 0x48, ttl 64, id 43991, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x71ab (correct), seq 35840:36128, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.846399 IP (tos 0x48, ttl 64, id 43992, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xc750 (correct), seq 36128:36624, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.846519 IP (tos 0x0, ttl 128, id 50489, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xc42c (correct), ack 30768, win 4106, length 0&#x27;, &#x27;05:19:10.846530 IP (tos 0x48, ttl 64, id 43993, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x3609 (correct), seq 36624:36912, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.846600 IP (tos 0x0, ttl 128, id 50490, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xc1ee (correct), ack 31344, win 4104, length 0&#x27;, &#x27;05:19:10.846601 IP (tos 0x48, ttl 64, id 43994, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x1b02 (correct), seq 36912:37408, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.846703 IP (tos 0x48, ttl 64, id 43995, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x98b9 (correct), seq 37408:37904, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.846775 IP (tos 0x48, ttl 64, id 43996, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xfba2 (correct), seq 37904:38192, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.846846 IP (tos 0x48, ttl 64, id 43997, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x544f (correct), seq 38192:38480, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.846894 IP (tos 0x0, ttl 128, id 50491, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xbfb1 (correct), ack 31920, win 4101, length 0&#x27;, &#x27;05:19:10.846919 IP (tos 0x48, ttl 64, id 43998, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x9b2f (correct), seq 38480:38768, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.847011 IP (tos 0x48, ttl 64, id 43999, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xe9e0 (correct), seq 38768:39264, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.847081 IP (tos 0x48, ttl 64, id 44000, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xdf93 (correct), seq 39264:39552, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.847124 IP (tos 0x0, ttl 128, id 50492, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xbdbc (correct), ack 32416, win 4106, length 0&#x27;, &#x27;05:19:10.847177 IP (tos 0x48, ttl 64, id 44001, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa2c3 (correct), seq 39552:40048, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.847648 IP (tos 0x0, ttl 128, id 50493, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xbb7e (correct), ack 32992, win 4104, length 0&#x27;, &#x27;05:19:10.847662 IP (tos 0x48, ttl 64, id 44002, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x72d5 (correct), seq 40048:40336, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.847760 IP (tos 0x48, ttl 64, id 44003, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xc63b (correct), seq 40336:40832, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.847986 IP (tos 0x0, ttl 128, id 50494, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xb79c (correct), ack 33984, win 4106, length 0&#x27;, &#x27;05:19:10.847997 IP (tos 0x48, ttl 64, id 44004, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa95c (correct), seq 40832:41120, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.848080 IP (tos 0x48, ttl 64, id 44005, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x2874 (correct), seq 41120:41616, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.848134 IP (tos 0x0, ttl 128, id 50495, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xb252 (correct), ack 35344, win 4100, length 0&#x27;, &#x27;05:19:10.848155 IP (tos 0x48, ttl 64, id 44006, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x1635 (correct), seq 41616:41904, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.848249 IP (tos 0x48, ttl 64, id 44007, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xab51 (correct), seq 41904:42400, ack 1, win 247, length 496&#x27;, &#x27;05:19:10.848320 IP (tos 0x48, ttl 64, id 44008, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x9bab (correct), seq 42400:42688, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.848389 IP (tos 0x48, ttl 64, id 44009, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x1838 (correct), seq 42688:42976, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.848460 IP (tos 0x0, ttl 128, id 50496, offset 0, flags [DF], proto TCP (6), length 40)&#x27;, &#x27;    192.168.0.157.58278 &gt; 192.168.0.201.ssh: Flags [.], cksum 0xac2c (correct), ack 36912, win 4106, length 0&#x27;, &#x27;05:19:10.848472 IP (tos 0x48, ttl 64, id 44010, offset 0, flags [DF], proto TCP (6), length 328)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0x5dd2 (correct), seq 42976:43264, ack 1, win 247, length 288&#x27;, &#x27;05:19:10.848542 IP (tos 0x48, ttl 64, id 44011, offset 0, flags [DF], proto TCP (6), length 536)&#x27;, &#x27;    192.168.0.201.ssh &gt; 192.168.0.157.58278: Flags [P.], cksum 0xa4d9 (correct), seq 43264:43760, ack 1, win 247, length 496&#x27;]
+[&#x27;tcpdump:&#x27;, &#x27;listening&#x27;, &#x27;on&#x27;, &#x27;eth0,&#x27;, &#x27;link-type&#x27;, &#x27;EN10MB&#x27;, &#x27;(Ethernet),&#x27;, &#x27;capture&#x27;, &#x27;size&#x27;, &#x27;262144&#x27;, &#x27;bytes&#x27;]
+[&#x27;05:19:10.833876&#x27;, &#x27;IP&#x27;, &#x27;(tos&#x27;, &#x27;0x48,&#x27;, &#x27;ttl&#x27;, &#x27;64,&#x27;, &#x27;id&#x27;, &#x27;43886,&#x27;, &#x27;offset&#x27;, &#x27;0,&#x27;, &#x27;flags&#x27;, &#x27;[DF],&#x27;, &#x27;proto&#x27;, &#x27;TCP&#x27;, &#x27;(6),&#x27;, &#x27;length&#x27;, &#x27;184)&#x27;]
+[&#x27;192.168.0.201.ssh&#x27;, &#x27;&gt;&#x27;, &#x27;192.168.0.157.58278:&#x27;, &#x27;Flags&#x27;, &#x27;[P.],&#x27;, &#x27;cksum&#x27;, &#x27;0xa1e6&#x27;, &#x27;(correct),&#x27;, &#x27;seq&#x27;, &#x27;2531221014:2531221158,&#x27;, &#x27;ack&#x27;, &#x27;3712494267,&#x27;, &#x27;win&#x27;, &#x27;247,&#x27;, &#x27;length&#x27;, &#x27;144&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_014_mirror_configure</td>
+          <td class="col-duration">23.41</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Mirror Test #####
+mirror dst: 1/2, dir: both, src: 1/25
+mirror dst: 1/2, dir: transmit, src: 1/25
+[True, True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_015_service_feature</td>
+          <td class="col-duration">48.03</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### service_feature #####
+[&#x27;disabled&#x27;, &#x27;disabled&#x27;, &#x27;disabled&#x27;]
+3
+[&#x27;enabled&#x27;, &#x27;enabled&#x27;, &#x27;enabled&#x27;]
+3
+[&#x27;disabled&#x27;]
+1
+[&#x27;enabled&#x27;]
+1
+[True, True, True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_021_max_vlan_4k</td>
+          <td class="col-duration">54.91</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of VLAN TEST    #####
+show vlan summary
+Number of VLAN: 4095
+show vlan summary
+Number of VLAN: 1
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_022_max_service_256</td>
+          <td class="col-duration">239.94</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### maximum number of of SVCs TEST    #####
+### check Nmmber of SVCs ###
+ 256
+### check Nmmber of UNIs ###
+24
+### check Nmmber of SEPs ###
+256
+### check the services are to be deleted ###
+service: 0, uni: 0, nni: 0, total: 0
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_031_static_lag</td>
+          <td class="col-duration">82.70</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Link Aggregation Test #####
+### check static channel-group ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;NONE&#x27;, &#x27;-&#x27;, &#x27;work:&#x27;, &#x27;1/15(P)*&#x27;, &#x27;protect:&#x27;, &#x27;1/16(P)&#x27;]
+### check BCM Port state ###
+[&#x27;xe15(&#x27;, &#x27;16)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_032_basic_lacp</td>
+          <td class="col-duration">159.69</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### LACP Basic Test #####
+### check lacp active Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/16(P)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FA&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x3f&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FA&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3f&#x27;]&quot;]
+### check lacp passive Mode ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/16(P)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x3e&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3e&#x27;]&quot;]
+### check lacp MaxMember 1 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;1&#x27;, &#x27;1/16(D)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FP&#x27;, &#x27;standby&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x6&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3e&#x27;]&quot;]
+### check BCM Port state ###
+[&#x27;xe15(&#x27;, &#x27;16)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Block&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+### check lacp MaxMember 8 ###
+[&#x27;1&#x27;, &#x27;po1&#x27;, &#x27;(SU)&#x27;, &#x27;LACP&#x27;, &#x27;8&#x27;, &#x27;1/16(P)&#x27;, &#x27;1/15(P)&#x27;]
+[&quot;[&#x27;1/16&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1398&#x27;, &quot;0x3e&#x27;,&quot;, &quot;&#x27;1/15&quot;, &#x27;FP&#x27;, &#x27;bndl&#x27;, &#x27;32768&#x27;, &#x27;1&#x27;, &#x27;1&#x27;, &#x27;0x1397&#x27;, &quot;0x3e&#x27;]&quot;]
+[&#x27;xe15(&#x27;, &#x27;16)&#x27;, &#x27;up&#x27;, &#x27;10G&#x27;, &#x27;FD&#x27;, &#x27;SW&#x27;, &#x27;No&#x27;, &#x27;Forward&#x27;, &#x27;None&#x27;, &#x27;FA&#x27;, &#x27;XFI&#x27;, &#x27;9216&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_033_basic_eoam</td>
+          <td class="col-duration">132.87</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### EOAM Basic Test #####
+### Ethernet OAM Passive Mode ###
+[&#x27;Mode:&#x27;, &#x27;passive&#x27;]
+[&#x27;Ok&#x27;]
+### Ethernet OAM Active Mode ###
+[&#x27;Mode:&#x27;, &#x27;active&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM dying-gasp ###
+[&#x27;Dying-Gasp:&#x27;, &#x27;disable&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM link-fault ###
+[&#x27;Link-Fault:&#x27;, &#x27;disable&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM link-monitor ###
+[&#x27;Status:&#x27;, &#x27;supported(on)&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM Loopback Test(start) ###
+[&#x27;Loopback&#x27;, &#x27;status:&#x27;, &#x27;local&#x27;, &#x27;loopback&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+### Ethernet OAM Loopback Test(stop) ###
+[&#x27;Loopback&#x27;, &#x27;status:&#x27;, &#x27;no&#x27;, &#x27;loopback&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+[&#x27;Tx&#x27;, &#x27;:&#x27;, &#x27;15&#x27;, &#x27;|&#x27;, &#x27;Rx&#x27;, &#x27;:&#x27;, &#x27;15&#x27;]
+[&#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;, &#x27;Ok&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_041_basic_lldp</td>
+          <td class="col-duration">254.88</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### LLDP Basic Test #####
+### check lacp default tlv ###
+PRINT: 40
+### check lldp disable all tlv ###
+PRINT: 0
+### check lldp enable all tlv###
+PRINT: 40
+### change lldp TLV to enable/disable for each tlv###
+### no 8021-org-spec ###
+PRINT TLV Count: 39 39
+PRINT TLV Count: 38 38
+PRINT TLV Count: 37 37
+PRINT TLV Count: 34 34
+### no 8023-org-spec ###
+PRINT TLV Count: 32 32
+PRINT TLV Count: 30 30
+PRINT TLV Count: 29 29
+PRINT TLV Count: 22 22
+PRINT TLV Count: 18 18
+### no basic ###
+PRINT TLV Count: 14 14
+PRINT TLV Count: 14 14
+PRINT TLV Count: 11 11
+PRINT TLV Count: 11 11
+PRINT TLV Count: 11 11
+###  8021-org-spec ###
+PRINT TLV Count: 12 12
+PRINT TLV Count: 13 13
+PRINT TLV Count: 14 14
+PRINT TLV Count: 17 17
+###  8023-org-spec ###
+PRINT TLV Count: 19 19
+PRINT TLV Count: 21 21
+PRINT TLV Count: 22 22
+PRINT TLV Count: 29 29
+PRINT TLV Count: 33 33
+###  basic ###
+PRINT TLV Count: 37 37
+PRINT TLV Count: 37 37
+PRINT TLV Count: 40 40
+PRINT TLV Count: 40 40
+PRINT TLV Count: 40 40
+### check lldp setMgmtTlv ###
+[&#x27;Management address Subtype  &#x27;, &#x27; All 802&#x27;]
+### check lldp setLldpTimer ###
+[&#x27;Time To Live    &#x27;, &#x27; 40&#x27;]
+### check lldp chgMgmtTlv ###
+[&#x27;Interface Number            &#x27;, &#x27; 25001  &#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_043_basic_ntp_time_zone</td>
+          <td class="col-duration">49.65</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### NTP Basic &amp; TIME ZONE Test #####
+[&#x27;*~106.247.248.106&#x27;, &#x27;17.253.68.253&#x27;, &#x27;2&#x27;, &#x27;15&#x27;, &#x27;64&#x27;, &#x27;001&#x27;, &#x27;0.0&#x27;, &#x27;0.0&#x27;, &#x27;7937.5&#x27;]
+Server status: *~106.247.248.106
+Current time: 14  KST Fri Dec 08 2023
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_044_max_ntp_server</td>
+          <td class="col-duration">43.84</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### Maximum NTP Server Test #####
+server count: 4
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_051_xstp_portRole</td>
+          <td class="col-duration">163.65</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_portRole Test #####
+The Spanning mode is stp
+Read Roles: {&#x27;1/11&#x27;: &#x27;Desg&#x27;, &#x27;1/12&#x27;: &#x27;Bakp&#x27;, &#x27;1/13&#x27;: &#x27;Desg&#x27;, &#x27;1/15&#x27;: &#x27;Root&#x27;, &#x27;1/16&#x27;: &#x27;Altn&#x27;}
+Expected Result: {&#x27;1/11&#x27;: &#x27;Desg&#x27;, &#x27;1/12&#x27;: &#x27;Bakp&#x27;, &#x27;1/13&#x27;: &#x27;Desg&#x27;, &#x27;1/15&#x27;: &#x27;Root&#x27;, &#x27;1/16&#x27;: &#x27;Altn&#x27;}
+The Spanning mode is rstp
+Read Roles: {&#x27;1/11&#x27;: &#x27;Desg&#x27;, &#x27;1/12&#x27;: &#x27;Bakp&#x27;, &#x27;1/13&#x27;: &#x27;Desg&#x27;, &#x27;1/15&#x27;: &#x27;Root&#x27;, &#x27;1/16&#x27;: &#x27;Altn&#x27;}
+Expected Result: {&#x27;1/11&#x27;: &#x27;Desg&#x27;, &#x27;1/12&#x27;: &#x27;Bakp&#x27;, &#x27;1/13&#x27;: &#x27;Desg&#x27;, &#x27;1/15&#x27;: &#x27;Root&#x27;, &#x27;1/16&#x27;: &#x27;Altn&#x27;}
+The Spanning mode is mstp
+Read Roles: {&#x27;1/11&#x27;: &#x27;Desg&#x27;, &#x27;1/12&#x27;: &#x27;Bakp&#x27;, &#x27;1/13&#x27;: &#x27;Desg&#x27;, &#x27;1/15&#x27;: &#x27;Root&#x27;, &#x27;1/16&#x27;: &#x27;Altn&#x27;}
+Expected Result: {&#x27;1/11&#x27;: &#x27;Desg&#x27;, &#x27;1/12&#x27;: &#x27;Bakp&#x27;, &#x27;1/13&#x27;: &#x27;Desg&#x27;, &#x27;1/15&#x27;: &#x27;Root&#x27;, &#x27;1/16&#x27;: &#x27;Altn&#x27;}
+Read Roles: {&#x27;1/11&#x27;: &#x27;Unknown&#x27;, &#x27;1/12&#x27;: &#x27;Unknown&#x27;, &#x27;1/13&#x27;: &#x27;Unknown&#x27;, &#x27;1/15&#x27;: &#x27;Unknown&#x27;, &#x27;1/16&#x27;: &#x27;Unknown&#x27;}
+Expected Result: {&#x27;1/11&#x27;: &#x27;Desg&#x27;, &#x27;1/12&#x27;: &#x27;Bakp&#x27;, &#x27;1/13&#x27;: &#x27;Desg&#x27;, &#x27;1/15&#x27;: &#x27;Root&#x27;, &#x27;1/16&#x27;: &#x27;Altn&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_052_xstp_portState</td>
+          <td class="col-duration">91.29</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_portState Test #####
+The Spanning port state is LSN
+The Spanning port state is LRN
+The Spanning port state is FWD
+The Spanning port state is BLK
+Read Roles: [&#x27;LSN&#x27;, &#x27;LRN&#x27;, &#x27;FWD&#x27;, &#x27;BLK&#x27;]
+## The Spanning mode is stp ##
+The Spanning port state is DSC
+The Spanning port state is LRN
+The Spanning port state is FWD
+The Spanning port state is DSC
+Read Roles: [&#x27;DSC&#x27;, &#x27;LRN&#x27;, &#x27;FWD&#x27;, &#x27;DSC&#x27;]
+## The Spanning mode is rstp ##
+The Spanning port state is DSC
+The Spanning port state is LRN
+The Spanning port state is FWD
+The Spanning port state is DSC
+Read Roles: [&#x27;DSC&#x27;, &#x27;LRN&#x27;, &#x27;FWD&#x27;, &#x27;DSC&#x27;]
+## The Spanning mode is mstp ##
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_053_xstp_RooteBridge</td>
+          <td class="col-duration">127.78</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_RooteBridge Test #####
+## The Spanning mode is stp ##
+root_address:  0023.aa29.adbf bridge_address:  0023.aa29.bca6
+root_pri:  32768 bridge_Pri:  32768
+root_address:  0023.aa29.bca6 bridge_address:  0023.aa29.bca6
+root_pri:  4096 bridge_Pri:  4096
+[&#x27;False&#x27;, &#x27;True&#x27;]
+## The Spanning mode is rstp ##
+root_address:  0023.aa29.adbf bridge_address:  0023.aa29.bca6
+root_pri:  32768 bridge_Pri:  32768
+root_address:  0023.aa29.bca6 bridge_address:  0023.aa29.bca6
+root_pri:  4096 bridge_Pri:  4096
+[&#x27;False&#x27;, &#x27;True&#x27;]
+## The Spanning mode is mstp ##
+root_address:  0023.aa29.adbf bridge_address:  0023.aa29.bca6
+root_pri:  32768 bridge_Pri:  32768
+root_address:  0023.aa29.bca6 bridge_address:  0023.aa29.bca6
+root_pri:  4096 bridge_Pri:  4096
+[&#x27;False&#x27;, &#x27;True&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_054_xstp_system_config</td>
+          <td class="col-duration">158.82</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_system_config(path cost) Test #####
+## The Spanning mode is stp ##
+The result of reding spanning CLI is 2000 
+2000
+The result of reding spanning CLI is 2 
+2
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is rstp ##
+The result of reding spanning CLI is 2000 
+2000
+The result of reding spanning CLI is 2 
+2
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is mstp ##
+The result of reding spanning CLI is 2000 
+2000
+The result of reding spanning CLI is 2 
+2
+[&#x27;True&#x27;, &#x27;True&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_055_xstp_timer_config</td>
+          <td class="col-duration">212.28</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_timer_config Test #####
+## The Spanning mode is stp ##
+Bridge Hello_Time: 4, Max_age: 40, Forward_Delay: 30
+[&#x27;4&#x27;, &#x27;40&#x27;, &#x27;30&#x27;]
+Root Bridge Hello_Time: 4, Max_age: 40, Forward_Delay: 30
+[&#x27;4&#x27;, &#x27;40&#x27;, &#x27;30&#x27;]
+## The Spanning mode is rstp ##
+Bridge Hello_Time: 4, Max_age: 40, Forward_Delay: 30
+[&#x27;4&#x27;, &#x27;40&#x27;, &#x27;30&#x27;]
+Root Bridge Hello_Time: 4, Max_age: 40, Forward_Delay: 30
+[&#x27;4&#x27;, &#x27;40&#x27;, &#x27;30&#x27;]
+## The Spanning mode is mstp ##
+Bridge Hello_Time: 4, Max_age: 40, Forward_Delay: 30
+[&#x27;4&#x27;, &#x27;40&#x27;, &#x27;30&#x27;]
+Root Bridge Hello_Time: 4, Max_age: 40, Forward_Delay: 30
+[&#x27;4&#x27;, &#x27;40&#x27;, &#x27;30&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_056_xstp_interface_RootGuard</td>
+          <td class="col-duration">209.57</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_interface_RootGuard Test #####
+The result of reding spanning CLI is Root-Inc 
+root_address:  0023.aa29.adbf bridge_address:  0023.aa29.adbf
+root_pri:  8192 bridge_Pri:  8192
+root_address:  0023.aa29.bca6 bridge_address:  0023.aa29.adbf
+root_pri:  4096 bridge_Pri:  8192
+The result of reding spanning CLI is Root-Inc 
+root_address:  0023.aa29.adbf bridge_address:  0023.aa29.adbf
+root_pri:  8192 bridge_Pri:  8192
+root_address:  0023.aa29.bca6 bridge_address:  0023.aa29.adbf
+root_pri:  4096 bridge_Pri:  8192
+The result of reding spanning CLI is Root-Inc 
+root_address:  0023.aa29.adbf bridge_address:  0023.aa29.adbf
+root_pri:  8192 bridge_Pri:  8192
+root_address:  0023.aa29.bca6 bridge_address:  0023.aa29.adbf
+root_pri:  4096 bridge_Pri:  8192
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_057_xstp_interface_BpduGuard</td>
+          <td class="col-duration">157.36</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_interface_BpduGuard Test #####
+## The Spanning mode is stp ##
+ErrDisable Reason        Timer Status
+-----------------        --------------
+link-flap                Disabled
+
+Timer interval: 300 seconds
+
+Interfaces that will be enabled at the next timeout:
+Interface Errdisable Reason Time Left(sec)
+--------- ----------------- --------------
+
+
+xSTP ---------------------------------
+ErrDisable Reason        Timer left(sec)
+-----------------        --------------
+bpduguard                Enabled
+
+Timer interval: 300 seconds
+bpduguard(1/16)          292
+
+The result of reding spanning CLI is &quot;bpduguard(1/16)&quot; 
+## The Spanning mode is rstp ##
+ErrDisable Reason        Timer Status
+-----------------        --------------
+link-flap                Disabled
+
+Timer interval: 300 seconds
+
+Interfaces that will be enabled at the next timeout:
+Interface Errdisable Reason Time Left(sec)
+--------- ----------------- --------------
+
+
+xSTP ---------------------------------
+ErrDisable Reason        Timer left(sec)
+-----------------        --------------
+bpduguard                Enabled
+
+Timer interval: 300 seconds
+bpduguard(1/16)          291
+
+The result of reding spanning CLI is &quot;bpduguard(1/16)&quot; 
+## The Spanning mode is mstp ##
+ErrDisable Reason        Timer Status
+-----------------        --------------
+link-flap                Disabled
+
+Timer interval: 300 seconds
+
+Interfaces that will be enabled at the next timeout:
+Interface Errdisable Reason Time Left(sec)
+--------- ----------------- --------------
+
+
+xSTP ---------------------------------
+ErrDisable Reason        Timer left(sec)
+-----------------        --------------
+bpduguard                Enabled
+
+Timer interval: 300 seconds
+bpduguard(1/16)          292
+
+The result of reding spanning CLI is &quot;bpduguard(1/16)&quot; 
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_058_xstp_interface_BpduFilter</td>
+          <td class="col-duration">173.88</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_interface_BpduFilter Test #####
+## The Spanning mode is stp ##
+VLAN0001
+  spanning-tree enabled protocol stp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5016 (1/16)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.c8a1
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/15             Altn BLK 2000      128       point-to-point
+1/16             Root LRN 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Root&quot; 
+VLAN0001
+  spanning-tree enabled protocol stp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.c8a1
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/15             Root LSN 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Desg&quot; 
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is rstp ##
+VLAN0001
+  spanning-tree enabled protocol rstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5016 (1/16)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.c8a1
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Root FWD 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Root&quot; 
+VLAN0001
+  spanning-tree enabled protocol rstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.c8a1
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/15             Root FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Desg&quot; 
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is mstp ##
+MST0000
+  spanning-tree enabled protocol mstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5016 (1/16)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.c8a1
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Root&quot; 
+MST0000
+  spanning-tree enabled protocol mstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.c8a1
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/15             Root FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Desg&quot; 
+[&#x27;True&#x27;, &#x27;True&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_059_xstp_interface_EdgePort</td>
+          <td class="col-duration">215.46</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_interface_EdgePort Test #####
+## The Spanning mode is stp ##
+VLAN0001
+  spanning-tree enabled protocol stp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       Edge point-to-point
+1/11             Desg LRN 2000      128       point-to-point
+1/12             Bakp BLK 2000      128       point-to-point
+1/13             Desg FWD 2000      128       Edge point-to-point
+1/15             Root LRN 2000      128       point-to-point
+1/16             Altn BLK 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Edge&quot; 
+reString : Edge
+## The Spanning mode is stp ##
+VLAN0001
+  spanning-tree enabled protocol stp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       Edge point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp BLK 2000      128       point-to-point
+1/13             Altn BLK 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn BLK 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;point-to-point&quot; 
+reString : point-to-point
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is rstp ##
+VLAN0001
+  spanning-tree enabled protocol rstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       Edge point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       Edge point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Edge&quot; 
+reString : Edge
+## The Spanning mode is rstp ##
+VLAN0001
+  spanning-tree enabled protocol rstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       Edge point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Altn DSC 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;point-to-point&quot; 
+reString : point-to-point
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is mstp ##
+MST0000
+  spanning-tree enabled protocol mstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       Edge point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       Edge point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Edge&quot; 
+reString : Edge
+## The Spanning mode is mstp ##
+MST0000
+  spanning-tree enabled protocol mstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       Edge point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Altn DSC 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;point-to-point&quot; 
+reString : point-to-point
+[&#x27;True&#x27;, &#x27;True&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_060_xstp_interface_PortPri</td>
+          <td class="col-duration">160.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_interface_PortPri Test #####
+## The Spanning mode is stp ##
+VLAN0001
+  spanning-tree enabled protocol stp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5016 (1/16)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg LRN 2000      128       point-to-point
+1/11             Desg LRN 2000      128       point-to-point
+1/12             Bakp BLK 2000      128       point-to-point
+1/13             Desg LRN 2000      128       point-to-point
+1/15             Altn BLK 2000      128       point-to-point
+1/16             Root LSN 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Root&quot; 
+reString : Root
+VLAN0001
+  spanning-tree enabled protocol stp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp BLK 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root LSN 2000      128       point-to-point
+1/16             Altn BLK 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Altn&quot; 
+reString : Altn
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is rstp ##
+VLAN0001
+  spanning-tree enabled protocol rstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5016 (1/16)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Root&quot; 
+reString : Root
+VLAN0001
+  spanning-tree enabled protocol rstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Altn&quot; 
+reString : Altn
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is mstp ##
+MST0000
+  spanning-tree enabled protocol mstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5016 (1/16)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Root&quot; 
+reString : Root
+MST0000
+  spanning-tree enabled protocol mstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Altn&quot; 
+reString : Altn
+[&#x27;True&#x27;, &#x27;True&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_061_xstp_interface_PortCost</td>
+          <td class="col-duration">160.03</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_interface_PortPri Test #####
+## The Spanning mode is stp ##
+VLAN0001
+  spanning-tree enabled protocol stp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        1800
+               Port        5016 (1/16)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg LRN 2000      128       point-to-point
+1/11             Desg LRN 2000      128       point-to-point
+1/12             Bakp BLK 2000      128       point-to-point
+1/13             Desg LRN 2000      128       point-to-point
+1/15             Altn BLK 2000      128       point-to-point
+1/16             Root LSN 1800      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Root&quot; 
+reString : Root
+VLAN0001
+  spanning-tree enabled protocol stp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp BLK 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root LSN 2000      128       point-to-point
+1/16             Altn BLK 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Altn&quot; 
+reString : Altn
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is rstp ##
+VLAN0001
+  spanning-tree enabled protocol rstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        1800
+               Port        5016 (1/16)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 1800      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Root&quot; 
+reString : Root
+VLAN0001
+  spanning-tree enabled protocol rstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Altn&quot; 
+reString : Altn
+[&#x27;True&#x27;, &#x27;True&#x27;]
+## The Spanning mode is mstp ##
+MST0000
+  spanning-tree enabled protocol mstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        1800
+               Port        5016 (1/16)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 1800      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Root&quot; 
+reString : Root
+MST0000
+  spanning-tree enabled protocol mstp
+  ROOT ID      priority    32768
+               address     0023.aa29.adbf
+               Cost        2000
+               Port        5015 (1/15)
+               Hello Time  2   Max age 20  Forward Delay 15
+
+  BRIDGE ID    priority    32768 (32768 sys-id-ext 0)
+               address     0023.aa29.bca6
+               Hello Time  2   Max age 20  Forward Delay 15
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+The result of reding spanning CLI is &quot;Altn&quot; 
+reString : Altn
+[&#x27;True&#x27;, &#x27;True&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_062_mstp_multi_instance</td>
+          <td class="col-duration">71.20</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### MSTP_Multi_Instance Test #####
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+Root          this switch for the CIST
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+[&#x27;Root&#x27;, &#x27;this&#x27;, &#x27;switch&#x27;, &#x27;for&#x27;, &#x27;the&#x27;, &#x27;CIST&#x27;]
+[&#x27;Root&#x27;, &#x27;this&#x27;, &#x27;switch&#x27;, &#x27;for&#x27;, &#x27;MST1&#x27;]
+[&#x27;Root&#x27;, &#x27;this&#x27;, &#x27;switch&#x27;, &#x27;for&#x27;, &#x27;MST2&#x27;]
+reString : [&#x27;CIST&#x27;, &#x27;MST1&#x27;, &#x27;MST2&#x27;]
+[&#x27;CIST&#x27;, &#x27;MST1&#x27;, &#x27;MST2&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_063_mstp_Priority_of_instance</td>
+          <td class="col-duration">80.29</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### MSTP_Priority_of_Instance Test #####
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.adbf  priority      4096 (4096 sysid 0)
+Root          this switch for the CIST
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+Root          address 0023.aa29.bca6  priority      4097 (4096 sysid 1)
+              port    1/15            cost          2000      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+Root          address 0023.aa29.c8a1  priority      4098 (4096 sysid 2)
+              port    1/14            cost          2000      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Root FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+[&#x27;Root&#x27;, &#x27;this&#x27;, &#x27;switch&#x27;, &#x27;for&#x27;, &#x27;the&#x27;, &#x27;CIST&#x27;]
+reString : CIST
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.bca6  priority      32768 (32768 sysid 0)
+Root          address 0023.aa29.adbf  priority      4096 (4096 sysid 0)
+              port    1/15            path cost     0
+Regional Root address 0023.aa29.adbf  priority      4096 (4096 sysid 0)
+                                      internal cost 2000      rem hops 19
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.bca6  priority      4097 (4096 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.bca6  priority      32770 (32768 sysid 2)
+Root          address 0023.aa29.c8a1  priority      4098 (4096 sysid 2)
+              port    1/13            cost          2000      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Root FWD 2000      128       point-to-point
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+[&#x27;Root&#x27;, &#x27;this&#x27;, &#x27;switch&#x27;, &#x27;for&#x27;, &#x27;MST1&#x27;]
+reString : MST1
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.c8a1  priority      32768 (32768 sysid 0)
+Root          address 0023.aa29.adbf  priority      4096 (4096 sysid 0)
+              port    1/16            path cost     0
+Regional Root address 0023.aa29.adbf  priority      4096 (4096 sysid 0)
+                                      internal cost 2000      rem hops 19
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.c8a1  priority      32769 (32768 sysid 1)
+Root          address 0023.aa29.bca6  priority      4097 (4096 sysid 1)
+              port    1/15            cost          2000      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.c8a1  priority      4098 (4096 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+[&#x27;Root&#x27;, &#x27;this&#x27;, &#x27;switch&#x27;, &#x27;for&#x27;, &#x27;MST2&#x27;]
+reString : MST2
+[&#x27;CIST&#x27;, &#x27;MST1&#x27;, &#x27;MST2&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_064_mstp_interface_cost_per_instance</td>
+          <td class="col-duration">46.09</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### MSTP_interface_cost_per_instance Test #####
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.bca6  priority      32768 (32768 sysid 0)
+Root          address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+              port    1/15            path cost     0
+Regional Root address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+                                      internal cost 2000      rem hops 19
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.bca6  priority      32769 (32768 sysid 1)
+Root          address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+              port    1/16            cost          1600      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 1600      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.bca6  priority      32770 (32768 sysid 2)
+Root          address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+              port    1/16            cost          1800      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 1800      128       point-to-point
+
+
+[&#x27;1/16&#x27;, &#x27;Altn&#x27;, &#x27;DSC&#x27;, &#x27;2000&#x27;, &#x27;128&#x27;, &#x27;point-to-point&#x27;]
+[&#x27;1/16&#x27;, &#x27;Root&#x27;, &#x27;FWD&#x27;, &#x27;1600&#x27;, &#x27;128&#x27;, &#x27;point-to-point&#x27;]
+[&#x27;1/16&#x27;, &#x27;Root&#x27;, &#x27;FWD&#x27;, &#x27;1800&#x27;, &#x27;128&#x27;, &#x27;point-to-point&#x27;]
+reString : [&#x27;Altn&#x27;, &#x27;2000&#x27;, &#x27;Root&#x27;, &#x27;1600&#x27;, &#x27;Root&#x27;, &#x27;1800&#x27;]
+[&#x27;Altn&#x27;, &#x27;2000&#x27;, &#x27;Root&#x27;, &#x27;1600&#x27;, &#x27;Root&#x27;, &#x27;1800&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_065_mstp_interface_priority_per_instance</td>
+          <td class="col-duration">51.38</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### MSTP_interface_priority_per_instance Test #####
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+Root          this switch for the CIST
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      64        point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      96        point-to-point
+
+
+reString : [&#x27;128&#x27;, &#x27;64&#x27;, &#x27;96&#x27;]
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.bca6  priority      32768 (32768 sysid 0)
+Root          address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+              port    1/15            path cost     0
+Regional Root address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+                                      internal cost 2000      rem hops 19
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.bca6  priority      32769 (32768 sysid 1)
+Root          address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+              port    1/16            cost          2000      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 2000      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.bca6  priority      32770 (32768 sysid 2)
+Root          address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+              port    1/16            cost          2000      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Altn DSC 2000      128       point-to-point
+1/16             Root FWD 2000      128       point-to-point
+
+
+reString : [&#x27;Altn&#x27;, &#x27;Root&#x27;, &#x27;Root&#x27;]
+[&#x27;128&#x27;, &#x27;64&#x27;, &#x27;96&#x27;, &#x27;Altn&#x27;, &#x27;Root&#x27;, &#x27;Root&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_066_mstp_regions_vlan</td>
+          <td class="col-duration">86.59</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### MSTP_region_vlan Test #####
+ 
+##### MST0    vlans mapped:   1,5-4094
+Bridge        address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+Root          this switch for the CIST
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point boundary
+1/15             Desg FWD 2000      128       point-to-point boundary
+1/16             Desg FWD 2000      128       point-to-point boundary
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point boundary
+1/15             Desg FWD 2000      128       point-to-point boundary
+1/16             Desg FWD 2000      128       point-to-point boundary
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point boundary
+1/15             Desg FWD 2000      128       point-to-point boundary
+1/16             Desg FWD 2000      128       point-to-point boundary
+
+
+reString : [&#x27;boundary&#x27;, &#x27;boundary&#x27;, &#x27;boundary&#x27;]
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+Root          this switch for the CIST
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+reString : [&#x27;Non&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;]
+[&#x27;boundary&#x27;, &#x27;boundary&#x27;, &#x27;boundary&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_067_mstp_regions_name</td>
+          <td class="col-duration">54.61</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### MSTP_region_name Test #####
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+Root          this switch for the CIST
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point boundary
+1/15             Desg FWD 2000      128       point-to-point boundary
+1/16             Desg FWD 2000      128       point-to-point boundary
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point boundary
+1/15             Desg FWD 2000      128       point-to-point boundary
+1/16             Desg FWD 2000      128       point-to-point boundary
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point boundary
+1/15             Desg FWD 2000      128       point-to-point boundary
+1/16             Desg FWD 2000      128       point-to-point boundary
+
+
+reString : [&#x27;boundary&#x27;, &#x27;boundary&#x27;, &#x27;boundary&#x27;]
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+Root          this switch for the CIST
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+reString : [&#x27;Non&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;]
+[&#x27;boundary&#x27;, &#x27;boundary&#x27;, &#x27;boundary&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_068_mstp_regions_revision</td>
+          <td class="col-duration">54.50</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### MSTP_region_revision Test #####
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+Root          this switch for the CIST
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point boundary
+1/15             Desg FWD 2000      128       point-to-point boundary
+1/16             Desg FWD 2000      128       point-to-point boundary
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point boundary
+1/15             Desg FWD 2000      128       point-to-point boundary
+1/16             Desg FWD 2000      128       point-to-point boundary
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point boundary
+1/15             Desg FWD 2000      128       point-to-point boundary
+1/16             Desg FWD 2000      128       point-to-point boundary
+
+
+reString : [&#x27;boundary&#x27;, &#x27;boundary&#x27;, &#x27;boundary&#x27;]
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+Root          this switch for the CIST
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/14             Desg FWD 2000      128       point-to-point
+1/15             Desg FWD 2000      128       point-to-point
+1/16             Desg FWD 2000      128       point-to-point
+
+
+reString : [&#x27;Non&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;]
+[&#x27;boundary&#x27;, &#x27;boundary&#x27;, &#x27;boundary&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_069_mstp_portRole_master</td>
+          <td class="col-duration">119.60</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### MSTP_portRole_master Test #####
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.bca6  priority      32768 (32768 sysid 0)
+Root          address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+              port    1/15            path cost     2000
+Regional Root this switch
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point boundary
+1/16             Altn DSC 2000      128       point-to-point boundary
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.bca6  priority      32769 (32768 sysid 1)
+Root          this switch for MST1
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Mstr FWD 2000      128       point-to-point boundary
+1/16             Altn DSC 2000      128       point-to-point boundary
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.bca6  priority      32770 (32768 sysid 2)
+Root          this switch for MST2
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Mstr FWD 2000      128       point-to-point boundary
+1/16             Altn DSC 2000      128       point-to-point boundary
+
+
+reString : [[&#x27;Root&#x27;, &#x27;boundary&#x27;], [&#x27;Mstr&#x27;, &#x27;boundary&#x27;], [&#x27;Mstr&#x27;, &#x27;boundary&#x27;]]
+ 
+##### MST0    vlans mapped:   1,4-4094
+Bridge        address 0023.aa29.bca6  priority      32768 (32768 sysid 0)
+Root          address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+              port    1/15            path cost     0
+Regional Root address 0023.aa29.adbf  priority      32768 (32768 sysid 0)
+                                      internal cost 2000      rem hops 19
+Operational   hello time 2 , forward delay 15, max age 20, txholdcount 6 
+Configured    hello time 2 , forward delay 15, max age 20, max hops    20
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+##### MST1    vlans mapped:   2
+Bridge        address 0023.aa29.bca6  priority      32769 (32768 sysid 1)
+Root          address 0023.aa29.adbf  priority      32769 (32768 sysid 1)
+              port    1/15            cost          2000      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+##### MST2    vlans mapped:   3
+Bridge        address 0023.aa29.bca6  priority      32770 (32768 sysid 2)
+Root          address 0023.aa29.adbf  priority      32770 (32768 sysid 2)
+              port    1/15            cost          2000      rem hops 19
+
+Interface        Role Sts cost      priority  Type                            
+---------------- ---- --- --------- --------- --------------------------------
+1/10             Desg FWD 2000      128       point-to-point
+1/11             Desg FWD 2000      128       point-to-point
+1/12             Bakp DSC 2000      128       point-to-point
+1/13             Desg FWD 2000      128       point-to-point
+1/15             Root FWD 2000      128       point-to-point
+1/16             Altn DSC 2000      128       point-to-point
+
+
+reString : [&#x27;Non&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;]
+[[&#x27;Root&#x27;, &#x27;boundary&#x27;], [&#x27;Mstr&#x27;, &#x27;boundary&#x27;], [&#x27;Mstr&#x27;, &#x27;boundary&#x27;], &#x27;Non&#x27;, &#x27;Non&#x27;, &#x27;Non&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_070_STP_compatibility_with_xSTP</td>
+          <td class="col-duration">61.17</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_with_LACP Test #####
+The result of reding spanning CLI is (&#x27;Root&#x27;, &#x27;(STP)&#x27;) 
+reString : (&#x27;Root&#x27;, &#x27;(STP)&#x27;)
+The result of reding spanning CLI is (&#x27;Root&#x27;, &#x27;boundary&#x27;) 
+reString : (&#x27;Root&#x27;, &#x27;boundary&#x27;)
+[&#x27;Root&#x27;, &#x27;(STP)&#x27;, &#x27;Root&#x27;, &#x27;boundary&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_071_xstp_with_LACP</td>
+          <td class="col-duration">293.75</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic xstp_with_LACP Test #####
+The result of reding spanning CLI is (&#x27;Root&#x27;, &#x27;1000&#x27;) 
+reString : (&#x27;Root&#x27;, &#x27;1000&#x27;)
+The result of reding spanning CLI is (&#x27;Root&#x27;, &#x27;2000&#x27;) 
+reString : (&#x27;Root&#x27;, &#x27;2000&#x27;)
+[&#x27;Root&#x27;, &#x27;1000&#x27;, &#x27;Root&#x27;, &#x27;2000&#x27;]
+The result of reding spanning CLI is (&#x27;Root&#x27;, &#x27;1000&#x27;) 
+reString : (&#x27;Root&#x27;, &#x27;1000&#x27;)
+The result of reding spanning CLI is (&#x27;Root&#x27;, &#x27;2000&#x27;) 
+reString : (&#x27;Root&#x27;, &#x27;2000&#x27;)
+[&#x27;Root&#x27;, &#x27;1000&#x27;, &#x27;Root&#x27;, &#x27;2000&#x27;]
+The result of reding spanning CLI is (&#x27;Root&#x27;, &#x27;1000&#x27;) 
+reString : (&#x27;Root&#x27;, &#x27;1000&#x27;)
+The result of reding spanning CLI is (&#x27;Root&#x27;, &#x27;2000&#x27;) 
+reString : (&#x27;Root&#x27;, &#x27;2000&#x27;)
+[&#x27;Root&#x27;, &#x27;1000&#x27;, &#x27;Root&#x27;, &#x27;2000&#x27;]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_091_basic_pm_configure</td>
+          <td class="col-duration">26.73</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic PM Config Test #####
+[&#x27;Disable&#x27;, &#x27;Disable&#x27;, &#x27;Disable&#x27;, &#x27;Disable&#x27;]
+4
+[&#x27;Enable&#x27;, &#x27;Enable&#x27;, &#x27;Enable&#x27;, &#x27;Enable&#x27;]
+4
+[True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_092_basic_pm_csv</td>
+          <td class="col-duration">25.34</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic PM CSV Test #####
+[&#x27;Disable&#x27;, &#x27;Disable&#x27;, &#x27;FTP&#x27;, &#x27;-&#x27;, &#x27;-&#x27;, &#x27;Off&#x27;, &#x27;Off&#x27;, &#x27;Off&#x27;, &#x27;Off&#x27;, &#x27;-&#x27;, &#x27;-&#x27;, &#x27;15&#x27;, &#x27;GMT+0&#x27;]
+[&#x27;Enable&#x27;, &#x27;Enable&#x27;, &#x27;SFTP&#x27;, &#x27;csv&#x27;, &#x27;192.168.0.157&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;On&#x27;, &#x27;10&#x27;, &#x27;Local&#x27;]
+[True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_093_mng_gw_config</td>
+          <td class="col-duration">61.16</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic MNG Gateway Configuration Test #####
+[&#x27;enable&#x27;, &#x27;10&#x27;, &#x27;1&#x27;, &#x27;192.168.0.2&#x27;, &#x27;success&#x27;, &#x27;normal&#x27;]
+[&#x27;enable&#x27;, &#x27;11&#x27;, &#x27;2&#x27;, &#x27;10.1.1.1&#x27;, &#x27;failure&#x27;, &#x27;fail&#x27;]
+17
+Reserved Actions: gate mon &amp; reboot
+[True, True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_094_mng_process_config</td>
+          <td class="col-duration">61.38</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic MNG Process Configuration Test #####
+[&#x27;disable&#x27;, &#x27;20&#x27;, &#x27;disable&#x27;, &#x27;60&#x27;, &#x27;reboot&#x27;, &#x27;alive&#x27;, &#x27;normal&#x27;]
+[&#x27;enable&#x27;, &#x27;2&#x27;, &#x27;enable&#x27;, &#x27;5&#x27;, &#x27;restart&#x27;, &#x27;dead&#x27;, &#x27;fail&#x27;]
+20
+Reserved Actions: mstpd &amp; restart
+plog-0000-00000002-mstpd.log
+[True, True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_095_mng_mem_config_</td>
+          <td class="col-duration">22.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### basic MNG Memory Configuration Test #####
+[&#x27;disable&#x27;, &#x27;60&#x27;, &#x27;10&#x27;, &#x27;5&#x27;, &#x27;80 %&#x27;, &#x27;60&#x27;, &#x27;normal&#x27;, &#x27;normal&#x27;]
+[&#x27;enable&#x27;, &#x27;11&#x27;, &#x27;10&#x27;, &#x27;1&#x27;, &#x27;20 %&#x27;, &#x27;10&#x27;, &#x27;normal&#x27;, &#x27;normal&#x27;]
+[True, True]
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">pytest_basic.py::TestClass::test_1000_check_plog</td>
+          <td class="col-duration">14.11</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>##### check plog #####
+ls: plog*: No such file or directory
+ls
+<br/> -----------------------------Captured log teardown------------------------------ <br/>ERROR    root:pytest_basic.py:58 teardown_class<br/></div></td></tr></tbody></table></body></html>

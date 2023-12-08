@@ -753,15 +753,16 @@ def check_stp_EdgePort(devs,mode):
     result = []
 
     stpModeCheck(devs[1]) 
-    time.sleep(2)
+    time.sleep(3)
                                               
     # Check if the edgeport of DUT#1 is configured.                         
     command = 'sh spanning-tree'
+    interfaces = ['1/10','1/13']
     startString = '1/13'
     cloum = 5   
 
-    stpEdgePortConf(devs[1],startString)
-    time.sleep(3)         
+    stpEdgePortConf(devs[1],interfaces)
+    time.sleep(5)         
          
     reString = get_cli_result(devs[1],command,startString,cloum)
 
@@ -773,11 +774,12 @@ def check_stp_EdgePort(devs,mode):
         result.append('False')
     
     # Enable STP on dut#3 
+    stpEnaDisConf([devs[2]],'enable') 
     stpModeConf([devs[2]],mode) 
     stpPathCost(devs[2],'short') 
       
     if mode == 'stp':
-        time.sleep(15) # To ensure forward delay (DIS -> LSN)
+        time.sleep(5) # To ensure forward delay (DIS -> LSN)
     else:
         time.sleep(3) # To ensure forward delay (DIS -> LSN) 
                
@@ -791,25 +793,16 @@ def check_stp_EdgePort(devs,mode):
     
     if reString == 'point-to-point':
         result.append('True')
-    # else: # If DUT don't resceive  
-    #     bc.sendConfigSet(devs[1],["int 1/13", "shutdown"])
-    #     time.sleep(2) 
-    #     bc.sendConfigSet(devs[1],["int 1/13", "no shutdown"]) 
-    #     time.sleep(2) 
-    #     reString = get_cli_result(devs[1],command,startString,cloum) 
-    #     time.sleep(3) 
-    #     if reString == 'point-to-point':
-    #         result.append('True')
     else:             
         result.append('False') 
                    
     time.sleep(5) 
    
-    noStpEdgePortConf(devs[1],startString)     
+    noStpEdgePortConf(devs[1],interfaces)     
     # Set pathcost as long
     stpPathCost(devs[2],'long') 
     # Disable STP on dut#3 
-    stpModeConf([devs[2]],'disable')
+    stpEnaDisConf([devs[2]],'disable')
     
     print(result)            
     if  result.count('True') == 2:
@@ -1360,23 +1353,19 @@ def stpModeConf(devs,mode):
             time.sleep(1)               
 
                        
-def stpEdgePortConf(dev,int):
+def stpEdgePortConf(dev, int):
     with bc.connect(dev) as child:
-        stp_edgeport_config =[
-            f'interface {int}',
-            'spanning port type edge'
-        ]
-        child.send_config_set(stp_edgeport_config)  
-        time.sleep(1)
+        for i in int:
+            stp_edgeport_config = [f'interface {i}' , 'spanning-tree port type edge']
+            child.send_config_set(stp_edgeport_config)  
+            time.sleep(1)
             
 def noStpEdgePortConf(dev,int):
     with bc.connect(dev) as child:
-        stp_edgeport_config =[
-            f'interface {int}',
-            'no spanning port type'
-        ]
-        child.send_config_set(stp_edgeport_config)  
-        time.sleep(1)
+        for i in int:
+            stp_edgeport_config = [f'interface {i}' , 'no spanning port type']
+            child.send_config_set(stp_edgeport_config)  
+            time.sleep(1)
             
 def stpPathCost(dut, mode):
     with bc.connect(dut) as child:
