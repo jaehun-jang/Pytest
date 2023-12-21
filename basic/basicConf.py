@@ -5,10 +5,8 @@
 
 from logging import root
 from netmiko import ConnectHandler
-import paramiko
-import sys
-import time
-import os
+import paramiko , sys , time, os
+
 
 def login(testName):
     child = connect() 
@@ -141,31 +139,52 @@ def crtVlan(host,vlans):
 def addiproute(host):
     with connect(host) as sub_child:
         sub_child.send_config_set('ip route 0.0.0.0/0 192.168.0.2')
+        addroute = sub_child.send_command('show ip route')
+        print(addroute)
         pass 
+# Old Ping Test Function
+# def ping(host):
+#     with connect(host) as child:
+#         if host == '192.168.0.201':
+#             command = child.send_command('ping 168.126.63.1', expect_string= 'icmp_seq=10')
+#             time.sleep(5)
+#             print(command)
+#             child.write_channel('\x03') 
+#             result = command.splitlines()[-1].split()[4]
+#             if result == 'icmp_seq=10':
+#                 return True
+#             else:
+#                 return False
 
+#         if host == '192.168.0.211':
+#             command = child.send_command('ping 168.126.63.1')
+#             time.sleep(7)
+#             print(command)
+#             result = command.splitlines()[-2].split()[5]
+#             if result == '0%':
+#                 return True
+#             else:
+#                 return False 
+
+# New Ping Test Function
 def ping(host):
     with connect(host) as child:
         if host == '192.168.0.201':
-            command = child.send_command('ping 168.126.63.1', expect_string= 'icmp_seq=10')
-            time.sleep(5)
-            print(command)
-            child.write_channel('\x03') 
-            result = command.splitlines()[-1].split()[4]
-            if result == 'icmp_seq=10':
-                return True
-            else:
-                return False
-
-        if host == '192.168.0.211':
-            command = child.send_command('ping 168.126.63.1')
+            command_output = child.send_command('ping 168.126.63.1')
             time.sleep(7)
-            print(command)
-            result = command.splitlines()[-2].split()[5]
-            if result == '0%':
-                return True
-            else:
-                return False 
-
+            print(command_output)
+            lines = command_output.splitlines()
+            print(command_output)
+            for line in lines:
+                columns = line.split()        
+                if columns and columns[1] == "packets": 
+                    result = columns[5] 
+                    print(f'The result of reding spanning CLI is "{result}" ')
+                    if result == '0%':
+                        return True
+                    else:
+                        return False
+           
 ### Delet maximum numberof VLAN  ###	  
 def dltVlan(host,vlans):
     with connect(host) as child:

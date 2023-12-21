@@ -2,12 +2,16 @@
 # $interface = "1.0"
 
 import pytest, sys, time, os, logging ,datetime
-import guictl.twamp as guitwamp    
-import guictl.radius as guiradius                   
+import pandas as pd 
+from logging import root
+from netmiko import ConnectHandler
+
+# ###  TEST MODULE ###                
 import basic.basicConf as bc
 import basic.basicVef as bv
 import GeneralMgmt.userAccount as gua
 import GeneralMgmt.ntpConf as gntpc
+import GeneralMgmt.timeZoneConf as gtzc
 import GeneralMgmt.miscellaneous as gmis
 import mef.mefConf as mc
 import mef.mefVef as mv
@@ -27,7 +31,11 @@ import radius.radiusConf as radius
 import pm.pmConfig as pmc
 import mngConfig.mngConfig as mngc
 import spanningTree.stpConfig as stpc
-import pandas as pd
+
+# ###  GUI MODULE ###    
+import guictl.twamp as guitwamp    
+import guictl.radius as guiradius  
+
 #######################  PYTEST   ##########################
 
 # TestCase
@@ -412,6 +420,19 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
+    def test_045_time_zone(self):
+        testName =  sys._getframe(0).f_code.co_name 
+        Title = "#" * 5 + " time_zone Test " + "#" * 5
+        print(Title)
+        try:         
+            bc.disTitle(self.devAll,Title)
+            time.sleep(1)            
+            assert gtzc.timeZone(self.dut1) == True           
+            time.sleep(10)                 
+        except:              
+            assert bv.ExceptionLog(testName) == 'normal'
+            time.sleep(10)
+            
     def test_051_xstp_portRole(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " basic xstp_portRole Test " + "#" * 5

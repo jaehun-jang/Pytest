@@ -3,13 +3,13 @@ import time
 
 def startRadiusServer():
     # Open Windows start manu
-    pyautogui.press('win')
-    time.sleep(1.5)  # 
+    # pyautogui.press('win')
+    # time.sleep(1.5)  # 
 
-    # Execute the twampclirnt
-    pyautogui.typewrite('tekradius lt manager')
-    pyautogui.press('enter')
-    time.sleep(5)  # 
+    # # Execute the twampclirnt
+    # pyautogui.typewrite('tekradius lt manager')
+    # pyautogui.press('enter')
+    # time.sleep(5)  # 
 
     # Start RADIUS Server 
     pyautogui.alert('Please Start RADIUS Server')

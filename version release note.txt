@@ -79,3 +79,8 @@ First distribution of version with completed L2 functions.
 ## V1.1 ##
 (2023-10-30)
 
+## V1.2 ##
+(2023-12-21)
+Add time_zone test code and timezone.csv file 
+
+
