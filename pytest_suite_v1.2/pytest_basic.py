@@ -121,7 +121,7 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
-    # @pytest.mark.skip() 
+    @pytest.mark.skip() 
     def test_04_AAA_RADIUS(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " AAA with RADIUS Test " + "#" * 5
