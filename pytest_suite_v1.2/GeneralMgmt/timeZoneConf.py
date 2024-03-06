@@ -13,7 +13,8 @@ import basic.basicConf as bc
 
 
 def timeZone(dut): 
-    timeZone_src = './GeneralMgmt/time_zone.csv'
+    timeZone_src = './GeneralMgmt/time_zone_m.csv'
+    # timeZone_src = './GeneralMgmt/time_zone.csv'
     timeZone_df = pd.read_csv(timeZone_src, encoding='utf-8')
     rows, cols = timeZone_df.shape  # Get the number of rows
     result = []
