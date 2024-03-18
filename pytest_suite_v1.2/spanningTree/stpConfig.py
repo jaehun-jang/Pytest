@@ -923,6 +923,7 @@ def check_mstp_priority_of_instance(devs):
     dutIndex = [0,1,2]   
         
     # To configure priority of each MST instance. 
+    # Set the  MSTP Priority for MST0 of DUT#1, MST1 of DUT#2, and MST2 of DUT#2 as 4096.  
     for i in range(3):  # Assuming you want to iterate from 0 to 2
         command = [f'spanning-tree mst {i} priority 4096']
         bc.sendConfigSet(devs[i], command)
