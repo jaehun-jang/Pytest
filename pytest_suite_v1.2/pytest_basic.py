@@ -861,7 +861,7 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
   
-    def test_066_mstp_regions_vlan(self):
+    def test_066_mstp_region_vlan(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " MSTP_region_vlan Test " + "#" * 5
         print(Title)
@@ -907,7 +907,7 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
-    def test_068_mstp_regions_revision(self):
+    def test_068_mstp_region_revision(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " MSTP_region_revision Test " + "#" * 5
         print(Title)
