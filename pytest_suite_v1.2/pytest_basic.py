@@ -884,7 +884,7 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
-    def test_067_mstp_regions_name(self):
+    def test_067_mstp_region_name(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " MSTP_region_name Test " + "#" * 5
         print(Title)
