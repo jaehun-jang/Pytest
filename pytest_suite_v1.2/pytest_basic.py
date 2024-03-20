@@ -1078,7 +1078,7 @@ class TestClass():
             assert bv.ExceptionLog(testName) == 'normal'
             time.sleep(5)
 
-    def test_095_mng_mem_config_(self):
+    def test_095_mng_mem_config(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " basic MNG Memory Configuration Test " + "#" * 5
         print(Title)
@@ -1094,7 +1094,7 @@ class TestClass():
             time.sleep(5)
 
     @pytest.mark.skip() #Because the feature hase a bug, this test item is skipped.
-    def test_096_mng_evm_config_(self):
+    def test_096_mng_evm_config(self):
         testName =  sys._getframe(0).f_code.co_name 
         Title = "#" * 5 + " basic MNG EVM Configuration Test " + "#" * 5
         print(Title)
