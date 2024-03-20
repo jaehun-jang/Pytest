@@ -249,34 +249,6 @@ def mngMemoryConf(dut1):
         else:
             return False
 
-# def mngEvmConf(dut1):
-#     result = []
-#     with bc.connect(dut1) as child:
-#         evm_enable_config = [
-#             'mng configuration',
-#             'evm tcpdump 100',
-#             'evm lockout count 1',
-#             'evm lockout interval 10 ',
-#             'enable evm watchdog',
-#             'enable evm lockout',
-#             ]
-#         mem_enable_config = [
-#             'mng configuration',
-#             'memory monitor type count 1 ',
-#             'memory monitor type duration 10',
-#             'memory monitor type interval 10',
-#             'memory monitor type period 11 ',
-#             'memory monitor type usage 20',
-#             'enable memory monitor'
-#             ]
-#         result.append(check_mng_evm_conf(child,'normal'))
-#         time.sleep(1)
-#         child.send_config_set(evm_enable_config)  
-#         time.sleep(1)
-#         child.send_config_set(mem_enable_config)
-#         child.send_command('write memory')
-#         generate_mrmory_overload(dut1)                
-#         time.sleep(300) 
 
 def mngEvmConf(dut1):
     result = []
