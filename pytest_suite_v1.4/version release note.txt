@@ -83,4 +83,15 @@ First distribution of version with completed L2 functions.
 (2023-12-21)
 Add time_zone test code and timezone.csv file 
 
+## V1.3 ##
+(2024-07-19)
+def setup_class(cls),  def teardown_class(cls),  def setup_method(self, method), def teardown_method(self, method) 적용하여 
+중복 Code 제거.
+ 
+@pytest.fixture
+def setup_teardown(self):
+적용 검토 .
+
+
+
 

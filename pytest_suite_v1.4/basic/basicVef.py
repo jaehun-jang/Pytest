@@ -36,10 +36,8 @@ def checkVtySsion(host, vty):
         numOfVty = readResult.count('pts/')
         for child in child_list:
             child.disconnect()
-        print('[DEBUG] Number of sessions: {}'.format(numOfVty))
         return numOfVty
     except Exception as e:
-        print('[DEBUG] Error connecting: {}'.format(str(e)))
         return numOfVty
     
 

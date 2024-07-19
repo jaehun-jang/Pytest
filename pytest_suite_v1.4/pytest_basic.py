@@ -51,16 +51,6 @@ class TestClass():
     blockport = '1/6,1/10-1/16'
     stpblockport = '1/25'
 
-    # # Fixture 정의
-    # @pytest.fixture
-    # def setup_teardown(self):
-    #     testName = sys._getframe(0).f_code.co_name
-    #     Title = "#" * 5 + " " + testName + " " + "#" * 5
-    #     yield testName, Title
-    #     time.sleep(1)
-    #     assert bv.checkPlog(self.devAll,self.Title) == 'OK'
-
-    ###    -----------------------------------------------------
     # setup_class: 클래스 레벨에서 한 번 실행         
     @classmethod
     def setup_class(cls,): # setUP_class(cls) -> unittest
@@ -94,18 +84,6 @@ class TestClass():
     ###    -----------------------------------------------------
     ###    ------- Function Test -------------------------------
     ###    -----------------------------------------------------
-    
-    # def test_001_maximum_number_of_vty(self,setup_teardown):
-    #     testName, Title = setup_teardown
-
-    #     try: 
-    #         bc.disTitle(self.devAll,self.Title)
-    #         vty = 39
-    #         assert bv.checkVtySsion(self.dut1,vty) == vty
-    #         time.sleep(5)
-    #     except:                
-    #         assert bv.ExceptionLog(self.testName) == 'normal'
-    #         time.sleep(5) 
 
     def test_001_maximum_number_of_vty(self):
         try: 
