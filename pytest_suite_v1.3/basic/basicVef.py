@@ -42,8 +42,9 @@ def checkVtySsion(host, vty):
         print('[DEBUG] Error connecting: {}'.format(str(e)))
         return numOfVty
     
+
 ### Check Process plog ###
-def checkPlog(devices,testName): 
+def checkPlog(devices, testName): 
     for host in devices:          
         with bc.connect(host) as child:
             Command = "show process plog"
@@ -51,11 +52,13 @@ def checkPlog(devices,testName):
             result_split = cmdResult.splitlines()[0] 
             result_split = result_split.split(':')[0]
 
-            if result_split is not 'ls':
+            if result_split != 'ls':
                 child.send_command(f"# Plog occurs while performing_{testName}")
-                with open('./plog/Plog_log.txt', 'at') as fw:
-                    # Get the current timestamp
-                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+                # Get the current timestamp
+                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+                # Create a unique file name for each log entry
+                file_name = f'./plog/Plog_log.txt'
+                with open(file_name, 'wt') as fw:
                     fw.writelines(f'Plog occurs while performing_{testName} + {timestamp}\n\n')
 
 ### Exception log ###
@@ -67,7 +70,6 @@ def ExceptionLog(testName):
 
         fw.writelines(f'Exception occurs while performing_{testName} + {timestamp}\n\n')
         return('exception')
-
 
      
  ### function to check the product type, which is either m6424 or not ### 
