@@ -277,19 +277,19 @@ def sendConfigSet(host,command):
 ######################################
 ######################################
 
-### Check Process plog ###
-def checkPlog(devices,testName): 
-    for host in devices:          
-        with connect(host) as child:
-            Command = "show process plog"
-            cmdResult = child.send_command(Command)
-            result_split = cmdResult.splitlines()[0] 
-            result_split = result_split.split(':')[0]
+### Rename log and plog names  ###
+def renamelogFile(): 
+    plogPath = './log/process_log_log.txt'
+    ElogPath = './log/exception_log.txt'
+    if os.path.exists(plogPath):
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        newPlogPath = f'./log/process_log_log{timestamp}.txt'
+        os.rename(plogPath, newPlogPath)
 
-            if result_split is not 'ls':
-                child.send_command(f"# Plog occurs while performing_{testName}")
-                with open('./plog/Plog_log.txt', 'at') as fw:
-                    # Get the current timestamp
-                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+    if os.path.exists(ElogPath):
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        newLogPath = f'./log/exception_log{timestamp}.txt'
+        os.rename(ElogPath, newLogPath)
 
-                    fw.writelines(f'Plog occurs while performing_{testName} + {timestamp}\n\n')
+
+    

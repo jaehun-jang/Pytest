@@ -57,13 +57,14 @@ def checkPlog(devices, testName):
                 # Get the current timestamp
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
                 # Create a unique file name for each log entry
-                file_name = f'./plog/Plog_log.txt'
-                with open(file_name, 'wt') as fw:
-                    fw.writelines(f'Plog occurs while performing_{testName} + {timestamp}\n\n')
+                file_name = f'./log/process_log_log.txt'
+                with open(file_name, 'at') as fw:
+                    fw.writelines(f'Plog occurs while performing_{testName} + {timestamp}\n')
+                    fw.writelines(Command,'\n\n')
 
 ### Exception log ###
 def ExceptionLog(testName):                 
-    with open('./log/Exception_log.txt', 'at') as fw:
+    with open('./log/exception_log.txt', 'at') as fw:
 
         # Get the current timestamp
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")

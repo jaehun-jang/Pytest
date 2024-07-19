@@ -67,7 +67,7 @@ class TestClass():
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         logging.info(sys._getframe(0).f_code.co_name) 
         """ AAA """  
-        # bc.defaultSetup(cls.devAll,cls.blockport)   
+        bc.defaultSetup(cls.devAll,cls.blockport)   
     
     # setup_class: 클래스 레벨에서 한 번 실행
     @classmethod       
@@ -75,6 +75,7 @@ class TestClass():
         logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
         logging.error(sys._getframe(0).f_code.co_name) 
         """ BBB """ 
+        bc.renamelogFile()
 
     # setup_method: 각 테스트 메서드 실행 전마다 실행
     def setup_method(self, method):
