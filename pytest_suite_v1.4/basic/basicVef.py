@@ -58,7 +58,7 @@ def checkPlog(devices, testName):
                 file_name = f'./log/process_log_log.txt'
                 with open(file_name, 'at') as fw:
                     fw.writelines(f'Plog occurs while performing_{testName} + {timestamp}\n')
-                    fw.writelines(Command +'\n\n')
+                    fw.writelines(cmdResult +'\n\n')
 
 ### Exception log ###
 def ExceptionLog(testName):                 
