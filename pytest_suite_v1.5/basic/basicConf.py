@@ -279,16 +279,16 @@ def sendConfigSet(host,command):
 
 ### Rename log and plog names  ###
 def renamelogFile(): 
-    plogPath = './log/process_log_log.txt'
+    plogPath = './log/process_log.txt'
     ElogPath = './log/exception_log.txt'
     if os.path.exists(plogPath):
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-        newPlogPath = f'./log/process_log_log{timestamp}.txt'
+        newPlogPath = f'./log/process_log_{timestamp}.txt'
         os.rename(plogPath, newPlogPath)
 
     if os.path.exists(ElogPath):
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-        newLogPath = f'./log/exception_log{timestamp}.txt'
+        newLogPath = f'./log/exception_log_{timestamp}.txt'
         os.rename(ElogPath, newLogPath)
 
 

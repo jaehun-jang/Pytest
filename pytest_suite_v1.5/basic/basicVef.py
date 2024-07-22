@@ -40,25 +40,39 @@ def checkVtySsion(host, vty):
     except Exception as e:
         return numOfVty
     
-
 ### Check Process plog ###
 def checkPlog(devices, testName): 
     for host in devices:          
         with bc.connect(host) as child:
             Command = "show process plog"
             cmdResult = child.send_command(Command)
-            result_split = cmdResult.splitlines()[0] 
-            result_split = result_split.split(':')[0]
+            result_list = cmdResult.splitlines()
+            # result_list0 = result_list[0]
+            # result_split = result_list0.split(':')[0]
 
-            if result_split != 'ls':
-                child.send_command(f"# Plog occurs while performing_{testName}")
+            if not result_list[0].startswith('ls'):
+            # if result_split != 'ls':
                 # Get the current timestamp
-                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")   
+                
+                plogs = ""  # 초기화
+                for process in result_list:
+                    # Get the detail process log
+                    Command = f"show process plog {process}" 
+                    plog = child.send_command(Command)
+                    plogs += plog
+
+                    # Remove the process log
+                    Command = f"remove file log {process}" 
+                    child.send_command(Command)
+
                 # Create a unique file name for each log entry
-                file_name = f'./log/process_log_log.txt'
+                file_name = f'./log/process_log.txt'
                 with open(file_name, 'at') as fw:
                     fw.writelines(f'Plog occurs while performing_{testName} + {timestamp}\n')
-                    fw.writelines(cmdResult +'\n\n')
+                    fw.writelines(cmdResult)
+                    fw.writelines(plogs + '\n\n')
+
 
 ### Exception log ###
 def ExceptionLog(testName):                 

@@ -79,7 +79,7 @@ class TestClass():
         self.testName = method.__name__
         self.Title = "#" * 5 + " " + self.testName + " " +"TEST END " + "#" * 5
         bc.disTitle(self.devAll,self.Title) 
-        bv.checkPlog(self.devAll,self.Title)
+        bv.checkPlog(self.devAll,self.testName)
 
     ###    -----------------------------------------------------
     ###    ------- Function Test -------------------------------

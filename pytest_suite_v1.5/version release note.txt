@@ -85,13 +85,22 @@ Add time_zone test code and timezone.csv file
 
 ## V1.3 ##
 (2024-07-19)
-def setup_class(cls),  def teardown_class(cls),  def setup_method(self, method), def teardown_method(self, method) 적용하여 
-중복 Code 제거.
+setup_class(), teardown_class(), setup_method(), teardown_method()를
+적용하여 중복 Code 제거.
  
 @pytest.fixture
 def setup_teardown(self):
 적용 검토 .
 
 
+## V1.4 ##
+(2024-07-22)
+def teardown_class(cls) 에 renamelogFile() 함수 추가
+test 수행 후 log 파일 구분을 위하여 log folder 아래 exception.log 와 process.log 에
+timestamp 를 추가햐여 파일이름 변경. 
+ 
+teardown_method에 checkPlog()함수를 수정 
+-> plog 확인 후 log생성 (test 항목마다 중복해서 log발생)
+  --> plog 확인 후 세부내역 출력 후 plog삭제하여 중복 로그 발생하지 않도록 처리.
 
 
