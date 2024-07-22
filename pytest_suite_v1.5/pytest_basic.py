@@ -977,15 +977,6 @@ class TestClass():
             assert bv.ExceptionLog(self.testName) == 'normal'
             time.sleep(5)
                         
-    def test_0100_check_plog(self):
-        try: 
-            bc.disTitle(self.devAll,self.Title)
-            assert bv.checkPlog(self.dut1,self.Title) == 'OK'
-            time.sleep(5)                
-        except:            
-            assert bv.ExceptionLog(self.testName) == 'normal'
-            time.sleep(5)
-
 class MyPlugin:
     def pytest_sessionfinish(self,session, exitstatus):
         print("Test session finished!")

@@ -95,12 +95,12 @@ def setup_teardown(self):
 
 ## V1.4 ##
 (2024-07-22)
-def teardown_class(cls) 에 renamelogFile() 함수 추가
+def teardown_class(cls) 에 renamelogFile() 함수 추가.
 test 수행 후 log 파일 구분을 위하여 log folder 아래 exception.log 와 process.log 에
 timestamp 를 추가햐여 파일이름 변경. 
  
-teardown_method에 checkPlog()함수를 수정 
+teardown_method에 checkPlog()함수를 수정. 
 -> plog 확인 후 log생성 (test 항목마다 중복해서 log발생)
   --> plog 확인 후 세부내역 출력 후 plog삭제하여 중복 로그 발생하지 않도록 처리.
 
-
+test_0100_check_plog(self)  항목 삭제. 
