@@ -61,11 +61,8 @@ class Test_m5216(basic):
 
     @pytest.mark.skip()
     def test_201_basic_soam(self):
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + testName + "#" * 5
-
         try: 
-            bc.disTitle(self.dut1,Title)
+            bc.disTitle(self.dut1,self.Title)
             eoc.confEoam(self.dut2)
             assert eoc.confBasicEoam(self.dut1,self.dut2) == 8
             time.sleep(1)
@@ -73,7 +70,7 @@ class Test_m5216(basic):
             time.sleep(1)                
         except: 
             eoc.removeEoam(self.dut2)                
-            assert bv.ExceptionLog(testName) == 'normal'
+            assert bv.ExceptionLog(self.testName) == 'normal'
             time.sleep(2)
 
 class MyPlugin:

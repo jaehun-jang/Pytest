@@ -43,13 +43,10 @@ class Test_m6424(basic):
 # ##### -----------------------------------------------------
 
     def test_101_change_profile_roe(self): 
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + testName + "#" * 5
-
         profile = 'roe'
         # profile = 'ethernet'
         try:  
-            bc.disTitle([self.dut1],Title)
+            bc.disTitle([self.dut1],self.Title)
             bc.chgProfile(self.dut1,profile)
             time.sleep(1)   
             assert bv.checkProfile(self.dut1,profile) == True
@@ -57,15 +54,12 @@ class Test_m6424(basic):
             bc.deftSystem(self.dut1)
             bc.defaultFor6424(self.dut1,self.blockport) 
             time.sleep(1)   
-            assert bv.ExceptionLog(testName) == 'normal'
+            assert bv.ExceptionLog(self.testName) == 'normal'
             time.sleep(2) 
             
     def test_102_basic_flexport(self): 
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + testName + "#" * 5
-
         try:  
-            bc.disTitle([self.dut1],Title)
+            bc.disTitle([self.dut1],self.Title)
             bc.defaultSetup([self.dut1],self.blockport)   
             bc.noshutblockport([self.dut1],self.blockport) 
             assert fc.confFlexPort(self.dut1) == 12
@@ -75,15 +69,12 @@ class Test_m6424(basic):
             bc.deftSystem(self.dut1)
             bc.defaultFor6424(self.dut1,self.blockport) 
             time.sleep(1)   
-            assert bv.ExceptionLog(testName) == 'normal'
+            assert bv.ExceptionLog(self.testName) == 'normal'
             time.sleep(2) 
           
     def test_103_flexport_example(self):
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + testName + "#" * 5
-
         try: 
-            bc.disTitle([self.dut1],Title)
+            bc.disTitle([self.dut1],self.Title)
             bc.noshutblockport([self.dut1],self.blockport)  
             assert fce.confFlexPortExam(self.dut1) == 7 
             time.sleep(1)
@@ -92,15 +83,12 @@ class Test_m6424(basic):
             bc.deftSystem(self.dut1)
             bc.defaultFor6424(self.dut1,self.blockport) 
             time.sleep(1) 
-            assert bv.ExceptionLog(testName) == 'normal'
+            assert bv.ExceptionLog(self.testName) == 'normal'
             time.sleep(2)  
 
     def test_104_flexport_breakout(self):
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + testName + "#" * 5
-
         try: 
-            bc.disTitle([self.dut1],Title)
+            bc.disTitle([self.dut1],self.Title)
             bc.noshutblockport([self.dut1],self.blockport)  
             assert fbc.flexPortBreakout(self.dut1) == 3
             time.sleep(1)
@@ -109,16 +97,13 @@ class Test_m6424(basic):
             bc.deftSystem(self.dut1)
             bc.defaultFor6424(self.dut1,self.blockport) 
             time.sleep(1) 
-            assert bv.ExceptionLog(testName) == 'normal'
+            assert bv.ExceptionLog(self.testName) == 'normal'
             time.sleep(2)                
 
     def test_105_change_defaultProfile(self): 
-        testName =  sys._getframe(0).f_code.co_name 
-        Title = "#" * 5 + testName + "#" * 5
-
         profile = 'ethernet'
         try:  
-            bc.disTitle([self.dut1],Title)
+            bc.disTitle([self.dut1],self.Title)
             bc.chgProfile(self.dut1,profile)
             time.sleep(1)   
             assert bv.checkProfile(self.dut1,profile) == True
@@ -127,7 +112,7 @@ class Test_m6424(basic):
             bc.deftSystem(self.dut1)
             bc.defaultFor6424(self.dut1,self.blockport) 
             time.sleep(1)   
-            assert bv.ExceptionLog(testName) == 'normal'
+            assert bv.ExceptionLog(self.testName) == 'normal'
             time.sleep(2) 
             
 class MyPlugin:
